@@ -110,10 +110,10 @@ impl RenderBoard {
         let cell_dimen = self.cell_attrs.dimen;
         let step_x = (cell_dimen.width() + border_width as u32) as i32;
         let step_y = (cell_dimen.height() + border_width as u32) as i32;
-        let new_x = x as i32 * step_x;
-        let new_y = y as i32 * step_y;
+        let dx = x as i32 * step_x;
+        let dy = y as i32 * step_y;
         let origin = Point::new(self.pos.x + border_width, self.pos.y + border_width);
-        origin + (new_x, new_y)
+        origin + (dx, dy)
     }
 }
 

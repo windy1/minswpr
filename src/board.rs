@@ -1,4 +1,4 @@
-use super::math::{self, Point};
+use super::math;
 
 bitflags! {
     #[derive(Default)]
@@ -13,7 +13,6 @@ pub struct Board {
     width: usize,
     height: usize,
     num_mines: usize,
-    mine_positions: Vec<Point>,
     cells: Vec<CellFlags>,
 }
 
@@ -31,16 +30,11 @@ impl Board {
         let num_cells = width * height;
         let mine_indices = math::gen_rand_unique(num_mines, 0, num_cells);
         let cells = Self::make_cells(num_cells, &mine_indices);
-        let mine_positions = mine_indices
-            .iter()
-            .map(|i| Self::point_from_index(width, height, *i))
-            .collect();
 
         Ok(Self {
             width,
             height,
             num_mines,
-            mine_positions,
             cells,
         })
     }
@@ -65,10 +59,6 @@ impl Board {
         &self.cells
     }
 
-    pub fn mine_positions(&self) -> &Vec<Point> {
-        &self.mine_positions
-    }
-
     pub fn get_cell(&self, x: u32, y: u32) -> Option<&CellFlags> {
         self.cells.get(Self::index(x, y, self.width))
     }
@@ -79,10 +69,6 @@ impl Board {
 
     fn index(x: u32, y: u32, w: usize) -> usize {
         y as usize * w + x as usize
-    }
-
-    fn point_from_index(width: usize, height: usize, idx: usize) -> Point {
-        Point::new((idx % width) as i32, (idx / height) as i32)
     }
 
     fn make_cells(num_cells: usize, mine_indices: &Vec<usize>) -> Vec<CellFlags> {
@@ -130,20 +116,5 @@ mod tests {
         assert_eq!(num_mines, b.num_mines());
         assert_eq!(b.width() * b.height(), b.cells().len());
         Ok(())
-    }
-
-    #[test]
-    fn test_board_indexing() {
-        let b = Board::default();
-        assert_eq!(10, b.index(2, 1));
-        assert_eq!(11, b.index(3, 1));
-        assert_eq!(
-            Point::new(2, 1),
-            Board::point_from_index(b.width(), b.height(), 10)
-        );
-        assert_eq!(
-            Point::new(3, 1),
-            Board::point_from_index(b.width(), b.height(), 11)
-        );
     }
 }

@@ -6,15 +6,15 @@ use sdl2::{self, EventPump, Sdl, VideoSubsystem};
 use std::thread;
 use std::time::Duration;
 
-pub struct Minswp {
+pub struct Minswpr {
     _sdl: Sdl,
     _video: VideoSubsystem,
     canvas: WindowCanvas,
     event_pump: EventPump,
 }
 
-impl Minswp {
-    pub fn new(config: Config) -> Result<Minswp, String> {
+impl Minswpr {
+    pub fn new(config: Config) -> Result<Self, String> {
         let sdl = sdl2::init()?;
         let video = sdl.video()?;
         let canvas = video
@@ -26,7 +26,7 @@ impl Minswp {
             .build()
             .map_err(|e| e.to_string())?;
         let event_pump = sdl.event_pump()?;
-        Ok(Minswp {
+        Ok(Self {
             _sdl: sdl,
             _video: video,
             canvas,
@@ -34,7 +34,7 @@ impl Minswp {
         })
     }
 
-    pub fn default() -> Result<Minswp, String> {
+    pub fn default() -> Result<Self, String> {
         Self::new(Config::default())
     }
 
@@ -72,7 +72,7 @@ pub struct Config<'a> {
 }
 
 impl<'a> Config<'a> {
-    const DEF_TITLE: &'static str = "minswp";
+    const DEF_TITLE: &'static str = "minswpr";
     const DEF_WIDTH: u32 = 800;
     const DEF_HEIGHT: u32 = 600;
 

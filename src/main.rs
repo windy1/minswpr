@@ -1,5 +1,5 @@
-use minswp::Minswp;
+use minswpr::Minswpr;
 
 fn main() -> Result<(), String> {
-    Minswp::default()?.start()
+    Minswpr::default()?.start()
 }

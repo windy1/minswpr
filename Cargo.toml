@@ -1,5 +1,5 @@
 [package]
-name = "minswp"
+name = "minswpr"
 version = "0.1.0"
 authors = ["Walker Crouse <Walker.Crouse@bjss.com>"]
 edition = "2018"

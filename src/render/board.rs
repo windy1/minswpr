@@ -14,7 +14,7 @@ pub struct RenderBoard {
 
 impl RenderBoard {
     pub fn new(board: Board, cell_attrs: CellAttrs) -> Self {
-        RenderBoard {
+        Self {
             board,
             cell_attrs,
             base_dimen: Dimen::new(0, 0),
@@ -124,7 +124,7 @@ pub struct RenderBoardBuilder {
 
 impl RenderBoardBuilder {
     pub fn new() -> Self {
-        RenderBoardBuilder {
+        Self {
             board: Board::empty(),
             cell_attrs: CellAttrs::new(),
         }
@@ -156,7 +156,7 @@ pub struct CellAttrs {
 
 impl CellAttrs {
     pub fn new() -> Self {
-        CellAttrs {
+        Self {
             dimen: Dimen::new(0, 0),
             border_width: 0,
             color: colors::WHITE,
@@ -199,7 +199,7 @@ impl CellAttrs {
 
 impl Default for CellAttrs {
     fn default() -> Self {
-        CellAttrs::new()
+        Self::new()
             .dimen(50, 50)
             .border_width(1)
             .border_color(colors::WHITE)

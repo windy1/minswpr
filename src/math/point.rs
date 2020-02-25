@@ -10,7 +10,7 @@ pub type RawPoint<T = i32> = (T, T);
 
 impl<T: Copy> Point<T> {
     pub fn new(x: T, y: T) -> Self {
-        Point { x, y }
+        Self { x, y }
     }
 }
 
@@ -26,7 +26,7 @@ impl<T: ops::Add<Output = T> + Copy> ops::Add<RawPoint<T>> for Point<T> {
     type Output = Self;
 
     fn add(self, rhs: RawPoint<T>) -> Self::Output {
-        self.add(Point::new(rhs.0, rhs.1))
+        self.add(Self::new(rhs.0, rhs.1))
     }
 }
 
@@ -39,7 +39,7 @@ impl<T: ops::AddAssign + Copy> ops::AddAssign for Point<T> {
 
 impl<T: ops::AddAssign + Copy> ops::AddAssign<RawPoint<T>> for Point<T> {
     fn add_assign(&mut self, rhs: RawPoint<T>) {
-        self.add_assign(Point::new(rhs.0, rhs.1))
+        self.add_assign(Self::new(rhs.0, rhs.1))
     }
 }
 
@@ -55,7 +55,7 @@ impl<T: ops::Sub<Output = T> + Copy> ops::Sub<RawPoint<T>> for Point<T> {
     type Output = Self;
 
     fn sub(self, rhs: RawPoint<T>) -> Self::Output {
-        self.sub(Point::new(rhs.0, rhs.1))
+        self.sub(Self::new(rhs.0, rhs.1))
     }
 }
 
@@ -68,7 +68,7 @@ impl<T: ops::SubAssign + Copy> ops::SubAssign for Point<T> {
 
 impl<T: ops::SubAssign + Copy> ops::SubAssign<RawPoint<T>> for Point<T> {
     fn sub_assign(&mut self, rhs: RawPoint<T>) {
-        self.sub_assign(Point::new(rhs.0, rhs.1))
+        self.sub_assign(Self::new(rhs.0, rhs.1))
     }
 }
 
@@ -76,7 +76,7 @@ impl<T: ops::Mul<Output = T> + Copy> ops::Mul for Point<T> {
     type Output = Self;
 
     fn mul(self, rhs: Self) -> Self::Output {
-        Point::new(self.x * rhs.x, self.y * rhs.y)
+        Self::new(self.x * rhs.x, self.y * rhs.y)
     }
 }
 
@@ -84,7 +84,7 @@ impl<T: ops::Mul<Output = T> + Copy> ops::Mul<RawPoint<T>> for Point<T> {
     type Output = Self;
 
     fn mul(self, rhs: RawPoint<T>) -> Self::Output {
-        self.mul(Point::new(rhs.0, rhs.1))
+        self.mul(Self::new(rhs.0, rhs.1))
     }
 }
 

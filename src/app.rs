@@ -1,4 +1,5 @@
-use super::board::{Board, CellFlags};
+use super::board::Board;
+use super::input::{Input, MouseUp};
 use super::render::board::{CellAttrs, RenderBoard};
 use super::render::colors;
 use sdl2::event::Event;
@@ -56,7 +57,13 @@ impl Minswpr {
             for event in self.event_pump.poll_iter() {
                 match event {
                     Event::Quit { .. } => break 'running,
-                    Event::MouseButtonUp { x, y, .. } => Self::mouse_up(&mut board_render, x, y),
+                    Event::MouseButtonUp { x, y, .. } => {
+                        board_render = Input::<RenderBoard>::new()
+                            .meta(board_render)
+                            .mouse_up(x, y)?
+                            .take_meta()
+                            .unwrap();
+                    }
                     _ => {}
                 }
             }
@@ -71,21 +78,6 @@ impl Minswpr {
         }
 
         Ok(())
-    }
-
-    fn mouse_up(board_render: &mut RenderBoard, x: i32, y: i32) {
-        match board_render.get_cell_at(x, y) {
-            Some(p) => {
-                match board_render
-                    .board_mut()
-                    .get_cell_mut(p.x as u32, p.y as u32)
-                {
-                    Some(c) => c.insert(CellFlags::MINE),
-                    None => {}
-                }
-            }
-            None => {}
-        }
     }
 }
 

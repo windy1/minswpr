@@ -2,8 +2,11 @@ use super::Config;
 use crate::board::Board;
 use crate::input::{ClickCell, Execute, Input};
 use crate::render::board::{CellAttrs, RenderBoard};
+use crate::render::colors;
 use sdl2::event::Event;
-use sdl2::render::WindowCanvas;
+use sdl2::rect::Rect;
+use sdl2::render::{Texture, TextureCreator, WindowCanvas};
+use sdl2::ttf::{FontStyle, Sdl2TtfContext};
 use sdl2::{self, EventPump, Sdl, VideoSubsystem};
 use std::cell::RefCell;
 use std::path::Path;
@@ -17,6 +20,7 @@ pub struct Minswpr {
     _sdl: Sdl,
     _video: VideoSubsystem,
     config: Config,
+    ttf: Sdl2TtfContext,
     event_pump: EventPump,
     canvas: WindowCanvas,
     board: BoardRef,
@@ -31,6 +35,7 @@ impl Minswpr {
         let sdl = sdl2::init()?;
         let video = sdl.video()?;
         let canvas = Self::make_canvas(&video, &win.title, win.width, win.height)?;
+        let ttf = sdl2::ttf::init().map_err(|e| e.to_string())?;
         let event_pump = sdl.event_pump()?;
 
         let board = Self::make_board(bc.width, bc.height, bc.mine_frequency)?;
@@ -40,6 +45,7 @@ impl Minswpr {
             _sdl: sdl,
             _video: video,
             config,
+            ttf,
             event_pump,
             canvas,
             board,
@@ -81,9 +87,32 @@ impl Minswpr {
             .build()?)
     }
 
+    fn load_text<'a, T>(&self, textures: &'a TextureCreator<T>) -> Result<Texture<'a>, String> {
+        let path = Path::new("/usr/share/fonts/truetype/ubuntu/Ubuntu-M.ttf");
+
+        let mut font = self.ttf.load_font(path, 128)?;
+        font.set_style(FontStyle::BOLD);
+
+        let surface = font
+            .render("Hello, world!")
+            .blended(colors::GREEN)
+            .map_err(|e| e.to_string())?;
+
+        let texture = textures
+            .create_texture_from_surface(&surface)
+            .map_err(|e| e.to_string())?;
+
+        Ok(texture)
+    }
+
     pub fn start(&mut self) -> Result<(), String> {
         self.canvas.clear();
         self.canvas.present();
+
+        let textures = self.canvas.texture_creator();
+
+        let text_test = self.load_text(&textures)?;
+        let tq = text_test.query();
 
         'main: loop {
             for event in self.event_pump.poll_iter() {
@@ -106,6 +135,13 @@ impl Minswpr {
             self.canvas.clear();
 
             self.board_render.render(&mut self.canvas)?;
+
+            self.canvas.copy(
+                &text_test,
+                None,
+                Some(Rect::new(10, 10, tq.width, tq.height)),
+            )?;
+
             self.canvas.present();
 
             thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));

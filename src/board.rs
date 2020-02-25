@@ -69,8 +69,16 @@ impl Board {
         &self.mine_positions
     }
 
-    pub fn index(&self, x: u32, y: u32) -> usize {
-        y as usize * self.width + x as usize
+    pub fn get_cell(&self, x: u32, y: u32) -> Option<&CellFlags> {
+        self.cells.get(Self::index(x, y, self.width))
+    }
+
+    pub fn get_cell_mut(&mut self, x: u32, y: u32) -> Option<&mut CellFlags> {
+        self.cells.get_mut(Self::index(x, y, self.width))
+    }
+
+    fn index(x: u32, y: u32, w: usize) -> usize {
+        y as usize * w + x as usize
     }
 
     fn point_from_index(width: usize, height: usize, idx: usize) -> Point {

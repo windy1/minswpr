@@ -1,9 +1,10 @@
 use super::colors;
-use crate::board::Board;
+use crate::board::{Board, CellFlags};
 use crate::math::{Dimen, Point};
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::{Canvas, RenderTarget};
+use std::cmp;
 
 pub struct RenderBoard {
     board: Board,
@@ -26,10 +27,14 @@ impl RenderBoard {
         RenderBoardBuilder::new()
     }
 
+    pub fn board_mut(&mut self) -> &mut Board {
+        &mut self.board
+    }
+
     pub fn render<T: RenderTarget>(&mut self, canvas: &mut Canvas<T>) -> Result<(), String> {
         self.draw_base(canvas)?;
         self.draw_cell_borders(canvas)?;
-        self.draw_mines(canvas)?;
+        self.draw_cells(canvas)?;
         Ok(())
     }
 
@@ -84,36 +89,81 @@ impl RenderBoard {
         Ok(())
     }
 
-    fn draw_mines<T: RenderTarget>(&self, canvas: &mut Canvas<T>) -> Result<(), String> {
+    fn draw_cells<T: RenderTarget>(&self, canvas: &mut Canvas<T>) -> Result<(), String> {
         canvas.set_draw_color(self.cell_attrs.mine_color);
 
-        let mine_width = self.cell_attrs.mine_dimen.width();
-        let mine_height = self.cell_attrs.mine_dimen.height();
-        let cell_width = self.cell_attrs.dimen.width();
-        let cell_height = self.cell_attrs.dimen.height();
+        let cell_attrs = &self.cell_attrs;
+        let mine_dimen = &cell_attrs.mine_dimen;
+        let cell_dimen = &cell_attrs.dimen;
 
-        for mine_pos in self.board.mine_positions() {
-            let cell_pos = self.cell_pos(mine_pos.x as u32, mine_pos.y as u32);
-            let mine_pos = cell_pos
-                + (
-                    (cell_width / 2 - (mine_width / 2)) as i32,
-                    (cell_height / 2 - (mine_height / 2)) as i32,
-                );
-            canvas.fill_rect(Rect::new(mine_pos.x, mine_pos.y, mine_width, mine_height))?;
+        let cell_width = cell_dimen.width();
+        let cell_height = cell_dimen.height();
+
+        let mine_width = mine_dimen.width();
+        let mine_height = mine_dimen.height();
+
+        for x in 0..self.board.width() {
+            for y in 0..self.board.height() {
+                let cell = self.board.get_cell(x as u32, y as u32).unwrap();
+                if !cell.contains(CellFlags::MINE) {
+                    continue;
+                }
+                let cell_pos = self.cell_pos(x as u32, y as u32);
+                let mine_x = (cell_width / 2 - (mine_width / 2)) as i32;
+                let mine_y = (cell_height / 2 - (mine_height / 2)) as i32;
+                let mine_pos = cell_pos + (mine_x, mine_y);
+                canvas.fill_rect(Rect::new(mine_pos.x, mine_pos.y, mine_width, mine_height))?;
+            }
         }
 
         Ok(())
     }
 
     fn cell_pos(&self, x: u32, y: u32) -> Point {
-        let border_width = self.cell_attrs.border_width as i32;
-        let cell_dimen = self.cell_attrs.dimen;
+        let cell_attrs = &self.cell_attrs;
+
+        let border_width = cell_attrs.border_width as i32;
+        let cell_dimen = &cell_attrs.dimen;
+
         let step_x = (cell_dimen.width() + border_width as u32) as i32;
         let step_y = (cell_dimen.height() + border_width as u32) as i32;
+
         let dx = x as i32 * step_x;
         let dy = y as i32 * step_y;
+
         let origin = Point::new(self.pos.x + border_width, self.pos.y + border_width);
+
         origin + (dx, dy)
+    }
+
+    pub fn get_cell_at(&self, x: i32, y: i32) -> Option<Point> {
+        let base_dimen = &self.base_dimen;
+
+        let min_x = self.pos.x;
+        let max_x = min_x + base_dimen.width() as i32;
+
+        let min_y = self.pos.y;
+        let max_y = min_y + base_dimen.height() as i32;
+
+        if x < min_x || x > max_x || y < min_y || y > max_y {
+            return None;
+        }
+
+        let cell_attrs = &self.cell_attrs;
+        let cell_dimen = cell_attrs.dimen;
+
+        let cell_width = cell_dimen.width() as i32;
+        let cell_height = cell_dimen.height() as i32;
+
+        let border_width = cell_attrs.border_width;
+
+        let cx = (x - min_x) / (cell_width + border_width as i32);
+        let cx = cmp::min(cx, self.board.width() as i32 - 1);
+
+        let cy = (y - min_y) / (cell_height + border_width as i32);
+        let cy = cmp::min(cy, self.board.height() as i32 - 1);
+
+        Some(Point::new(cx, cy))
     }
 }
 

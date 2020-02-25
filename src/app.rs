@@ -1,6 +1,8 @@
-use super::board::Board;
+use super::board::{Board, CellFlags};
 use super::render::board::{CellAttrs, RenderBoard};
+use super::render::colors;
 use sdl2::event::Event;
+use sdl2::pixels::Color;
 use sdl2::render::WindowCanvas;
 use sdl2::{self, EventPump, Sdl, VideoSubsystem};
 use std::thread;
@@ -11,6 +13,7 @@ pub struct Minswpr {
     _video: VideoSubsystem,
     canvas: WindowCanvas,
     event_pump: EventPump,
+    bg_color: Color,
 }
 
 impl Minswpr {
@@ -26,11 +29,13 @@ impl Minswpr {
             .build()
             .map_err(|e| e.to_string())?;
         let event_pump = sdl.event_pump()?;
+
         Ok(Self {
             _sdl: sdl,
             _video: video,
             canvas,
             event_pump,
+            bg_color: config.bg_color,
         })
     }
 
@@ -51,9 +56,13 @@ impl Minswpr {
             for event in self.event_pump.poll_iter() {
                 match event {
                     Event::Quit { .. } => break 'running,
+                    Event::MouseButtonUp { x, y, .. } => Self::mouse_up(&mut board_render, x, y),
                     _ => {}
                 }
             }
+
+            self.canvas.set_draw_color(self.bg_color);
+            self.canvas.clear();
 
             board_render.render(&mut self.canvas)?;
             self.canvas.present();
@@ -63,24 +72,42 @@ impl Minswpr {
 
         Ok(())
     }
+
+    fn mouse_up(board_render: &mut RenderBoard, x: i32, y: i32) {
+        match board_render.get_cell_at(x, y) {
+            Some(p) => {
+                match board_render
+                    .board_mut()
+                    .get_cell_mut(p.x as u32, p.y as u32)
+                {
+                    Some(c) => c.insert(CellFlags::MINE),
+                    None => {}
+                }
+            }
+            None => {}
+        }
+    }
 }
 
 pub struct Config<'a> {
     title: &'a str,
     width: u32,
     height: u32,
+    bg_color: Color,
 }
 
 impl<'a> Config<'a> {
     const DEF_TITLE: &'static str = "minswpr";
     const DEF_WIDTH: u32 = 800;
     const DEF_HEIGHT: u32 = 600;
+    const DEF_BG_COLOR: Color = colors::BLACK;
 
     pub fn new() -> Config<'a> {
-        Config {
+        Self {
             title: "",
             width: 0,
             height: 0,
+            bg_color: colors::BLACK,
         }
     }
 
@@ -98,6 +125,11 @@ impl<'a> Config<'a> {
         self.height = height;
         self
     }
+
+    pub fn bg_color(mut self, bg_color: Color) -> Self {
+        self.bg_color = bg_color;
+        self
+    }
 }
 
 impl<'a> Default for Config<'a> {
@@ -106,5 +138,6 @@ impl<'a> Default for Config<'a> {
             .title(Self::DEF_TITLE)
             .width(Self::DEF_WIDTH)
             .height(Self::DEF_HEIGHT)
+            .bg_color(Self::DEF_BG_COLOR)
     }
 }

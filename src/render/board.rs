@@ -1,20 +1,21 @@
 use super::colors;
-use crate::board::{Board, CellFlags};
+use crate::board::CellFlags;
 use crate::math::{Dimen, Point};
+use crate::BoardRef;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::{Canvas, RenderTarget};
 use std::cmp;
 
 pub struct RenderBoard {
-    board: Board,
+    board: BoardRef,
     cell_attrs: CellAttrs,
     base_dimen: Dimen,
     pos: Point,
 }
 
 impl RenderBoard {
-    pub fn new(board: Board, cell_attrs: CellAttrs) -> Self {
+    pub fn new(board: BoardRef, cell_attrs: CellAttrs) -> Self {
         Self {
             board,
             cell_attrs,
@@ -27,9 +28,17 @@ impl RenderBoard {
         RenderBoardBuilder::new()
     }
 
-    pub fn board_mut(&mut self) -> &mut Board {
-        &mut self.board
-    }
+    // pub fn board(&self) -> Option<&Board> {
+    //     self.board.as_ref()
+    // }
+    //
+    // pub fn board_mut(&mut self) -> Option<&mut Board> {
+    //     self.board.as_mut()
+    // }
+    //
+    // pub fn set_board(&mut self, board: Board) {
+    //     self.board = Some(board)
+    // }
 
     pub fn render<T: RenderTarget>(&mut self, canvas: &mut Canvas<T>) -> Result<(), String> {
         self.draw_base(canvas)?;
@@ -42,11 +51,13 @@ impl RenderBoard {
         let cell_dimen = &self.cell_attrs.dimen;
         let cell_border_width = self.cell_attrs.border_width as u32;
 
-        let board_cell_width = self.board.width() as u32;
+        let board = self.board.borrow();
+
+        let board_cell_width = board.width() as u32;
         let board_px_width = cell_dimen.width() as u32 * board_cell_width
             + cell_border_width * (board_cell_width + 1);
 
-        let board_cell_height = self.board.height() as u32;
+        let board_cell_height = board.height() as u32;
         let board_px_height = cell_dimen.height() as u32 * board_cell_height
             + cell_border_width * (board_cell_height + 1);
 
@@ -90,31 +101,73 @@ impl RenderBoard {
     }
 
     fn draw_cells<T: RenderTarget>(&self, canvas: &mut Canvas<T>) -> Result<(), String> {
-        canvas.set_draw_color(self.cell_attrs.mine_color);
+        let board = self.board.borrow();
+        for x in 0..board.width() as u32 {
+            for y in 0..board.height() as u32 {
+                self.draw_cell(canvas, x, y)?;
+            }
+        }
+        Ok(())
+    }
 
+    fn draw_cell<T>(&self, canvas: &mut Canvas<T>, x: u32, y: u32) -> Result<(), String>
+    where
+        T: RenderTarget,
+    {
+        let board = self.board.borrow();
+        let cell = board.get_cell(x, y).unwrap();
+        let cell_pos = self.cell_pos(x as u32, y as u32);
+        if cell.contains(CellFlags::REVEALED) {
+            self.fill_cell(canvas, &cell_pos, &self.cell_attrs.revealed_color)?;
+
+            if cell.contains(CellFlags::MINE) {
+                self.draw_mine(canvas, &cell_pos)?;
+            }
+        }
+
+        Ok(())
+    }
+
+    fn fill_cell<T>(
+        &self,
+        canvas: &mut Canvas<T>,
+        cell_pos: &Point,
+        color: &Color,
+    ) -> Result<(), String>
+    where
+        T: RenderTarget,
+    {
+        let cell_dimen = &self.cell_attrs.dimen;
+        canvas.set_draw_color(*color);
+        canvas.fill_rect(Rect::new(
+            cell_pos.x,
+            cell_pos.y,
+            cell_dimen.width(),
+            cell_dimen.height(),
+        ))?;
+        Ok(())
+    }
+
+    fn draw_mine<T>(&self, canvas: &mut Canvas<T>, cell_pos: &Point) -> Result<(), String>
+    where
+        T: RenderTarget,
+    {
         let cell_attrs = &self.cell_attrs;
-        let mine_dimen = &cell_attrs.mine_dimen;
-        let cell_dimen = &cell_attrs.dimen;
 
+        let cell_dimen = &cell_attrs.dimen;
         let cell_width = cell_dimen.width();
         let cell_height = cell_dimen.height();
 
+        let mine_dimen = &cell_attrs.mine_dimen;
         let mine_width = mine_dimen.width();
         let mine_height = mine_dimen.height();
 
-        for x in 0..self.board.width() {
-            for y in 0..self.board.height() {
-                let cell = self.board.get_cell(x as u32, y as u32).unwrap();
-                if !cell.contains(CellFlags::MINE) {
-                    continue;
-                }
-                let cell_pos = self.cell_pos(x as u32, y as u32);
-                let mine_x = (cell_width / 2 - (mine_width / 2)) as i32;
-                let mine_y = (cell_height / 2 - (mine_height / 2)) as i32;
-                let mine_pos = cell_pos + (mine_x, mine_y);
-                canvas.fill_rect(Rect::new(mine_pos.x, mine_pos.y, mine_width, mine_height))?;
-            }
-        }
+        let mine_x = (cell_width / 2 - (mine_width / 2)) as i32;
+        let mine_y = (cell_height / 2 - (mine_height / 2)) as i32;
+        let mine_pos = *cell_pos + (mine_x, mine_y);
+
+        canvas.set_draw_color(self.cell_attrs.mine_color);
+        canvas.fill_rect(Rect::new(mine_pos.x, mine_pos.y, mine_width, mine_height))?;
 
         Ok(())
     }
@@ -157,31 +210,33 @@ impl RenderBoard {
 
         let border_width = cell_attrs.border_width;
 
+        let board = self.board.borrow();
+
         let cx = (x - min_x) / (cell_width + border_width as i32);
-        let cx = cmp::min(cx, self.board.width() as i32 - 1);
+        let cx = cmp::min(cx, board.width() as i32 - 1);
 
         let cy = (y - min_y) / (cell_height + border_width as i32);
-        let cy = cmp::min(cy, self.board.height() as i32 - 1);
+        let cy = cmp::min(cy, board.height() as i32 - 1);
 
         Some(Point::new(cx, cy))
     }
 }
 
 pub struct RenderBoardBuilder {
-    board: Board,
+    board: Option<BoardRef>,
     cell_attrs: CellAttrs,
 }
 
 impl RenderBoardBuilder {
     pub fn new() -> Self {
         Self {
-            board: Board::empty(),
+            board: None,
             cell_attrs: CellAttrs::new(),
         }
     }
 
-    pub fn board(mut self, board: Board) -> Self {
-        self.board = board;
+    pub fn board(mut self, board: BoardRef) -> Self {
+        self.board = Some(board);
         self
     }
 
@@ -190,8 +245,9 @@ impl RenderBoardBuilder {
         self
     }
 
-    pub fn build(self) -> RenderBoard {
-        RenderBoard::new(self.board, self.cell_attrs)
+    pub fn build(self) -> Result<RenderBoard, String> {
+        let board = self.board.ok_or_else(|| "missing board")?;
+        Ok(RenderBoard::new(board, self.cell_attrs))
     }
 }
 
@@ -202,6 +258,7 @@ pub struct CellAttrs {
     border_color: Color,
     mine_color: Color,
     mine_dimen: Dimen,
+    revealed_color: Color,
 }
 
 impl CellAttrs {
@@ -209,10 +266,11 @@ impl CellAttrs {
         Self {
             dimen: Dimen::new(0, 0),
             border_width: 0,
-            color: colors::WHITE,
+            color: colors::BLACK,
             border_color: colors::BLACK,
             mine_color: colors::BLACK,
             mine_dimen: Dimen::new(0, 0),
+            revealed_color: colors::BLACK,
         }
     }
 
@@ -245,6 +303,11 @@ impl CellAttrs {
         self.mine_dimen = mine_dimen;
         self
     }
+
+    pub fn revealed_color(mut self, revealed_color: Color) -> Self {
+        self.revealed_color = revealed_color;
+        self
+    }
 }
 
 impl Default for CellAttrs {
@@ -256,5 +319,6 @@ impl Default for CellAttrs {
             .color(colors::RED)
             .mine_color(colors::BLACK)
             .mine_dimen(Dimen::new(20, 20))
+            .revealed_color(colors::BLUE)
     }
 }

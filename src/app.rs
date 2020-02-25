@@ -1,13 +1,17 @@
 use super::board::Board;
-use super::input::{Input, MouseUp};
+use super::input::{ClickCell, Input, MouseUp};
 use super::render::board::{CellAttrs, RenderBoard};
 use super::render::colors;
 use sdl2::event::Event;
 use sdl2::pixels::Color;
 use sdl2::render::WindowCanvas;
 use sdl2::{self, EventPump, Sdl, VideoSubsystem};
+use std::cell::RefCell;
+use std::rc::Rc;
 use std::thread;
 use std::time::Duration;
+
+pub type BoardRef = Rc<RefCell<Board>>;
 
 pub struct Minswpr {
     _sdl: Sdl,
@@ -48,21 +52,22 @@ impl Minswpr {
         self.canvas.clear();
         self.canvas.present();
 
+        let board = Rc::new(RefCell::new(Board::default()));
         let mut board_render = RenderBoard::builder()
-            .board(Board::default())
+            .board(Rc::clone(&board))
             .cell_attrs(CellAttrs::default())
-            .build();
+            .build()?;
 
         'running: loop {
             for event in self.event_pump.poll_iter() {
                 match event {
                     Event::Quit { .. } => break 'running,
                     Event::MouseButtonUp { x, y, .. } => {
-                        board_render = Input::<RenderBoard>::new()
-                            .meta(board_render)
-                            .mouse_up(x, y)?
-                            .take_meta()
-                            .unwrap();
+                        Input::<ClickCell>::with_meta(ClickCell::new(
+                            Rc::clone(&board),
+                            &board_render,
+                        ))
+                        .mouse_up(x, y)?;
                     }
                     _ => {}
                 }

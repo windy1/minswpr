@@ -1,9 +1,10 @@
-use super::math;
+use super::math::{self, Point};
+use itertools::Itertools;
 
 bitflags! {
     #[derive(Default)]
     pub struct CellFlags: u8 {
-        const EXCAVATED = 0b00000001;
+        const REVEALED = 0b00000001;
         const MINE = 0b00000010;
     }
 }
@@ -59,12 +60,78 @@ impl Board {
         &self.cells
     }
 
+    pub fn cell(&self, x: u32, y: u32) -> &CellFlags {
+        &self.cells[Self::index(x, y, self.width)]
+    }
+
+    pub fn cell_mut(&mut self, x: u32, y: u32) -> &mut CellFlags {
+        &mut self.cells[Self::index(x, y, self.width)]
+    }
+
     pub fn get_cell(&self, x: u32, y: u32) -> Option<&CellFlags> {
         self.cells.get(Self::index(x, y, self.width))
     }
 
     pub fn get_cell_mut(&mut self, x: u32, y: u32) -> Option<&mut CellFlags> {
         self.cells.get_mut(Self::index(x, y, self.width))
+    }
+
+    pub fn reveal_from(&mut self, x: u32, y: u32) {
+        let cell = match self.get_cell_mut(x, y) {
+            Some(c) => c,
+            None => return,
+        };
+
+        // make sure the cell hasn't been previously revealed
+        if cell.contains(CellFlags::REVEALED) {
+            return;
+        }
+
+        // reveal the current cell
+        cell.insert(CellFlags::REVEALED);
+
+        // if the revealed cell was a mine, stop revealing cells
+        // or...
+        // if the revealed cell is touching a mine, stop revealing cells
+        if cell.contains(CellFlags::MINE) || self.count_adjacent_mines(x, y) > 0 {
+            return;
+        }
+
+        // reveal all adjacent cells that are not a mine
+        self.filter_neighbors(x, y, |c| {
+            !c.contains(CellFlags::MINE) && !c.contains(CellFlags::REVEALED)
+        })
+        .iter()
+        .for_each(|p| self.reveal_from(p.x, p.y));
+    }
+
+    fn neighbors(&self, x: u32, y: u32) -> Vec<Point<u32>> {
+        let x = x as i32;
+        let y = y as i32;
+        (x - 1..x + 2)
+            .cartesian_product(y - 1..y + 2)
+            .filter(|(nx, ny)| *nx >= 0 && *ny >= 0 && !(*nx == x && *ny == y))
+            .map(|(nx, ny)| (nx as u32, ny as u32))
+            .filter(|(nx, ny)| self.get_cell(*nx, *ny).is_some())
+            .map(|(nx, ny)| Point::new(nx, ny))
+            .collect()
+    }
+
+    fn filter_neighbors<F>(&self, x: u32, y: u32, f: F) -> Vec<Point<u32>>
+    where
+        F: Fn(&CellFlags) -> bool,
+    {
+        let neighbors = self.neighbors(x, y);
+        neighbors
+            .iter()
+            .filter(|p| f(self.cell(p.x, p.y)))
+            .cloned()
+            .collect()
+    }
+
+    fn count_adjacent_mines(&self, x: u32, y: u32) -> usize {
+        self.filter_neighbors(x, y, |c| c.contains(CellFlags::MINE))
+            .len()
     }
 
     fn index(x: u32, y: u32, w: usize) -> usize {
@@ -88,17 +155,18 @@ impl Default for Board {
 
 #[cfg(test)]
 mod tests {
+    use super::math::Point;
     use super::{Board, CellFlags};
-    use crate::math::Point;
+    use std::collections::HashSet;
 
     #[test]
     fn test_cell_flags() {
-        let c1 = CellFlags::EXCAVATED | CellFlags::MINE;
-        assert!(c1.contains(CellFlags::EXCAVATED));
+        let c1 = CellFlags::REVEALED | CellFlags::MINE;
+        assert!(c1.contains(CellFlags::REVEALED));
         assert!(c1.contains(CellFlags::MINE));
 
-        let c2 = CellFlags::EXCAVATED;
-        assert!(c2.contains(CellFlags::EXCAVATED));
+        let c2 = CellFlags::REVEALED;
+        assert!(c2.contains(CellFlags::REVEALED));
         assert!(!c2.contains(CellFlags::MINE));
 
         let c3: CellFlags = Default::default();
@@ -116,5 +184,24 @@ mod tests {
         assert_eq!(num_mines, b.num_mines());
         assert_eq!(b.width() * b.height(), b.cells().len());
         Ok(())
+    }
+
+    #[test]
+    fn test_board_neighbors() {
+        let b = Board::default();
+        let neighbors: HashSet<Point<u32>> = vec![
+            Point::new(0, 0),
+            Point::new(1, 0),
+            Point::new(2, 0),
+            Point::new(0, 1),
+            Point::new(2, 1),
+            Point::new(0, 2),
+            Point::new(1, 2),
+            Point::new(2, 2),
+        ]
+        .iter()
+        .cloned()
+        .collect();
+        assert_eq!(neighbors, b.neighbors(1, 1).iter().cloned().collect());
     }
 }

@@ -20,10 +20,6 @@ pub trait Execute {
     fn execute(&mut self) -> Result<(), String>;
 }
 
-pub trait MouseUp {
-    fn mouse_up(&mut self, x: i32, y: i32) -> Result<(), String>;
-}
-
 pub struct ClickCell<'a> {
     mouse_pos: Point,
     board: BoardRef,

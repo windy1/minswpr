@@ -81,14 +81,6 @@ impl Minswpr {
                 match event {
                     Event::Quit { .. } => break 'main,
                     Event::MouseButtonUp { x, y, .. } => {
-                        // Input::<ClickCell>::with_meta(ClickCell::new(
-                        //     x,
-                        //     y,
-                        //     Rc::clone(&self.board),
-                        //     &self.board_render,
-                        // ))
-                        // .execute()?;
-
                         Input::<ClickCell>::with_meta(
                             ClickCell::new()
                                 .mouse_pos(x, y)

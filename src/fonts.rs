@@ -1,7 +1,6 @@
 use sdl2::ttf::Font;
 use sdl2::ttf::Sdl2TtfContext;
 use std::collections::HashMap;
-use std::ops;
 use std::path::Path;
 
 pub struct Fonts<'a> {
@@ -21,15 +20,9 @@ impl<'a> Fonts<'a> {
         Ok(())
     }
 
-    pub fn get(&self, key: &str) -> Option<&Font<'a, 'a>> {
-        self.font_map.get(key)
-    }
-}
-
-impl<'a> ops::Index<&str> for Fonts<'a> {
-    type Output = Font<'a, 'a>;
-
-    fn index(&self, key: &str) -> &Self::Output {
-        &self.font_map[key]
+    pub fn get(&self, key: &str) -> Result<&Font<'a, 'a>, String> {
+        self.font_map
+            .get(key)
+            .ok_or_else(|| format!("missing required font `{}`", key))
     }
 }

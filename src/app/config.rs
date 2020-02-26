@@ -2,6 +2,7 @@ use crate::math;
 use sdl2::pixels::Color;
 use serde::de::{self, Visitor};
 use serde::{Deserialize, Deserializer};
+use std::collections::HashMap;
 use std::fmt;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -9,6 +10,7 @@ use std::path::{Path, PathBuf};
 #[derive(Deserialize)]
 pub struct Config {
     pub window: WindowConfig,
+    pub fonts: HashMap<String, FontConfig>,
     pub board: BoardConfig,
 }
 
@@ -40,7 +42,6 @@ pub struct CellAttrsConfig {
     pub border_color: Color,
     #[serde(deserialize_with = "read_color")]
     pub revealed_color: Color,
-    pub font_path: PathBuf,
     pub mines: MinesConfig,
 }
 
@@ -50,6 +51,12 @@ pub struct MinesConfig {
     pub color: Color,
     pub width: u32,
     pub height: u32,
+}
+
+#[derive(Deserialize)]
+pub struct FontConfig {
+    pub path: PathBuf,
+    pub pt: u16,
 }
 
 pub fn read_config<P>(fname: P) -> Result<Config, String>

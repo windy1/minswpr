@@ -1,9 +1,11 @@
+use super::colors;
 use crate::board::CellFlags;
+use crate::fonts::Fonts;
 use crate::math::{Dimen, Point};
 use crate::BoardRef;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
-use sdl2::render::{Canvas, RenderTarget};
+use sdl2::render::{Canvas, RenderTarget, WindowCanvas};
 use std::cmp;
 
 mod builder;
@@ -31,11 +33,10 @@ impl RenderBoard {
         RenderBoardBuilder::new()
     }
 
-    pub fn render<T: RenderTarget>(&mut self, canvas: &mut Canvas<T>) -> Result<(), String> {
+    pub fn render(&mut self, canvas: &mut WindowCanvas, fonts: &Fonts) -> Result<(), String> {
         self.draw_base(canvas)?;
         self.draw_cell_borders(canvas)?;
-        self.draw_cells(canvas)?;
-        Ok(())
+        self.draw_cells(canvas, fonts)
     }
 
     fn draw_base<T: RenderTarget>(&mut self, canvas: &mut Canvas<T>) -> Result<(), String> {
@@ -91,32 +92,73 @@ impl RenderBoard {
         Ok(())
     }
 
-    fn draw_cells<T: RenderTarget>(&self, canvas: &mut Canvas<T>) -> Result<(), String> {
+    fn draw_cells(&self, canvas: &mut WindowCanvas, fonts: &Fonts) -> Result<(), String> {
         let board = self.board.borrow();
         for x in 0..board.width() as u32 {
             for y in 0..board.height() as u32 {
-                self.draw_cell(canvas, x, y)?;
+                self.draw_cell(canvas, fonts, x, y)?;
             }
         }
         Ok(())
     }
 
-    fn draw_cell<T>(&self, canvas: &mut Canvas<T>, x: u32, y: u32) -> Result<(), String>
-    where
-        T: RenderTarget,
-    {
+    fn draw_cell(
+        &self,
+        canvas: &mut WindowCanvas,
+        fonts: &Fonts,
+        x: u32,
+        y: u32,
+    ) -> Result<(), String> {
         let board = self.board.borrow();
         let cell = board.get_cell(x, y).unwrap();
         let cell_pos = self.cell_pos(x as u32, y as u32);
+
         if cell.contains(CellFlags::REVEALED) {
             self.fill_cell(canvas, &cell_pos, &self.cell_attrs.revealed_color)?;
 
+            let adjacent_mines = board.count_adjacent_mines(x, y);
+
             if cell.contains(CellFlags::MINE) {
                 self.draw_mine(canvas, &cell_pos)?;
+            } else if adjacent_mines > 0 {
+                self.draw_cell_hint(canvas, fonts, &cell_pos, adjacent_mines)?;
             }
         }
 
         Ok(())
+    }
+
+    fn draw_cell_hint(
+        &self,
+        canvas: &mut WindowCanvas,
+        fonts: &Fonts,
+        cell_pos: &Point,
+        hint: usize,
+    ) -> Result<(), String> {
+        let textures = canvas.texture_creator();
+
+        let surface = fonts
+            .get("board.cell")?
+            .render(&hint.to_string())
+            .blended(colors::GREEN)
+            .map_err(|e| e.to_string())?;
+
+        let texture = textures
+            .create_texture_from_surface(&surface)
+            .map_err(|e| e.to_string())?;
+
+        let tq = texture.query();
+
+        let cell_dimen = &self.cell_attrs.dimen;
+        let cell_dimen = point!(cell_dimen.x as i32, cell_dimen.y as i32);
+        let tex_dimen = point!(tq.width as i32, tq.height as i32);
+        let hint_pos = *cell_pos + cell_dimen / (2, 2) - tex_dimen / (2, 2);
+
+        canvas.copy(
+            &texture,
+            None,
+            Some(Rect::new(hint_pos.x, hint_pos.y, tq.width, tq.height)),
+        )
     }
 
     fn fill_cell<T>(

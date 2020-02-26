@@ -113,6 +113,11 @@ impl Board {
             .collect()
     }
 
+    pub fn count_adjacent_mines(&self, x: u32, y: u32) -> usize {
+        self.filter_neighbors(x, y, |c| c.contains(CellFlags::MINE))
+            .len()
+    }
+
     fn filter_neighbors<F>(&self, x: u32, y: u32, f: F) -> Vec<Point<u32>>
     where
         F: Fn(&CellFlags) -> bool,
@@ -123,11 +128,6 @@ impl Board {
             .filter(|p| f(self.cell(p.x, p.y)))
             .cloned()
             .collect()
-    }
-
-    fn count_adjacent_mines(&self, x: u32, y: u32) -> usize {
-        self.filter_neighbors(x, y, |c| c.contains(CellFlags::MINE))
-            .len()
     }
 
     fn index(x: u32, y: u32, w: usize) -> usize {

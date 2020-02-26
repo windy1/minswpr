@@ -107,20 +107,9 @@ impl Minswpr {
         self.canvas.present();
 
         let mut fonts = Fonts::new(&self.ttf)?;
-        fonts.load("board.cell", &self.config.board.cells.font_path, 24)?;
-
-        let textures = self.canvas.texture_creator();
-
-        let surface = fonts["board.cell"]
-            .render("Hello, world!")
-            .blended(colors::GREEN)
-            .map_err(|e| e.to_string())?;
-
-        let texture = textures
-            .create_texture_from_surface(&surface)
-            .map_err(|e| e.to_string())?;
-
-        let tq = texture.query();
+        for (k, f) in &self.config.fonts {
+            fonts.load(k, &f.path, f.pt)?;
+        }
 
         'main: loop {
             for event in self.event_pump.poll_iter() {
@@ -142,10 +131,7 @@ impl Minswpr {
             self.canvas.set_draw_color(self.config.window.bg_color);
             self.canvas.clear();
 
-            self.board_render.render(&mut self.canvas)?;
-
-            self.canvas
-                .copy(&texture, None, Some(Rect::new(10, 10, tq.width, tq.height)))?;
+            self.board_render.render(&mut self.canvas, &fonts)?;
 
             self.canvas.present();
 

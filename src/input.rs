@@ -62,7 +62,7 @@ impl<'a> Execute for Input<ClickCell<'a>> {
                 .as_ref()
                 .unwrap()
                 .borrow_mut()
-                .reveal_from(p.x as u32, p.y as u32),
+                .reveal_from(p.x, p.y),
             None => {}
         }
         Ok(())

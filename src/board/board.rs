@@ -73,6 +73,8 @@ impl Board {
     }
 
     pub fn reveal_from(&mut self, x: u32, y: u32) {
+        println!("reveal_from = {:?}", (x, y));
+
         let cell = match self.get_cell_mut(x, y) {
             Some(c) => c,
             None => return,
@@ -106,7 +108,9 @@ impl Board {
         let y = y as i32;
         (x - 1..x + 2)
             .cartesian_product(y - 1..y + 2)
-            .filter(|(nx, ny)| *nx >= 0 && *ny >= 0 && !(*nx == x && *ny == y))
+            .filter(|(nx, ny)| *nx >= 0 && *ny >= 0)
+            .filter(|(nx, ny)| *nx < self.width as i32 && *ny < self.height as i32)
+            .filter(|(nx, ny)| !(*nx == x && *ny == y))
             .map(|(nx, ny)| (nx as u32, ny as u32))
             .filter(|(nx, ny)| self.get_cell(*nx, *ny).is_some())
             .map(|(nx, ny)| Point::new(nx, ny))

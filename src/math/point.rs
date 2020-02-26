@@ -8,17 +8,23 @@ macro_rules! point {
     };
 }
 
+pub type RawPoint<T = i32> = (T, T);
+
 #[derive(Debug, Eq, PartialEq, Copy, Clone, Hash)]
 pub struct Point<T: Copy = i32> {
     pub x: T,
     pub y: T,
 }
 
-pub type RawPoint<T = i32> = (T, T);
-
 impl<T: Copy> Point<T> {
     pub fn new(x: T, y: T) -> Self {
         Self { x, y }
+    }
+}
+
+impl Point<u32> {
+    pub fn as_i32(&self) -> Point {
+        point!(self.x as i32, self.y as i32)
     }
 }
 

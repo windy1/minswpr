@@ -6,6 +6,7 @@ use sdl2::event::Event;
 use sdl2::render::WindowCanvas;
 use sdl2::{self, EventPump, Sdl, VideoSubsystem};
 use std::cell::RefCell;
+use std::path::Path;
 use std::rc::Rc;
 use std::thread;
 use std::time::Duration;
@@ -15,11 +16,11 @@ pub type BoardRef = Rc<RefCell<Board>>;
 pub struct Minswpr {
     _sdl: Sdl,
     _video: VideoSubsystem,
-    canvas: WindowCanvas,
+    config: Config,
     event_pump: EventPump,
+    canvas: WindowCanvas,
     board: BoardRef,
     board_render: RenderBoard,
-    config: Config,
 }
 
 impl Minswpr {
@@ -30,16 +31,22 @@ impl Minswpr {
         let event_pump = sdl.event_pump()?;
         let board = Rc::new(RefCell::new(Board::default()));
         let board_render = Self::make_board_render(&board)?;
-
         Ok(Self {
             _sdl: sdl,
             _video: video,
-            canvas,
+            config,
             event_pump,
+            canvas,
             board,
             board_render,
-            config,
         })
+    }
+
+    pub fn from_config<P>(fname: P) -> Result<Self, String>
+    where
+        P: AsRef<Path>,
+    {
+        Self::new(super::read_config(fname)?)
     }
 
     fn make_canvas(
@@ -63,10 +70,6 @@ impl Minswpr {
             .board(Rc::clone(board))
             .cell_attrs(CellAttrs::default())
             .build()?)
-    }
-
-    pub fn default() -> Result<Self, String> {
-        Self::new(Config::default())
     }
 
     pub fn start(&mut self) -> Result<(), String> {

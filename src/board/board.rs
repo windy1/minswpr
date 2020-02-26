@@ -18,10 +18,6 @@ pub struct Board {
 }
 
 impl Board {
-    const DEF_WIDTH: usize = 8;
-    const DEF_HEIGHT: usize = 8;
-    const DEF_MINE_FREQ: f64 = 0.078;
-
     pub fn new(width: usize, height: usize, mine_freq: f64) -> Result<Self, &'static str> {
         if mine_freq < 0.0 || mine_freq > 1.0 {
             return Err("mine_freq must be between 0.0 and 1.0");
@@ -144,11 +140,5 @@ impl Board {
             cells[*idx].insert(CellFlags::MINE);
         }
         cells
-    }
-}
-
-impl Default for Board {
-    fn default() -> Self {
-        Self::new(Self::DEF_WIDTH, Self::DEF_HEIGHT, Self::DEF_MINE_FREQ).unwrap()
     }
 }

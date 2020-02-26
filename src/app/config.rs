@@ -6,11 +6,24 @@ use std::path::Path;
 
 #[derive(Deserialize)]
 pub struct Config {
+    pub window: WindowConfig,
+    pub board: BoardConfig,
+}
+
+#[derive(Deserialize)]
+pub struct WindowConfig {
     pub title: String,
     pub width: u32,
     pub height: u32,
     #[serde(deserialize_with = "read_color")]
     pub bg_color: Color,
+}
+
+#[derive(Deserialize)]
+pub struct BoardConfig {
+    pub width: usize,
+    pub height: usize,
+    pub mine_frequency: f64,
 }
 
 pub fn read_config<P>(fname: P) -> Result<Config, String>

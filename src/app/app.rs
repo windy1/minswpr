@@ -25,12 +25,17 @@ pub struct Minswpr {
 
 impl Minswpr {
     pub fn new(config: Config) -> Result<Self, String> {
+        let win = &config.window;
+        let bc = &config.board;
+
         let sdl = sdl2::init()?;
         let video = sdl.video()?;
-        let canvas = Self::make_canvas(&video, &config.title, config.width, config.height)?;
+        let canvas = Self::make_canvas(&video, &win.title, win.width, win.height)?;
         let event_pump = sdl.event_pump()?;
-        let board = Rc::new(RefCell::new(Board::default()));
+
+        let board = Self::make_board(bc.width, bc.height, bc.mine_frequency)?;
         let board_render = Self::make_board_render(&board)?;
+
         Ok(Self {
             _sdl: sdl,
             _video: video,
@@ -65,6 +70,10 @@ impl Minswpr {
             .map_err(|e| e.to_string())?)
     }
 
+    fn make_board(w: usize, h: usize, mf: f64) -> Result<BoardRef, String> {
+        Ok(Rc::new(RefCell::new(Board::new(w, h, mf)?)))
+    }
+
     fn make_board_render(board: &BoardRef) -> Result<RenderBoard, String> {
         Ok(RenderBoard::builder()
             .board(Rc::clone(board))
@@ -93,7 +102,7 @@ impl Minswpr {
                 }
             }
 
-            self.canvas.set_draw_color(self.config.bg_color);
+            self.canvas.set_draw_color(self.config.window.bg_color);
             self.canvas.clear();
 
             self.board_render.render(&mut self.canvas)?;

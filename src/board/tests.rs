@@ -16,9 +16,13 @@ fn test_cell_flags() {
     assert!(c3.is_empty());
 }
 
+fn make_board() -> Board {
+    Board::new(8, 8, 0.078).unwrap()
+}
+
 #[test]
 fn test_board_new() -> Result<(), &'static str> {
-    let b = Board::default();
+    let b = make_board();
     let num_mines = b
         .cells()
         .iter()
@@ -31,16 +35,16 @@ fn test_board_new() -> Result<(), &'static str> {
 
 #[test]
 fn test_board_neighbors() {
-    let b = Board::default();
+    let b = make_board();
     let neighbors: HashSet<Point<u32>> = vec![
-        Point::new(0, 0),
-        Point::new(1, 0),
-        Point::new(2, 0),
-        Point::new(0, 1),
-        Point::new(2, 1),
-        Point::new(0, 2),
-        Point::new(1, 2),
-        Point::new(2, 2),
+        point!(0, 0),
+        point!(1, 0),
+        point!(2, 0),
+        point!(0, 1),
+        point!(2, 1),
+        point!(0, 2),
+        point!(1, 2),
+        point!(2, 2),
     ]
     .iter()
     .cloned()

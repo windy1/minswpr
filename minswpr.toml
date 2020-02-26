@@ -1,4 +1,10 @@
+[window]
 title = "minswpr"
 width = 800
 height = 600
 bg_color = ""
+
+[board]
+width = 8
+height = 8
+mine_frequency = 0.078

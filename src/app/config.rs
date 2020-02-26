@@ -4,7 +4,7 @@ use serde::de::{self, Visitor};
 use serde::{Deserialize, Deserializer};
 use std::fmt;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 #[derive(Deserialize)]
 pub struct Config {
@@ -40,6 +40,7 @@ pub struct CellAttrsConfig {
     pub border_color: Color,
     #[serde(deserialize_with = "read_color")]
     pub revealed_color: Color,
+    pub font_path: PathBuf,
     pub mines: MinesConfig,
 }
 

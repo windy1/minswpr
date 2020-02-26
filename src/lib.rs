@@ -6,6 +6,7 @@ pub mod math;
 
 mod app;
 pub mod board;
+pub mod fonts;
 pub mod input;
 pub mod render;
 

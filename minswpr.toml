@@ -16,4 +16,5 @@ color = "#f57842"
 border_width = 1
 border_color = "#000000"
 revealed_color = "#4269f5"
+font_path = "/usr/share/fonts/truetype/ubuntu/Ubuntu-M.ttf"
 mines = { color = "#000000", width = 20, height = 20 }

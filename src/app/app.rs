@@ -1,12 +1,13 @@
 use super::Config;
 use crate::board::Board;
+use crate::fonts::Fonts;
 use crate::input::{ClickCell, Execute, Input};
 use crate::render::board::{CellAttrs, RenderBoard};
 use crate::render::colors;
 use sdl2::event::Event;
 use sdl2::rect::Rect;
-use sdl2::render::{Texture, TextureCreator, WindowCanvas};
-use sdl2::ttf::{FontStyle, Sdl2TtfContext};
+use sdl2::render::WindowCanvas;
+use sdl2::ttf::Sdl2TtfContext;
 use sdl2::{self, EventPump, Sdl, VideoSubsystem};
 use std::cell::RefCell;
 use std::path::Path;
@@ -19,8 +20,8 @@ pub type BoardRef = Rc<RefCell<Board>>;
 pub struct Minswpr {
     _sdl: Sdl,
     _video: VideoSubsystem,
-    config: Config,
     ttf: Sdl2TtfContext,
+    config: Config,
     event_pump: EventPump,
     canvas: WindowCanvas,
     board: BoardRef,
@@ -35,22 +36,25 @@ impl Minswpr {
         let sdl = sdl2::init()?;
         let video = sdl.video()?;
         let canvas = Self::make_canvas(&video, &win.title, win.width, win.height)?;
-        let ttf = sdl2::ttf::init().map_err(|e| e.to_string())?;
         let event_pump = sdl.event_pump()?;
+
+        let ttf = sdl2::ttf::init().map_err(|e| e.to_string())?;
 
         let board = Self::make_board(bc.width, bc.height, bc.mine_frequency)?;
         let board_render = Self::make_board_render(&board, &config)?;
 
-        Ok(Self {
+        let app = Self {
             _sdl: sdl,
             _video: video,
-            config,
             ttf,
+            config,
             event_pump,
             canvas,
             board,
             board_render,
-        })
+        };
+
+        Ok(app)
     }
 
     pub fn from_config<P>(fname: P) -> Result<Self, String>
@@ -98,13 +102,16 @@ impl Minswpr {
             .build()?)
     }
 
-    fn load_text<'a, T>(&self, textures: &'a TextureCreator<T>) -> Result<Texture<'a>, String> {
-        let path = Path::new("/usr/share/fonts/truetype/ubuntu/Ubuntu-M.ttf");
+    pub fn start(&mut self) -> Result<(), String> {
+        self.canvas.clear();
+        self.canvas.present();
 
-        let mut font = self.ttf.load_font(path, 128)?;
-        font.set_style(FontStyle::BOLD);
+        let mut fonts = Fonts::new(&self.ttf)?;
+        fonts.load("board.cell", &self.config.board.cells.font_path, 24)?;
 
-        let surface = font
+        let textures = self.canvas.texture_creator();
+
+        let surface = fonts["board.cell"]
             .render("Hello, world!")
             .blended(colors::GREEN)
             .map_err(|e| e.to_string())?;
@@ -113,17 +120,7 @@ impl Minswpr {
             .create_texture_from_surface(&surface)
             .map_err(|e| e.to_string())?;
 
-        Ok(texture)
-    }
-
-    pub fn start(&mut self) -> Result<(), String> {
-        self.canvas.clear();
-        self.canvas.present();
-
-        let textures = self.canvas.texture_creator();
-
-        let text_test = self.load_text(&textures)?;
-        let tq = text_test.query();
+        let tq = texture.query();
 
         'main: loop {
             for event in self.event_pump.poll_iter() {
@@ -147,11 +144,8 @@ impl Minswpr {
 
             self.board_render.render(&mut self.canvas)?;
 
-            self.canvas.copy(
-                &text_test,
-                None,
-                Some(Rect::new(10, 10, tq.width, tq.height)),
-            )?;
+            self.canvas
+                .copy(&texture, None, Some(Rect::new(10, 10, tq.width, tq.height)))?;
 
             self.canvas.present();
 

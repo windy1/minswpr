@@ -73,8 +73,6 @@ impl Board {
     }
 
     pub fn reveal_from(&mut self, x: u32, y: u32) {
-        println!("reveal_from = {:?}", (x, y));
-
         let cell = match self.get_cell_mut(x, y) {
             Some(c) => c,
             None => return,

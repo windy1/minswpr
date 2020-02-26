@@ -55,10 +55,7 @@ impl Minswpr {
         Ok(app)
     }
 
-    pub fn from_config<P>(fname: P) -> Result<Self, String>
-    where
-        P: AsRef<Path>,
-    {
+    pub fn from_config<P: AsRef<Path>>(fname: P) -> Result<Self, String> {
         Self::new(super::read_config(fname)?)
     }
 

@@ -91,7 +91,7 @@ where
         }
     }
 
-    des.deserialize_str(ColorVisitor {})
+    des.deserialize_str(ColorVisitor)
 }
 
 fn normalize_hex_str<E>(hex: &str) -> Result<&str, E>

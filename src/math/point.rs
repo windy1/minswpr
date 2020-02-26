@@ -1,4 +1,12 @@
+#![macro_use]
+
 use std::ops;
+
+macro_rules! point {
+    ($x:expr, $y: expr) => {
+        Point::new($x, $y)
+    };
+}
 
 #[derive(Debug, Eq, PartialEq, Copy, Clone, Hash)]
 pub struct Point<T: Copy = i32> {

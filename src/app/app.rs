@@ -1,6 +1,6 @@
 use super::Config;
 use crate::board::Board;
-use crate::input::{ClickCell, Input, MouseUp};
+use crate::input::{ClickCell, Execute, Input};
 use crate::render::board::{CellAttrs, RenderBoard};
 use sdl2::event::Event;
 use sdl2::render::WindowCanvas;
@@ -76,16 +76,18 @@ impl Minswpr {
         self.canvas.clear();
         self.canvas.present();
 
-        'running: loop {
+        'main: loop {
             for event in self.event_pump.poll_iter() {
                 match event {
-                    Event::Quit { .. } => break 'running,
+                    Event::Quit { .. } => break 'main,
                     Event::MouseButtonUp { x, y, .. } => {
                         Input::<ClickCell>::with_meta(ClickCell::new(
+                            x,
+                            y,
                             Rc::clone(&self.board),
                             &self.board_render,
                         ))
-                        .mouse_up(x, y)?;
+                        .execute()?;
                     }
                     _ => {}
                 }

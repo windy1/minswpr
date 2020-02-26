@@ -2,9 +2,18 @@
 title = "minswpr"
 width = 800
 height = 600
-bg_color = ""
+bg_color = "#ffffff"
 
 [board]
 width = 8
 height = 8
 mine_frequency = 0.078
+
+[board.cells]
+width = 50
+height = 50
+color = "#f57842"
+border_width = 1
+border_color = "#000000"
+revealed_color = "#4269f5"
+mines = { color = "#000000", width = 20, height = 20 }

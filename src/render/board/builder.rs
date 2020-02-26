@@ -35,29 +35,34 @@ impl RenderBoardBuilder {
 
 pub struct CellAttrs {
     pub dimen: Dimen,
-    pub border_width: u32,
     pub color: Color,
+    pub border_width: u32,
     pub border_color: Color,
+    pub revealed_color: Color,
     pub mine_color: Color,
     pub mine_dimen: Dimen,
-    pub revealed_color: Color,
 }
 
 impl CellAttrs {
     pub fn new() -> Self {
         Self {
             dimen: Dimen::new(0, 0),
-            border_width: 0,
             color: colors::BLACK,
+            border_width: 0,
             border_color: colors::BLACK,
+            revealed_color: colors::BLACK,
             mine_color: colors::BLACK,
             mine_dimen: Dimen::new(0, 0),
-            revealed_color: colors::BLACK,
         }
     }
 
     pub fn dimen(mut self, width: u32, height: u32) -> Self {
         self.dimen = Dimen::new(width, height);
+        self
+    }
+
+    pub fn color(mut self, color: Color) -> Self {
+        self.color = color;
         self
     }
 
@@ -71,8 +76,8 @@ impl CellAttrs {
         self
     }
 
-    pub fn color(mut self, color: Color) -> Self {
-        self.color = color;
+    pub fn revealed_color(mut self, revealed_color: Color) -> Self {
+        self.revealed_color = revealed_color;
         self
     }
 
@@ -81,26 +86,8 @@ impl CellAttrs {
         self
     }
 
-    pub fn mine_dimen(mut self, mine_dimen: Dimen) -> Self {
-        self.mine_dimen = mine_dimen;
+    pub fn mine_dimen(mut self, width: u32, height: u32) -> Self {
+        self.mine_dimen = Dimen::new(width, height);
         self
-    }
-
-    pub fn revealed_color(mut self, revealed_color: Color) -> Self {
-        self.revealed_color = revealed_color;
-        self
-    }
-}
-
-impl Default for CellAttrs {
-    fn default() -> Self {
-        Self::new()
-            .dimen(50, 50)
-            .border_width(1)
-            .border_color(colors::WHITE)
-            .color(colors::RED)
-            .mine_color(colors::BLACK)
-            .mine_dimen(Dimen::new(20, 20))
-            .revealed_color(colors::BLUE)
     }
 }

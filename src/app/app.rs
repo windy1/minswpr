@@ -39,7 +39,7 @@ impl Minswpr {
         let event_pump = sdl.event_pump()?;
 
         let board = Self::make_board(bc.width, bc.height, bc.mine_frequency)?;
-        let board_render = Self::make_board_render(&board)?;
+        let board_render = Self::make_board_render(&board, &config)?;
 
         Ok(Self {
             _sdl: sdl,
@@ -80,10 +80,21 @@ impl Minswpr {
         Ok(Rc::new(RefCell::new(Board::new(w, h, mf)?)))
     }
 
-    fn make_board_render(board: &BoardRef) -> Result<RenderBoard, String> {
+    fn make_board_render(board: &BoardRef, c: &Config) -> Result<RenderBoard, String> {
+        let c = &c.board.cells;
+        let mc = &c.mines;
         Ok(RenderBoard::builder()
             .board(Rc::clone(board))
-            .cell_attrs(CellAttrs::default())
+            .cell_attrs(
+                CellAttrs::new()
+                    .dimen(c.width, c.height)
+                    .color(c.color)
+                    .border_width(c.border_width)
+                    .border_color(c.border_color)
+                    .revealed_color(c.revealed_color)
+                    .mine_color(mc.color)
+                    .mine_dimen(mc.width, mc.height),
+            )
             .build()?)
     }
 

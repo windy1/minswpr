@@ -23,6 +23,15 @@ where
     res.drain().collect()
 }
 
+pub fn hex_to_rgb(hex: &str) -> (u8, u8, u8) {
+    let hex = u32::from_str_radix(hex, 16).unwrap();
+    (
+        ((hex >> 16) & 0xff) as u8,
+        ((hex >> 8) & 0xff) as u8,
+        (hex & 0xff) as u8,
+    )
+}
+
 #[cfg(test)]
 mod tests {
     #[test]

@@ -43,6 +43,7 @@ pub struct CellAttrsConfig {
     #[serde(deserialize_with = "read_color")]
     pub revealed_color: Color,
     pub mines: MinesConfig,
+    pub flags: FlagsConfig,
 }
 
 #[derive(Deserialize)]
@@ -52,6 +53,8 @@ pub struct MinesConfig {
     pub width: u32,
     pub height: u32,
 }
+
+pub type FlagsConfig = MinesConfig;
 
 #[derive(Deserialize)]
 pub struct FontConfig {

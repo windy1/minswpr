@@ -6,6 +6,7 @@ bitflags! {
     pub struct CellFlags: u8 {
         const REVEALED = 0b00000001;
         const MINE = 0b00000010;
+        const FLAG = 0b00000100;
     }
 }
 
@@ -72,6 +73,17 @@ impl Board {
         self.cells.get_mut(Self::index(x, y, self.width))
     }
 
+    pub fn toggle_flag(&mut self, x: u32, y: u32) {
+        match self.get_cell_mut(x, y) {
+            Some(c) => {
+                if !c.contains(CellFlags::REVEALED) {
+                    c.toggle(CellFlags::FLAG);
+                }
+            }
+            None => {}
+        }
+    }
+
     pub fn reveal_from(&mut self, x: u32, y: u32) {
         let cell = match self.get_cell_mut(x, y) {
             Some(c) => c,
@@ -79,7 +91,9 @@ impl Board {
         };
 
         // make sure the cell hasn't been previously revealed
-        if cell.contains(CellFlags::REVEALED) {
+        // or..
+        // make sure the cell isn't flagged
+        if cell.contains(CellFlags::REVEALED) || cell.contains(CellFlags::FLAG) {
             return;
         }
 

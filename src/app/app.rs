@@ -3,7 +3,9 @@ use crate::board::Board;
 use crate::fonts::Fonts;
 use crate::input::{ClickCell, Execute, Input};
 use crate::render::board::{CellAttrs, RenderBoard};
+use crate::render::Render;
 use sdl2::event::Event;
+use sdl2::mouse::MouseButton;
 use sdl2::render::WindowCanvas;
 use sdl2::ttf::Sdl2TtfContext;
 use sdl2::{self, EventPump, Sdl, VideoSubsystem};
@@ -23,7 +25,6 @@ pub struct Minswpr {
     event_pump: EventPump,
     canvas: WindowCanvas,
     board: BoardRef,
-    board_render: RenderBoard,
 }
 
 impl Minswpr {
@@ -35,11 +36,9 @@ impl Minswpr {
         let video = sdl.video()?;
         let canvas = Self::make_canvas(&video, &win.title, win.width, win.height)?;
         let event_pump = sdl.event_pump()?;
-
         let ttf = sdl2::ttf::init().map_err(|e| e.to_string())?;
 
         let board = Self::make_board(bc.width, bc.height, bc.mine_frequency)?;
-        let board_render = Self::make_board_render(&board, &config)?;
 
         let app = Self {
             _sdl: sdl,
@@ -49,7 +48,6 @@ impl Minswpr {
             event_pump,
             canvas,
             board,
-            board_render,
         };
 
         Ok(app)
@@ -79,22 +77,25 @@ impl Minswpr {
         Ok(Rc::new(RefCell::new(Board::new(w, h, mf)?)))
     }
 
-    fn make_board_render(board: &BoardRef, c: &Config) -> Result<RenderBoard, String> {
+    fn make_board_render<'a>(
+        fonts: &'a Fonts<'a>,
+        board: &BoardRef,
+        c: &Config,
+    ) -> Result<RenderBoard<'a>, String> {
         let c = &c.board.cells;
         let mc = &c.mines;
-        Ok(RenderBoard::builder()
-            .board(Rc::clone(board))
-            .cell_attrs(
-                CellAttrs::new()
-                    .dimen(c.width, c.height)
-                    .color(c.color)
-                    .border_width(c.border_width)
-                    .border_color(c.border_color)
-                    .revealed_color(c.revealed_color)
-                    .mine_color(mc.color)
-                    .mine_dimen(mc.width, mc.height),
-            )
-            .build()?)
+        let fc = &c.flags;
+        let cell_attrs = CellAttrs::new()
+            .dimen(c.width, c.height)
+            .color(c.color)
+            .border_width(c.border_width)
+            .border_color(c.border_color)
+            .revealed_color(c.revealed_color)
+            .mine_color(mc.color)
+            .mine_dimen(mc.width, mc.height)
+            .flag_color(fc.color)
+            .flag_dimen(fc.width, fc.height);
+        Ok(RenderBoard::new(&fonts, Rc::clone(&board), cell_attrs))
     }
 
     pub fn start(&mut self) -> Result<(), String> {
@@ -106,19 +107,15 @@ impl Minswpr {
             fonts.load(k, &f.path, f.pt)?;
         }
 
+        let board_render = Self::make_board_render(&fonts, &self.board, &self.config)?;
+
         'main: loop {
             for event in self.event_pump.poll_iter() {
                 match event {
                     Event::Quit { .. } => break 'main,
-                    Event::MouseButtonUp { x, y, .. } => {
-                        Input::<ClickCell>::with_meta(
-                            ClickCell::new()
-                                .mouse_pos(x, y)
-                                .board(Rc::clone(&self.board))
-                                .board_render(&self.board_render),
-                        )
-                        .execute()?;
-                    }
+                    Event::MouseButtonUp {
+                        mouse_btn, x, y, ..
+                    } => Self::handle_mouse_up(mouse_btn, x, y, &self.board, &board_render)?,
                     _ => {}
                 }
             }
@@ -126,7 +123,7 @@ impl Minswpr {
             self.canvas.set_draw_color(self.config.window.bg_color);
             self.canvas.clear();
 
-            self.board_render.render(&mut self.canvas, &fonts)?;
+            board_render.render(&mut self.canvas)?;
 
             self.canvas.present();
 
@@ -134,5 +131,22 @@ impl Minswpr {
         }
 
         Ok(())
+    }
+
+    fn handle_mouse_up(
+        mouse_btn: MouseButton,
+        x: i32,
+        y: i32,
+        board: &BoardRef,
+        board_render: &RenderBoard,
+    ) -> Result<(), String> {
+        Input::with_meta(
+            ClickCell::new()
+                .mouse_btn(mouse_btn)
+                .mouse_pos(x, y)
+                .board(Rc::clone(board))
+                .board_render(board_render),
+        )
+        .execute()
     }
 }

@@ -1,6 +1,7 @@
 use super::math::Point;
 use super::render::board::RenderBoard;
 use super::BoardRef;
+use sdl2::mouse::MouseButton;
 
 pub struct Input<T> {
     meta: Option<T>,
@@ -21,18 +22,25 @@ pub trait Execute {
 }
 
 pub struct ClickCell<'a> {
+    mouse_btn: MouseButton,
     mouse_pos: Point,
     board: Option<BoardRef>,
-    board_render: Option<&'a RenderBoard>,
+    board_render: Option<&'a RenderBoard<'a>>,
 }
 
 impl<'a> ClickCell<'a> {
     pub fn new() -> Self {
         Self {
+            mouse_btn: MouseButton::Unknown,
             mouse_pos: point!(0, 0),
             board: None,
             board_render: None,
         }
+    }
+
+    pub fn mouse_btn(mut self, mouse_btn: MouseButton) -> Self {
+        self.mouse_btn = mouse_btn;
+        self
     }
 
     pub fn mouse_pos(mut self, x: i32, y: i32) -> Self {
@@ -55,14 +63,17 @@ impl<'a> Execute for Input<ClickCell<'a>> {
     fn execute(&mut self) -> Result<(), String> {
         let meta = self.meta.as_ref().unwrap();
         let Point { x, y } = meta.mouse_pos;
+        let cell = meta.board_render.unwrap().get_cell_at(x, y);
+        let mut board = meta.board.as_ref().unwrap().borrow_mut();
+
         println!("mouse_up = {:?}", point!(x, y));
-        match meta.board_render.unwrap().get_cell_at(x, y) {
-            Some(p) => meta
-                .board
-                .as_ref()
-                .unwrap()
-                .borrow_mut()
-                .reveal_from(p.x, p.y),
+
+        match cell {
+            Some(p) => match meta.mouse_btn {
+                MouseButton::Left => board.reveal_from(p.x, p.y),
+                MouseButton::Right => board.toggle_flag(p.x, p.y),
+                _ => {}
+            },
             None => {}
         }
         Ok(())

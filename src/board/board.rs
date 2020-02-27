@@ -84,7 +84,13 @@ impl Board {
         }
     }
 
-    pub fn reveal_from(&mut self, x: u32, y: u32) {
+    pub fn reveal_from(&mut self, x: u32, y: u32) -> u32 {
+        let mut count = 0;
+        self._reveal_from(x, y, &mut count);
+        count
+    }
+
+    fn _reveal_from(&mut self, x: u32, y: u32, count: &mut u32) {
         let cell = match self.get_cell_mut(x, y) {
             Some(c) => c,
             None => return,
@@ -99,6 +105,7 @@ impl Board {
 
         // reveal the current cell
         cell.insert(CellFlags::REVEALED);
+        *count += 1;
 
         // if the revealed cell was a mine, stop revealing cells
         // or...
@@ -112,7 +119,7 @@ impl Board {
             !c.contains(CellFlags::MINE) && !c.contains(CellFlags::REVEALED)
         })
         .iter()
-        .for_each(|p| self.reveal_from(p.x, p.y));
+        .for_each(|p| self._reveal_from(p.x, p.y, count));
     }
 
     pub fn neighbors(&self, x: u32, y: u32) -> Vec<Point<u32>> {

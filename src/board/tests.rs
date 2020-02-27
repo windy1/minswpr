@@ -51,3 +51,9 @@ fn test_board_neighbors() {
     .collect();
     assert_eq!(neighbors, b.neighbors(1, 1).iter().cloned().collect());
 }
+
+#[test]
+fn test_reveal_from() {
+    let mut b = Board::new(9, 9, 0.0).unwrap();
+    assert_eq!(81, b.reveal_from(0, 0));
+}

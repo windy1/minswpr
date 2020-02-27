@@ -86,8 +86,9 @@ impl<'a> Execute for Input<MouseUp<'a>> {
         match cell {
             Some(p) => match meta.mouse_btn {
                 MouseButton::Left => {
-                    board.reveal_from(p.x, p.y);
-                    if board.cell(p.x, p.y).contains(CellFlags::MINE) {
+                    if board.reveal_from(p.x, p.y) > 0
+                        && board.cell(p.x, p.y).contains(CellFlags::MINE)
+                    {
                         Ok(GameState::Over)
                     } else {
                         Ok(game_state)

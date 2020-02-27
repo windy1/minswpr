@@ -2,7 +2,7 @@ use super::Config;
 use crate::board::Board;
 use crate::fonts::Fonts;
 use crate::input::{Execute, Input, KeyDown, MouseUp};
-use crate::math::{Dimen, Point};
+use crate::math::Dimen;
 use crate::render::board::RenderBoard;
 use crate::render::Render;
 use sdl2::event::Event;

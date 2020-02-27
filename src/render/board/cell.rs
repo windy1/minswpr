@@ -25,11 +25,17 @@ impl<'a> Render for RenderCell<'a> {
         let flags = &config.flags;
 
         if cell.contains(CellFlags::REVEALED) {
-            self.fill(canvas, &config.revealed_color)?;
+            let is_mine = cell.contains(CellFlags::MINE);
+            let fill_color = if is_mine {
+                &mines.revealed_color
+            } else {
+                &config.revealed_color
+            };
+            self.fill(canvas, fill_color)?;
 
             let adjacent_mines = self.board.count_adjacent_mines(self.pos.x, self.pos.y);
 
-            if cell.contains(CellFlags::MINE) {
+            if is_mine {
                 self.draw_centered_rect(canvas, &mines.dimen, &mines.color)?;
             } else if adjacent_mines > 0 {
                 self.draw_hint(canvas, adjacent_mines)?;

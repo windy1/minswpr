@@ -84,8 +84,8 @@ where
         where
             E: de::Error,
         {
-            let value = normalize_hex_str(value)?;
-            let (r, g, b) = math::hex_to_rgb(value);
+            let value = normalize_hex_str(value).map_err(de::Error::custom)?;
+            let (r, g, b) = math::hex_to_rgb(value).map_err(de::Error::custom)?;
             println!("(r, g, b) = {:?}", (r, g, b));
             Ok(Color::RGB(r, g, b))
         }
@@ -94,19 +94,29 @@ where
     des.deserialize_str(ColorVisitor)
 }
 
-fn normalize_hex_str<E>(hex: &str) -> Result<&str, E>
-where
-    E: de::Error,
-{
+fn normalize_hex_str(hex: &str) -> Result<&str, String> {
     let len = hex.len();
     if len == 0 {
-        Err(de::Error::invalid_length(
-            len,
-            &"cannot accept empty string for hex",
-        ))
+        Err("cannot accept empty string for hex".to_string())
     } else if hex.as_bytes()[0] == b'#' {
         Ok(&hex[1..])
     } else {
         Ok(hex)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    #[should_panic]
+    fn test_normalize_hex_str_empty_str() {
+        super::normalize_hex_str("").unwrap();
+    }
+
+    #[test]
+    fn test_normalize_hex_str() -> Result<(), String> {
+        assert_eq!("ffffff", super::normalize_hex_str("#ffffff")?);
+        assert_eq!("ffffff", super::normalize_hex_str("ffffff")?);
+        Ok(())
     }
 }

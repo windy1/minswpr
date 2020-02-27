@@ -1,5 +1,6 @@
 #![macro_use]
 
+use serde::Deserialize;
 use std::ops;
 
 macro_rules! point {
@@ -10,7 +11,7 @@ macro_rules! point {
 
 pub type RawPoint<T = i32> = (T, T);
 
-#[derive(Debug, Eq, PartialEq, Copy, Clone, Hash)]
+#[derive(Debug, Eq, PartialEq, Copy, Clone, Hash, Deserialize)]
 pub struct Point<T: Copy = i32> {
     pub x: T,
     pub y: T,

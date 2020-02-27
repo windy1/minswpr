@@ -1,4 +1,4 @@
-use crate::math;
+use crate::math::{self, Dimen};
 use sdl2::pixels::Color;
 use serde::de::{self, Visitor};
 use serde::{Deserialize, Deserializer};
@@ -17,24 +17,21 @@ pub struct Config {
 #[derive(Deserialize)]
 pub struct WindowConfig {
     pub title: String,
-    pub width: u32,
-    pub height: u32,
+    pub dimen: Dimen,
     #[serde(deserialize_with = "read_color")]
     pub bg_color: Color,
 }
 
 #[derive(Deserialize)]
 pub struct BoardConfig {
-    pub width: usize,
-    pub height: usize,
+    pub dimen: Dimen<usize>,
     pub mine_frequency: f64,
-    pub cells: CellAttrsConfig,
+    pub cells: CellConfig,
 }
 
 #[derive(Deserialize)]
-pub struct CellAttrsConfig {
-    pub width: u32,
-    pub height: u32,
+pub struct CellConfig {
+    pub dimen: Dimen,
     #[serde(deserialize_with = "read_color")]
     pub color: Color,
     pub border_width: u32,
@@ -50,11 +47,17 @@ pub struct CellAttrsConfig {
 pub struct MinesConfig {
     #[serde(deserialize_with = "read_color")]
     pub color: Color,
-    pub width: u32,
-    pub height: u32,
+    pub dimen: Dimen,
+    #[serde(deserialize_with = "read_color")]
+    pub revealed_color: Color,
 }
 
-pub type FlagsConfig = MinesConfig;
+#[derive(Deserialize)]
+pub struct FlagsConfig {
+    #[serde(deserialize_with = "read_color")]
+    pub color: Color,
+    pub dimen: Dimen,
+}
 
 #[derive(Deserialize)]
 pub struct FontConfig {

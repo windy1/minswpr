@@ -2,7 +2,8 @@ use super::Config;
 use crate::board::Board;
 use crate::fonts::Fonts;
 use crate::input::{ClickCell, Execute, Input};
-use crate::render::board::{CellAttrs, RenderBoard};
+use crate::math::Dimen;
+use crate::render::board::RenderBoard;
 use crate::render::Render;
 use sdl2::event::Event;
 use sdl2::mouse::MouseButton;
@@ -35,11 +36,11 @@ impl Minswpr {
 
         let sdl = sdl2::init()?;
         let video = sdl.video()?;
-        let canvas = Self::make_canvas(&video, &win.title, win.width, win.height)?;
+        let canvas = Self::make_canvas(&video, &win.title, win.dimen)?;
         let event_pump = sdl.event_pump()?;
         let ttf = sdl2::ttf::init().map_err(|e| e.to_string())?;
 
-        let board = Self::make_board(bc.width, bc.height, bc.mine_frequency)?;
+        let board = Self::make_board(bc.dimen, bc.mine_frequency)?;
         let game_state = GameState::Unknown;
 
         let app = Self {
@@ -63,11 +64,10 @@ impl Minswpr {
     fn make_canvas(
         video: &VideoSubsystem,
         title: &str,
-        width: u32,
-        height: u32,
+        dimen: Dimen,
     ) -> Result<WindowCanvas, String> {
         Ok(video
-            .window(title, width, height)
+            .window(title, dimen.width(), dimen.height())
             .position_centered()
             .build()
             .map_err(|e| e.to_string())?
@@ -76,29 +76,16 @@ impl Minswpr {
             .map_err(|e| e.to_string())?)
     }
 
-    fn make_board(w: usize, h: usize, mf: f64) -> Result<BoardRef, String> {
+    fn make_board(Dimen { x: w, y: h }: Dimen<usize>, mf: f64) -> Result<BoardRef, String> {
         Ok(Rc::new(RefCell::new(Board::new(w, h, mf)?)))
     }
 
     fn make_board_render<'a>(
         fonts: &'a Fonts<'a>,
         board: &BoardRef,
-        c: &Config,
+        c: &'a Config,
     ) -> Result<RenderBoard<'a>, String> {
-        let c = &c.board.cells;
-        let mc = &c.mines;
-        let fc = &c.flags;
-        let cell_attrs = CellAttrs::new()
-            .dimen(c.width, c.height)
-            .color(c.color)
-            .border_width(c.border_width)
-            .border_color(c.border_color)
-            .revealed_color(c.revealed_color)
-            .mine_color(mc.color)
-            .mine_dimen(mc.width, mc.height)
-            .flag_color(fc.color)
-            .flag_dimen(fc.width, fc.height);
-        Ok(RenderBoard::new(&fonts, Rc::clone(&board), cell_attrs))
+        Ok(RenderBoard::new(&fonts, Rc::clone(&board), &c.board.cells))
     }
 
     pub fn start(&mut self) -> Result<(), String> {

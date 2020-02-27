@@ -3,19 +3,19 @@ mod cell;
 use super::Render;
 use crate::fonts::Fonts;
 use crate::math::{Dimen, Point};
-use crate::BoardRef;
+use crate::{BoardRef, CellConfig};
 use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
 use std::cmp;
 
-pub use self::cell::*;
+use self::cell::RenderCell;
 
 pub struct RenderBoard<'a> {
     fonts: &'a Fonts<'a>,
     board: BoardRef,
     base_dimen: Dimen,
     pos: Point,
-    cell_attrs: CellAttrs,
+    cell_config: &'a CellConfig,
 }
 
 impl<'a> Render for RenderBoard<'a> {
@@ -27,9 +27,9 @@ impl<'a> Render for RenderBoard<'a> {
 }
 
 impl<'a> RenderBoard<'a> {
-    pub fn new(fonts: &'a Fonts<'a>, board: BoardRef, cell_attrs: CellAttrs) -> Self {
-        let cell_dimen = cell_attrs.dimen.as_i32();
-        let border_width = cell_attrs.border_width as i32;
+    pub fn new(fonts: &'a Fonts<'a>, board: BoardRef, cell_config: &'a CellConfig) -> Self {
+        let cell_dimen = cell_config.dimen.as_i32();
+        let border_width = cell_config.border_width as i32;
 
         let board_cell_dimen: Point;
         {
@@ -45,14 +45,14 @@ impl<'a> RenderBoard<'a> {
         Self {
             fonts,
             board,
-            cell_attrs,
+            cell_config,
             base_dimen,
             pos: Point::new(10, 10),
         }
     }
 
     fn draw_base(&self, canvas: &mut WindowCanvas) -> Result<(), String> {
-        canvas.set_draw_color(self.cell_attrs.color);
+        canvas.set_draw_color(self.cell_config.color);
         canvas.fill_rect(Rect::new(
             self.pos.x,
             self.pos.y,
@@ -62,10 +62,10 @@ impl<'a> RenderBoard<'a> {
     }
 
     fn draw_cell_borders(&self, canvas: &mut WindowCanvas) -> Result<(), String> {
-        canvas.set_draw_color(self.cell_attrs.border_color);
+        canvas.set_draw_color(self.cell_config.border_color);
 
-        let cell_attrs = &self.cell_attrs;
-        let cell_dimen = cell_attrs.dimen;
+        let cell_config = &self.cell_config;
+        let cell_dimen = cell_config.dimen;
         let base_dimen = &self.base_dimen;
 
         let board_height = base_dimen.height();
@@ -74,7 +74,7 @@ impl<'a> RenderBoard<'a> {
         let cell_width = cell_dimen.width() as usize;
         let cell_height = cell_dimen.height() as usize;
 
-        let border_width = cell_attrs.border_width;
+        let border_width = cell_config.border_width;
 
         let x_max = self.pos.x + board_width as i32;
         let y_max = self.pos.y + board_height as i32;
@@ -115,7 +115,7 @@ impl<'a> RenderBoard<'a> {
             self.board.borrow(),
             &point!(x, y),
             &self.pos,
-            &self.cell_attrs,
+            &self.cell_config,
         )
         .render(canvas)
     }
@@ -131,9 +131,9 @@ impl<'a> RenderBoard<'a> {
             return None;
         }
 
-        let cell_attrs = &self.cell_attrs;
-        let cell_dimen = &cell_attrs.dimen.as_i32();
-        let border_width = cell_attrs.border_width as i32;
+        let cell_config = &self.cell_config;
+        let cell_dimen = &cell_config.dimen.as_i32();
+        let border_width = cell_config.border_width as i32;
         let board = self.board.borrow();
         let screen_pos = point!(x, y);
 

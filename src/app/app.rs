@@ -105,10 +105,6 @@ impl Minswpr {
         Ok(())
     }
 
-    pub fn game_state(&self) -> &GameState {
-        &self.game_state
-    }
-
     fn handle_event(
         event: Event,
         game_state: GameState,

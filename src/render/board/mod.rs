@@ -5,7 +5,7 @@ use crate::math::{Dimen, Point};
 use crate::BoardRef;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
-use sdl2::render::{Canvas, RenderTarget, WindowCanvas};
+use sdl2::render::WindowCanvas;
 use std::cell::Ref;
 use std::cmp;
 
@@ -40,7 +40,7 @@ impl RenderBoard {
         self.draw_cells(canvas, fonts)
     }
 
-    fn draw_base<T: RenderTarget>(&mut self, canvas: &mut Canvas<T>) -> Result<(), String> {
+    fn draw_base(&mut self, canvas: &mut WindowCanvas) -> Result<(), String> {
         let board = self.board.borrow();
         let cell_attrs = &self.cell_attrs;
         let cell_dimen = cell_attrs.dimen.as_i32();
@@ -61,7 +61,7 @@ impl RenderBoard {
         ))
     }
 
-    fn draw_cell_borders<T: RenderTarget>(&self, canvas: &mut Canvas<T>) -> Result<(), String> {
+    fn draw_cell_borders(&self, canvas: &mut WindowCanvas) -> Result<(), String> {
         canvas.set_draw_color(self.cell_attrs.border_color);
 
         let cell_attrs = &self.cell_attrs;

@@ -180,8 +180,6 @@ pub enum GameState {
     Unknown,
     Ready,
     InProgress,
-    LeftClick { mouse_pos: Point },
-    RightClick { mouse_pos: Point },
     Over,
     Reset,
     Quit,

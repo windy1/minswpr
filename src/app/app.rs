@@ -132,7 +132,7 @@ impl Minswpr {
                         .replace(Board::new(bd.width(), bd.height(), bc.mine_frequency)?);
                     GameState::Ready
                 }
-                _ => self.game_state
+                _ => self.game_state,
             };
 
             self.canvas.set_draw_color(self.config.window.bg_color);

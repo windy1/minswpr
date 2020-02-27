@@ -19,8 +19,8 @@ impl<T> Input<T> {
     }
 }
 
-pub trait Execute<R = ()> {
-    fn execute(&mut self) -> Result<R, String>;
+pub trait Execute {
+    fn execute(&self) -> Result<GameState, String>;
 }
 
 pub struct MouseUp<'a> {
@@ -68,8 +68,8 @@ impl<'a> MouseUp<'a> {
     }
 }
 
-impl<'a> Execute<GameState> for Input<MouseUp<'a>> {
-    fn execute(&mut self) -> Result<GameState, String> {
+impl<'a> Execute for Input<MouseUp<'a>> {
+    fn execute(&self) -> Result<GameState, String> {
         let meta = self.meta.as_ref().unwrap();
         let game_state = meta.game_state;
 
@@ -78,10 +78,10 @@ impl<'a> Execute<GameState> for Input<MouseUp<'a>> {
         }
 
         let Point { x, y } = meta.mouse_pos;
+        println!("mouse_up = {:?}", point!(x, y));
+
         let cell = meta.board_render.unwrap().get_cell_at(x, y);
         let mut board = meta.board.as_ref().unwrap().borrow_mut();
-
-        println!("mouse_up = {:?}", point!(x, y));
 
         match cell {
             Some(p) => match meta.mouse_btn {
@@ -118,8 +118,8 @@ impl KeyDown {
     }
 }
 
-impl Execute<GameState> for Input<KeyDown> {
-    fn execute(&mut self) -> Result<GameState, String> {
+impl Execute for Input<KeyDown> {
+    fn execute(&self) -> Result<GameState, String> {
         let meta = self.meta.as_ref().unwrap();
         let game_state = meta.game_state;
         match meta.keycode {

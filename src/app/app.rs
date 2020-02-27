@@ -1,11 +1,12 @@
 use super::Config;
 use crate::board::Board;
 use crate::fonts::Fonts;
-use crate::input::{ClickCell, Execute, Input};
+use crate::input::{Execute, Input, KeyDown, MouseUp};
 use crate::math::Dimen;
 use crate::render::board::RenderBoard;
 use crate::render::Render;
 use sdl2::event::Event;
+use sdl2::keyboard::Keycode;
 use sdl2::mouse::MouseButton;
 use sdl2::render::WindowCanvas;
 use sdl2::ttf::Sdl2TtfContext;
@@ -115,9 +116,24 @@ impl Minswpr {
                         &board_render,
                         self.game_state,
                     )?,
+                    Event::KeyDown { keycode, .. } => match keycode {
+                        Some(k) => Self::handle_key_down(k, self.game_state)?,
+                        None => self.game_state,
+                    },
                     _ => self.game_state,
                 }
             }
+
+            self.game_state = match self.game_state {
+                GameState::Reset => {
+                    let bc = &self.config.board;
+                    let bd = &bc.dimen;
+                    self.board
+                        .replace(Board::new(bd.width(), bd.height(), bc.mine_frequency)?);
+                    GameState::Ready
+                }
+                _ => self.game_state
+            };
 
             self.canvas.set_draw_color(self.config.window.bg_color);
             self.canvas.clear();
@@ -141,7 +157,7 @@ impl Minswpr {
         game_state: GameState,
     ) -> Result<GameState, String> {
         Input::with_meta(
-            ClickCell::new()
+            MouseUp::new()
                 .mouse_btn(mouse_btn)
                 .mouse_pos(x, y)
                 .board(Rc::clone(board))
@@ -149,6 +165,10 @@ impl Minswpr {
                 .game_state(game_state),
         )
         .execute()
+    }
+
+    fn handle_key_down(keycode: Keycode, game_state: GameState) -> Result<GameState, String> {
+        Input::with_meta(KeyDown::new(keycode, game_state)).execute()
     }
 }
 
@@ -158,4 +178,5 @@ pub enum GameState {
     Ready,
     InProgress,
     Over,
+    Reset,
 }

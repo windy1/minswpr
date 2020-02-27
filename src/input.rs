@@ -2,6 +2,7 @@ use super::board::CellFlags;
 use super::math::Point;
 use super::render::board::RenderBoard;
 use super::{BoardRef, GameState};
+use sdl2::keyboard::Keycode;
 use sdl2::mouse::MouseButton;
 
 pub struct Input<T> {
@@ -22,7 +23,7 @@ pub trait Execute<R = ()> {
     fn execute(&mut self) -> Result<R, String>;
 }
 
-pub struct ClickCell<'a> {
+pub struct MouseUp<'a> {
     mouse_btn: MouseButton,
     mouse_pos: Point,
     board: Option<BoardRef>,
@@ -30,7 +31,7 @@ pub struct ClickCell<'a> {
     game_state: GameState,
 }
 
-impl<'a> ClickCell<'a> {
+impl<'a> MouseUp<'a> {
     pub fn new() -> Self {
         Self {
             mouse_btn: MouseButton::Unknown,
@@ -67,7 +68,7 @@ impl<'a> ClickCell<'a> {
     }
 }
 
-impl<'a> Execute<GameState> for Input<ClickCell<'a>> {
+impl<'a> Execute<GameState> for Input<MouseUp<'a>> {
     fn execute(&mut self) -> Result<GameState, String> {
         let meta = self.meta.as_ref().unwrap();
         let game_state = meta.game_state;
@@ -99,6 +100,31 @@ impl<'a> Execute<GameState> for Input<ClickCell<'a>> {
                 _ => Ok(game_state),
             },
             None => Ok(game_state),
+        }
+    }
+}
+
+pub struct KeyDown {
+    keycode: Keycode,
+    game_state: GameState,
+}
+
+impl KeyDown {
+    pub fn new(keycode: Keycode, game_state: GameState) -> Self {
+        Self {
+            keycode,
+            game_state,
+        }
+    }
+}
+
+impl Execute<GameState> for Input<KeyDown> {
+    fn execute(&mut self) -> Result<GameState, String> {
+        let meta = self.meta.as_ref().unwrap();
+        let game_state = meta.game_state;
+        match meta.keycode {
+            Keycode::F2 => Ok(GameState::Reset),
+            _ => Ok(game_state),
         }
     }
 }

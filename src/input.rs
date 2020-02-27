@@ -1,6 +1,7 @@
+use super::board::CellFlags;
 use super::math::Point;
 use super::render::board::RenderBoard;
-use super::BoardRef;
+use super::{BoardRef, GameState};
 use sdl2::mouse::MouseButton;
 
 pub struct Input<T> {
@@ -17,8 +18,8 @@ impl<T> Input<T> {
     }
 }
 
-pub trait Execute {
-    fn execute(&mut self) -> Result<(), String>;
+pub trait Execute<R = ()> {
+    fn execute(&mut self) -> Result<R, String>;
 }
 
 pub struct ClickCell<'a> {
@@ -26,6 +27,7 @@ pub struct ClickCell<'a> {
     mouse_pos: Point,
     board: Option<BoardRef>,
     board_render: Option<&'a RenderBoard<'a>>,
+    game_state: GameState,
 }
 
 impl<'a> ClickCell<'a> {
@@ -35,6 +37,7 @@ impl<'a> ClickCell<'a> {
             mouse_pos: point!(0, 0),
             board: None,
             board_render: None,
+            game_state: GameState::Unknown,
         }
     }
 
@@ -57,11 +60,22 @@ impl<'a> ClickCell<'a> {
         self.board_render = Some(board_render);
         self
     }
+
+    pub fn game_state(mut self, game_state: GameState) -> Self {
+        self.game_state = game_state;
+        self
+    }
 }
 
-impl<'a> Execute for Input<ClickCell<'a>> {
-    fn execute(&mut self) -> Result<(), String> {
+impl<'a> Execute<GameState> for Input<ClickCell<'a>> {
+    fn execute(&mut self) -> Result<GameState, String> {
         let meta = self.meta.as_ref().unwrap();
+        let game_state = meta.game_state;
+
+        if let GameState::Over = game_state {
+            return Ok(game_state);
+        }
+
         let Point { x, y } = meta.mouse_pos;
         let cell = meta.board_render.unwrap().get_cell_at(x, y);
         let mut board = meta.board.as_ref().unwrap().borrow_mut();
@@ -70,12 +84,21 @@ impl<'a> Execute for Input<ClickCell<'a>> {
 
         match cell {
             Some(p) => match meta.mouse_btn {
-                MouseButton::Left => board.reveal_from(p.x, p.y),
-                MouseButton::Right => board.toggle_flag(p.x, p.y),
-                _ => {}
+                MouseButton::Left => {
+                    board.reveal_from(p.x, p.y);
+                    if board.cell(p.x, p.y).contains(CellFlags::MINE) {
+                        Ok(GameState::Over)
+                    } else {
+                        Ok(game_state)
+                    }
+                }
+                MouseButton::Right => {
+                    board.toggle_flag(p.x, p.y);
+                    Ok(game_state)
+                }
+                _ => Ok(game_state),
             },
-            None => {}
+            None => Ok(game_state),
         }
-        Ok(())
     }
 }

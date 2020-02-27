@@ -25,6 +25,7 @@ pub struct Minswpr {
     event_pump: EventPump,
     canvas: WindowCanvas,
     board: BoardRef,
+    game_state: GameState,
 }
 
 impl Minswpr {
@@ -39,6 +40,7 @@ impl Minswpr {
         let ttf = sdl2::ttf::init().map_err(|e| e.to_string())?;
 
         let board = Self::make_board(bc.width, bc.height, bc.mine_frequency)?;
+        let game_state = GameState::Unknown;
 
         let app = Self {
             _sdl: sdl,
@@ -48,6 +50,7 @@ impl Minswpr {
             event_pump,
             canvas,
             board,
+            game_state,
         };
 
         Ok(app)
@@ -99,9 +102,6 @@ impl Minswpr {
     }
 
     pub fn start(&mut self) -> Result<(), String> {
-        self.canvas.clear();
-        self.canvas.present();
-
         let mut fonts = Fonts::new(&self.ttf)?;
         for (k, f) in &self.config.fonts {
             fonts.load(k, &f.path, f.pt)?;
@@ -109,14 +109,26 @@ impl Minswpr {
 
         let board_render = Self::make_board_render(&fonts, &self.board, &self.config)?;
 
+        self.game_state = GameState::Ready;
+
+        self.canvas.clear();
+        self.canvas.present();
+
         'main: loop {
             for event in self.event_pump.poll_iter() {
-                match event {
+                self.game_state = match event {
                     Event::Quit { .. } => break 'main,
                     Event::MouseButtonUp {
                         mouse_btn, x, y, ..
-                    } => Self::handle_mouse_up(mouse_btn, x, y, &self.board, &board_render)?,
-                    _ => {}
+                    } => Self::handle_mouse_up(
+                        mouse_btn,
+                        x,
+                        y,
+                        &self.board,
+                        &board_render,
+                        self.game_state,
+                    )?,
+                    _ => self.game_state,
                 }
             }
 
@@ -139,14 +151,24 @@ impl Minswpr {
         y: i32,
         board: &BoardRef,
         board_render: &RenderBoard,
-    ) -> Result<(), String> {
+        game_state: GameState,
+    ) -> Result<GameState, String> {
         Input::with_meta(
             ClickCell::new()
                 .mouse_btn(mouse_btn)
                 .mouse_pos(x, y)
                 .board(Rc::clone(board))
-                .board_render(board_render),
+                .board_render(board_render)
+                .game_state(game_state),
         )
         .execute()
     }
+}
+
+#[derive(Clone, Copy, Debug)]
+pub enum GameState {
+    Unknown,
+    Ready,
+    InProgress,
+    Over,
 }

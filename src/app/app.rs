@@ -1,8 +1,8 @@
 use super::Config;
 use crate::board::Board;
 use crate::fonts::Fonts;
-use crate::input::{Execute, Input, KeyDown, MouseUp};
-use crate::math::Dimen;
+use crate::input::{Execute, KeyDown, MouseUpBuilder};
+use crate::math::{Dimen, Point};
 use crate::render::board::RenderBoard;
 use crate::render::Render;
 use sdl2::event::Event;
@@ -132,19 +132,18 @@ impl Minswpr {
         board_render: &RenderBoard,
         game_state: GameState,
     ) -> Result<GameState, String> {
-        Input::with_meta(
-            MouseUp::new()
-                .mouse_btn(mouse_btn)
-                .mouse_pos(x, y)
-                .board(Rc::clone(board))
-                .board_render(board_render)
-                .game_state(game_state),
-        )
-        .execute()
+        MouseUpBuilder::default()
+            .mouse_btn(mouse_btn)
+            .mouse_pos(Point::new(x, y))
+            .board(Some(Rc::clone(board)))
+            .board_render(Some(board_render))
+            .game_state(game_state)
+            .build()?
+            .execute()
     }
 
     fn handle_key_down(keycode: Keycode, game_state: GameState) -> Result<GameState, String> {
-        Input::with_meta(KeyDown::new(keycode, game_state)).execute()
+        KeyDown::new(keycode, game_state).execute()
     }
 
     fn make_canvas(
@@ -183,4 +182,10 @@ pub enum GameState {
     Over,
     Reset,
     Quit,
+}
+
+impl Default for GameState {
+    fn default() -> Self {
+        Self::Unknown
+    }
 }

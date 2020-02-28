@@ -11,7 +11,7 @@ macro_rules! point {
 
 pub type RawPoint<T = i32> = (T, T);
 
-#[derive(Debug, Eq, PartialEq, Copy, Clone, Hash, Deserialize)]
+#[derive(Debug, Eq, PartialEq, Copy, Clone, Hash, Deserialize, Default)]
 pub struct Point<T: Copy = i32> {
     pub x: T,
     pub y: T,

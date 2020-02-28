@@ -123,7 +123,7 @@ impl Board {
         .for_each(|p| self._reveal_from(p.x, p.y, count));
     }
 
-    pub fn reveal_unflagged(&mut self, x: u32, y: u32) -> u32 {
+    pub fn reveal_unflagged(&mut self, x: u32, y: u32) -> Vec<Point<u32>> {
         let num_mines = self.count_adjacent_mines(x, y);
         let num_flags = self.count_adjacent_flags(x, y);
 
@@ -131,7 +131,7 @@ impl Board {
         // and...
         // the player must have flagged an amount of cells equal to the amount of adjacent mines
         if num_mines <= 0 || num_flags != num_mines {
-            return 0;
+            return Vec::new();
         }
 
         // only accept revealed cells
@@ -139,7 +139,7 @@ impl Board {
             .get_cell(x, y)
             .filter(|c| c.contains(CellFlags::REVEALED));
         if let None = cell {
-            return 0;
+            return Vec::new();
         }
 
         // reveal the cells neighbors that are not revealed and not flagged
@@ -147,14 +147,12 @@ impl Board {
             !c.contains(CellFlags::REVEALED) && !c.contains(CellFlags::FLAG)
         });
 
-        println!("len = {}", neighbors.len());
-
         for neighbor in &neighbors {
             self.cell_mut(neighbor.x, neighbor.y)
                 .insert(CellFlags::REVEALED);
         }
 
-        neighbors.len() as u32
+        neighbors
     }
 
     pub fn neighbors(&self, x: u32, y: u32) -> Vec<Point<u32>> {

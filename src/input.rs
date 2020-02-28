@@ -45,33 +45,31 @@ impl<'a> Execute for MouseUp<'a> {
         let cell = &self.board_render.unwrap().get_cell_at(x, y);
         let mut board = self.board.as_ref().unwrap().borrow_mut();
 
-        fn reveal_cells<F>(
-            board: &mut RefMut<Board>,
-            game_state: &GameState,
-            p: &Point<u32>,
-            f: F,
-        ) -> Result<GameState, String>
-        where
-            F: Fn(&mut RefMut<Board>) -> u32,
-        {
-            if f(board) > 0 && board.cell(p.x, p.y).contains(CellFlags::MINE) {
-                Ok(GameState::Over)
-            } else {
-                Ok(*game_state)
-            }
-        }
-
         match cell {
             Some(p) => match &self.mouse_btn {
                 MouseButton::Left => {
-                    reveal_cells(&mut board, game_state, p, |b| b.reveal_from(p.x, p.y))
+                    let num_revealed = board.reveal_from(p.x, p.y);
+                    if num_revealed > 0 && board.cell(p.x, p.y).contains(CellFlags::MINE) {
+                        Ok(GameState::Over)
+                    } else {
+                        Ok(*game_state)
+                    }
                 }
                 MouseButton::Right => {
                     board.toggle_flag(p.x, p.y);
                     Ok(*game_state)
                 }
                 MouseButton::Middle => {
-                    reveal_cells(&mut board, game_state, p, |b| b.reveal_unflagged(p.x, p.y))
+                    let mines_revealed = board
+                        .reveal_unflagged(p.x, p.y)
+                        .iter()
+                        .filter(|p| board.cell(p.x, p.y).contains(CellFlags::MINE))
+                        .count();
+                    if mines_revealed > 0 {
+                        Ok(GameState::Over)
+                    } else {
+                        Ok(*game_state)
+                    }
                 }
                 _ => Ok(*game_state),
             },

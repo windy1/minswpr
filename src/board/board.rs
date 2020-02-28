@@ -10,7 +10,7 @@ bitflags! {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Board {
     width: usize,
     height: usize,
@@ -91,17 +91,18 @@ impl Board {
     }
 
     fn _reveal_from(&mut self, x: u32, y: u32, count: &mut u32) {
-        let cell = match self.get_cell_mut(x, y) {
-            Some(c) => c,
-            None => return,
-        };
-
         // make sure the cell hasn't been previously revealed
         // or..
         // make sure the cell isn't flagged
-        if cell.contains(CellFlags::REVEALED) || cell.contains(CellFlags::FLAG) {
-            return;
-        }
+        let cell = self
+            .get_cell_mut(x, y)
+            .filter(|c| !c.contains(CellFlags::REVEALED))
+            .filter(|c| !c.contains(CellFlags::FLAG));
+
+        let cell = match cell {
+            Some(c) => c,
+            None => return,
+        };
 
         // reveal the current cell
         cell.insert(CellFlags::REVEALED);
@@ -122,6 +123,40 @@ impl Board {
         .for_each(|p| self._reveal_from(p.x, p.y, count));
     }
 
+    pub fn reveal_unflagged(&mut self, x: u32, y: u32) -> u32 {
+        let num_mines = self.count_adjacent_mines(x, y);
+        let num_flags = self.count_adjacent_flags(x, y);
+
+        // this function only accepts cells that have at least 1 adjacent mine
+        // and...
+        // the player must have flagged an amount of cells equal to the amount of adjacent mines
+        if num_mines <= 0 || num_flags != num_mines {
+            return 0;
+        }
+
+        // only accept revealed cells
+        let cell = self
+            .get_cell(x, y)
+            .filter(|c| c.contains(CellFlags::REVEALED));
+        if let None = cell {
+            return 0;
+        }
+
+        // reveal the cells neighbors that are not revealed and not flagged
+        let neighbors = self.filter_neighbors(x, y, |c| {
+            !c.contains(CellFlags::REVEALED) && !c.contains(CellFlags::FLAG)
+        });
+
+        println!("len = {}", neighbors.len());
+
+        for neighbor in &neighbors {
+            self.cell_mut(neighbor.x, neighbor.y)
+                .insert(CellFlags::REVEALED);
+        }
+
+        neighbors.len() as u32
+    }
+
     pub fn neighbors(&self, x: u32, y: u32) -> Vec<Point<u32>> {
         let x = x as i32;
         let y = y as i32;
@@ -138,6 +173,11 @@ impl Board {
 
     pub fn count_adjacent_mines(&self, x: u32, y: u32) -> usize {
         self.filter_neighbors(x, y, |c| c.contains(CellFlags::MINE))
+            .len()
+    }
+
+    pub fn count_adjacent_flags(&self, x: u32, y: u32) -> usize {
+        self.filter_neighbors(x, y, |c| c.contains(CellFlags::FLAG))
             .len()
     }
 

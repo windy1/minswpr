@@ -1,9 +1,10 @@
-use super::board::CellFlags;
+use super::board::{Board, CellFlags};
 use super::math::Point;
 use super::render::board::RenderBoard;
 use super::{BoardRef, GameState};
 use sdl2::keyboard::Keycode;
 use sdl2::mouse::MouseButton;
+use std::cell::RefMut;
 
 pub trait Execute {
     fn execute(&self) -> Result<GameState, String>;
@@ -44,20 +45,33 @@ impl<'a> Execute for MouseUp<'a> {
         let cell = &self.board_render.unwrap().get_cell_at(x, y);
         let mut board = self.board.as_ref().unwrap().borrow_mut();
 
+        fn reveal_cells<F>(
+            board: &mut RefMut<Board>,
+            game_state: &GameState,
+            p: &Point<u32>,
+            f: F,
+        ) -> Result<GameState, String>
+        where
+            F: Fn(&mut RefMut<Board>) -> u32,
+        {
+            if f(board) > 0 && board.cell(p.x, p.y).contains(CellFlags::MINE) {
+                Ok(GameState::Over)
+            } else {
+                Ok(*game_state)
+            }
+        }
+
         match cell {
             Some(p) => match &self.mouse_btn {
                 MouseButton::Left => {
-                    if board.reveal_from(p.x, p.y) > 0
-                        && board.cell(p.x, p.y).contains(CellFlags::MINE)
-                    {
-                        Ok(GameState::Over)
-                    } else {
-                        Ok(*game_state)
-                    }
+                    reveal_cells(&mut board, game_state, p, |b| b.reveal_from(p.x, p.y))
                 }
                 MouseButton::Right => {
                     board.toggle_flag(p.x, p.y);
                     Ok(*game_state)
+                }
+                MouseButton::Middle => {
+                    reveal_cells(&mut board, game_state, p, |b| b.reveal_unflagged(p.x, p.y))
                 }
                 _ => Ok(*game_state),
             },

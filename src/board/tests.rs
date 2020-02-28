@@ -57,3 +57,33 @@ fn test_reveal_from() {
     let mut b = Board::new(9, 9, 0.0).unwrap();
     assert_eq!(81, b.reveal_from(0, 0));
 }
+
+#[test]
+fn test_reveal_unflagged() {
+    let mut b = Board::new(9, 9, 0.0).unwrap();
+    assert_eq!(0, b.reveal_unflagged(0, 0));
+
+    b.cell_mut(1, 0).insert(CellFlags::MINE);
+    assert_eq!(0, b.reveal_unflagged(0, 0));
+
+    b.cell_mut(1, 0).insert(CellFlags::FLAG);
+    assert_eq!(0, b.reveal_unflagged(0, 0));
+
+    b.cell_mut(0, 0).insert(CellFlags::REVEALED);
+    assert_eq!(2, b.reveal_unflagged(0, 0));
+
+    b = Board::new(9, 9, 0.0).unwrap();
+    b.cell_mut(0, 0).insert(CellFlags::MINE | CellFlags::FLAG);
+    b.cell_mut(1, 0).insert(CellFlags::MINE | CellFlags::FLAG);
+    b.cell_mut(1, 1).insert(CellFlags::REVEALED);
+
+    let mut b2 = b.clone();
+
+    assert_eq!(6, b.reveal_unflagged(1, 1));
+
+    b2.cell_mut(0, 0).remove(CellFlags::FLAG);
+    assert_eq!(0, b2.reveal_unflagged(1, 1));
+
+    b2.cell_mut(0, 1).insert(CellFlags::FLAG);
+    assert_eq!(6, b2.reveal_unflagged(1, 1));
+}

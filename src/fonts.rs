@@ -3,13 +3,13 @@ use sdl2::ttf::Sdl2TtfContext;
 use std::collections::HashMap;
 use std::path::Path;
 
-pub struct Fonts<'a> {
-    ttf: &'a Sdl2TtfContext,
-    font_map: HashMap<String, Font<'a, 'a>>,
+pub struct Fonts<'ttf> {
+    ttf: &'ttf Sdl2TtfContext,
+    font_map: HashMap<String, Font<'ttf, 'ttf>>, // TODO: &'static str
 }
 
-impl<'a> Fonts<'a> {
-    pub fn new(ttf: &'a Sdl2TtfContext) -> Result<Self, String> {
+impl<'ttf> Fonts<'ttf> {
+    pub fn new(ttf: &'ttf Sdl2TtfContext) -> Result<Self, String> {
         let font_map = HashMap::new();
         Ok(Self { ttf, font_map })
     }
@@ -20,7 +20,7 @@ impl<'a> Fonts<'a> {
         Ok(())
     }
 
-    pub fn get(&self, key: &str) -> Result<&Font<'a, 'a>, String> {
+    pub fn get(&self, key: &str) -> Result<&Font<'ttf, 'ttf>, String> {
         self.font_map
             .get(key)
             .ok_or_else(|| format!("missing required font `{}`", key))

@@ -1,10 +1,10 @@
-use super::board::{Board, CellFlags};
+use super::board::CellFlags;
 use super::math::Point;
 use super::render::board::RenderBoard;
+use super::Context;
 use super::{BoardRef, GameState};
 use sdl2::keyboard::Keycode;
 use sdl2::mouse::MouseButton;
-use std::cell::RefMut;
 
 pub trait Execute {
     fn execute(&self) -> Result<GameState, String>;
@@ -14,9 +14,10 @@ pub trait Execute {
 pub struct MouseUp<'a> {
     mouse_btn: MouseButton,
     mouse_pos: Point,
-    board: Option<BoardRef>,
-    board_render: Option<&'a RenderBoard<'a>>,
-    game_state: GameState,
+    // board: Option<BoardRef>,
+    // board_render: Option<&'a RenderBoard<'a>>,
+    // game_state: GameState,
+    context: Option<&'a Context<'a>>,
 }
 
 impl<'a> Default for MouseUp<'a> {
@@ -24,16 +25,18 @@ impl<'a> Default for MouseUp<'a> {
         Self {
             mouse_btn: MouseButton::Unknown,
             mouse_pos: point!(0, 0),
-            board: None,
-            board_render: None,
-            game_state: GameState::Unknown,
+            // board: None,
+            // board_render: None,
+            // game_state: GameState::Unknown,
+            context: None,
         }
     }
 }
 
 impl<'a> Execute for MouseUp<'a> {
     fn execute(&self) -> Result<GameState, String> {
-        let game_state = &self.game_state;
+        let ctx = self.context.unwrap();
+        let game_state = ctx.game_state();
 
         if let GameState::Over = game_state {
             return Ok(*game_state);
@@ -42,8 +45,10 @@ impl<'a> Execute for MouseUp<'a> {
         let Point { x, y } = self.mouse_pos;
         println!("mouse_up = {:?}", point!(x, y));
 
-        let cell = &self.board_render.unwrap().get_cell_at(x, y);
-        let mut board = self.board.as_ref().unwrap().borrow_mut();
+        let board_pos = point!(10, 10); // TODO: temporary
+
+        let cell = ctx.get_cell_at(x, y, &board_pos);
+        let mut board = ctx.board().borrow_mut();
 
         match cell {
             Some(p) => match &self.mouse_btn {

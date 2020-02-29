@@ -54,9 +54,7 @@ impl Minswpr {
         let bc = &self.config.board;
 
         let mut fonts = Fonts::new(&self.ttf)?;
-        for (k, f) in &self.config.fonts {
-            fonts.load(k, &f.path, f.pt)?;
-        }
+        fonts.load_config(&self.config.fonts)?;
         let fonts = Rc::new(fonts);
 
         let board = Self::make_board(bc.dimen, bc.mine_frequency)?;

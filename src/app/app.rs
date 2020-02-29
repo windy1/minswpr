@@ -133,7 +133,6 @@ impl Minswpr {
 pub enum GameState {
     Unknown,
     Ready,
-    InProgress,
     Over,
     Reset,
     Quit,

@@ -21,7 +21,7 @@ impl<'ttf> Fonts<'ttf> {
         Ok(())
     }
 
-    pub fn load_config(&mut self, config: &HashMap<String, FontConfig>) -> Result<(), String> {
+    pub fn load_from_config(&mut self, config: &HashMap<String, FontConfig>) -> Result<(), String> {
         for (k, f) in config {
             self.load(k, &f.path, f.pt)?;
         }

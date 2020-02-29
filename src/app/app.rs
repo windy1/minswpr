@@ -65,7 +65,7 @@ impl Minswpr {
             Rc::clone(&board),
             self.config.board.cells.clone(),
         );
-        layout.insert("board", Box::new(board_render));
+        layout.insert("board", 0, Box::new(board_render));
 
         let mut ctx = ContextBuilder::default()
             .config(self.config.clone())

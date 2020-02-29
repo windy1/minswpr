@@ -8,6 +8,7 @@ pub mod math;
 
 mod app;
 pub mod board;
+pub mod events;
 pub mod fonts;
 pub mod input;
 pub mod layout;

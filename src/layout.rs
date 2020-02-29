@@ -3,22 +3,18 @@ use crate::render::Render;
 use sdl2::render::WindowCanvas;
 use std::collections::HashMap;
 
-use crate::render::board::RenderBoard;
-
 pub struct Layout<'a> {
-    components: HashMap<&'static str, Box<dyn Render>>,
-    pub test: Option<RenderBoard<'a, 'a>>,
+    components: HashMap<&'static str, Box<dyn Render + 'a>>,
 }
 
 impl<'a> Layout<'a> {
     pub fn new() -> Self {
         Self {
             components: HashMap::new(),
-            test: None,
         }
     }
 
-    pub fn insert(&mut self, key: &'static str, component: Box<dyn Render>) {
+    pub fn insert(&mut self, key: &'static str, component: Box<dyn Render + 'a>) {
         self.components.insert(key, component);
     }
 

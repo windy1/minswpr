@@ -1,9 +1,9 @@
+mod point;
+
 use rand::distributions::uniform::{SampleBorrow, SampleUniform};
 use rand::Rng;
 use std::collections::HashSet;
 use std::hash::Hash;
-
-mod point;
 
 pub use self::point::*;
 

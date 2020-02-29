@@ -7,14 +7,14 @@ use std::fmt;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub struct Config {
     pub window: WindowConfig,
     pub fonts: HashMap<String, FontConfig>,
     pub board: BoardConfig,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub struct WindowConfig {
     pub title: String,
     pub dimen: Dimen,
@@ -22,14 +22,14 @@ pub struct WindowConfig {
     pub bg_color: Color,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub struct BoardConfig {
     pub dimen: Dimen<usize>,
     pub mine_frequency: f64,
     pub cells: CellConfig,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub struct CellConfig {
     pub dimen: Dimen,
     #[serde(deserialize_with = "read_color")]
@@ -43,7 +43,7 @@ pub struct CellConfig {
     pub flags: FlagsConfig,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub struct MinesConfig {
     #[serde(deserialize_with = "read_color")]
     pub color: Color,
@@ -52,14 +52,14 @@ pub struct MinesConfig {
     pub revealed_color: Color,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub struct FlagsConfig {
     #[serde(deserialize_with = "read_color")]
     pub color: Color,
     pub dimen: Dimen,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub struct FontConfig {
     pub path: PathBuf,
     pub pt: u16,

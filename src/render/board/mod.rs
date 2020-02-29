@@ -1,6 +1,6 @@
 mod cell;
 
-use self::cell::RenderCell;
+use self::cell::RenderCellBuilder;
 use super::Render;
 use crate::fonts::Fonts;
 use crate::math::{Dimen, Point};
@@ -130,15 +130,13 @@ impl<'ttf> RenderBoard<'ttf> {
         x: u32,
         y: u32,
     ) -> Result<(), String> {
-        RenderCell::new(
-            fonts,
-            Rc::clone(&self.board),
-            &point!(x, y),
-            &self.cell_config,
-        )
-        .render(
-            canvas,
-            &Self::calc_cell_screen_pos(&point!(x, y), pos, &self.cell_config),
-        )
+        let screen_pos = Self::calc_cell_screen_pos(&point!(x, y), pos, &self.cell_config);
+        RenderCellBuilder::default()
+            .fonts(fonts)
+            .board(Rc::clone(&self.board))
+            .board_pos(&point!(x, y))
+            .config(&self.cell_config)
+            .build()?
+            .render(canvas, &screen_pos)
     }
 }

@@ -8,7 +8,7 @@ use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
 
-#[derive(Clone)]
+#[derive(Clone, Builder)]
 pub(super) struct RenderCell<'a> {
     fonts: &'a Fonts<'a>,
     board: BoardRef,
@@ -53,20 +53,6 @@ impl<'a> Render for RenderCell<'a> {
 }
 
 impl<'a> RenderCell<'a> {
-    pub fn new(
-        fonts: &'a Fonts<'a>,
-        board: BoardRef,
-        board_pos: &'a Point<u32>,
-        config: &'a CellConfig,
-    ) -> Self {
-        Self {
-            fonts,
-            board,
-            board_pos,
-            config,
-        }
-    }
-
     fn fill(&self, canvas: &mut WindowCanvas, pos: &Point, color: &Color) -> Result<(), String> {
         let cell_dimen = &self.config.dimen;
         canvas.set_draw_color(*color);

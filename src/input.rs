@@ -85,18 +85,10 @@ impl<'a> Default for MouseUp<'a> {
     }
 }
 
+#[derive(new)]
 pub struct KeyDown {
     keycode: Keycode,
     game_state: GameState,
-}
-
-impl KeyDown {
-    pub fn new(keycode: Keycode, game_state: GameState) -> Self {
-        Self {
-            keycode,
-            game_state,
-        }
-    }
 }
 
 impl Execute for KeyDown {

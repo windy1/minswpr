@@ -4,17 +4,14 @@ use sdl2::ttf::Sdl2TtfContext;
 use std::collections::HashMap;
 use std::path::Path;
 
+#[derive(new)]
 pub struct Fonts<'ttf> {
     ttf: &'ttf Sdl2TtfContext,
+    #[new(default)]
     font_map: HashMap<String, Font<'ttf, 'ttf>>,
 }
 
 impl<'ttf> Fonts<'ttf> {
-    pub fn new(ttf: &'ttf Sdl2TtfContext) -> Result<Self, String> {
-        let font_map = HashMap::new();
-        Ok(Self { ttf, font_map })
-    }
-
     pub fn load(&mut self, key: &str, fname: &Path, size: u16) -> Result<(), String> {
         let font = self.ttf.load_font(fname, size)?;
         self.font_map.insert(key.to_string(), font);

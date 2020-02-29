@@ -53,7 +53,7 @@ impl Minswpr {
     pub fn start(&mut self) -> Result<(), String> {
         let bc = &self.config.board;
 
-        let mut fonts = Fonts::new(&self.ttf)?;
+        let mut fonts = Fonts::new(&self.ttf);
         fonts.load_from_config(&self.config.fonts)?;
         let fonts = Rc::new(fonts);
 

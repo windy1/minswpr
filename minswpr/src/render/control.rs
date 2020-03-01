@@ -16,7 +16,7 @@ pub struct RenderControl<'ttf> {
 }
 
 impl<'ttf> Render for RenderControl<'ttf> {
-    fn render(&self, canvas: &mut WindowCanvas, pos: &Point) -> Result<(), String> {
+    fn render(&self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
         RenderRect::new(self.dimen, self.color).render(canvas, pos)
     }
 

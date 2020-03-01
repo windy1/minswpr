@@ -18,7 +18,7 @@ pub struct RenderBoard<'ttf> {
 }
 
 impl<'ttf> Render for RenderBoard<'ttf> {
-    fn render(&self, canvas: &mut WindowCanvas, pos: &Point) -> Result<(), String> {
+    fn render(&self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
         RenderRect::new(self.dimen, self.cell_config.color).render(canvas, pos)?;
         self.draw_cell_borders(canvas, pos)?;
         self.draw_cells(canvas, pos)
@@ -52,7 +52,7 @@ impl<'ttf> RenderBoard<'ttf> {
         }
     }
 
-    fn draw_cell_borders(&self, canvas: &mut WindowCanvas, pos: &Point) -> Result<(), String> {
+    fn draw_cell_borders(&self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
         canvas.set_draw_color(self.cell_config.border_color);
 
         let cell_config = &self.cell_config;
@@ -86,7 +86,7 @@ impl<'ttf> RenderBoard<'ttf> {
         Ok(())
     }
 
-    fn draw_cells(&self, canvas: &mut WindowCanvas, pos: &Point) -> Result<(), String> {
+    fn draw_cells(&self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
         let b = self.board.borrow();
         for x in 0..b.width() as u32 {
             for y in 0..b.height() as u32 {
@@ -96,11 +96,7 @@ impl<'ttf> RenderBoard<'ttf> {
         Ok(())
     }
 
-    fn calc_cell_screen_pos(
-        cell_pos: &Point<u32>,
-        board_pos: &Point,
-        config: &CellConfig,
-    ) -> Point {
+    fn calc_cell_screen_pos(cell_pos: Point<u32>, board_pos: Point, config: &CellConfig) -> Point {
         let cell_pos = cell_pos.as_i32();
         let cell_dimen = &config.dimen.as_i32();
         let border_width = config.border_width as i32;
@@ -115,18 +111,18 @@ impl<'ttf> RenderBoard<'ttf> {
     fn draw_cell(
         &self,
         canvas: &mut WindowCanvas,
-        pos: &Point,
+        pos: Point,
         fonts: &Fonts,
         x: u32,
         y: u32,
     ) -> Result<(), String> {
-        let screen_pos = Self::calc_cell_screen_pos(&point!(x, y), pos, &self.cell_config);
+        let screen_pos = Self::calc_cell_screen_pos(point!(x, y), pos, &self.cell_config);
         RenderCellBuilder::default()
             .fonts(fonts)
             .board(Rc::clone(&self.board))
             .board_pos(&point!(x, y))
             .config(&self.cell_config)
             .build()?
-            .render(canvas, &screen_pos)
+            .render(canvas, screen_pos)
     }
 }

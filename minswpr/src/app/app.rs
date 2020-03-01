@@ -94,7 +94,7 @@ impl Minswpr {
             canvas.set_draw_color(self.config.window.bg_color);
             canvas.clear();
 
-            ctx.layout_mut().render(&mut canvas, &layout_pos)?;
+            ctx.layout_mut().render(&mut canvas, layout_pos)?;
 
             canvas.present();
 

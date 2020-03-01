@@ -59,18 +59,18 @@ fn test_reveal_from() {
 }
 
 #[test]
-fn test_reveal_unflagged() {
+fn test_reveal_area() {
     let mut b = Board::new(9, 9, 0.0).unwrap();
-    assert_eq!(0, b.reveal_unflagged(0, 0).len());
+    assert_eq!(0, b.reveal_area(0, 0).len());
 
     b.cell_mut(1, 0).insert(CellFlags::MINE);
-    assert_eq!(0, b.reveal_unflagged(0, 0).len());
+    assert_eq!(0, b.reveal_area(0, 0).len());
 
     b.cell_mut(1, 0).insert(CellFlags::FLAG);
-    assert_eq!(0, b.reveal_unflagged(0, 0).len());
+    assert_eq!(0, b.reveal_area(0, 0).len());
 
     b.cell_mut(0, 0).insert(CellFlags::REVEALED);
-    assert_eq!(2, b.reveal_unflagged(0, 0).len());
+    assert_eq!(2, b.reveal_area(0, 0).len());
 
     b = Board::new(9, 9, 0.0).unwrap();
     b.cell_mut(0, 0).insert(CellFlags::MINE | CellFlags::FLAG);
@@ -79,11 +79,11 @@ fn test_reveal_unflagged() {
 
     let mut b2 = b.clone();
 
-    assert_eq!(6, b.reveal_unflagged(1, 1).len());
+    assert_eq!(6, b.reveal_area(1, 1).len());
 
     b2.cell_mut(0, 0).remove(CellFlags::FLAG);
-    assert_eq!(0, b2.reveal_unflagged(1, 1).len());
+    assert_eq!(0, b2.reveal_area(1, 1).len());
 
     b2.cell_mut(0, 1).insert(CellFlags::FLAG);
-    assert_eq!(6, b2.reveal_unflagged(1, 1).len());
+    assert_eq!(6, b2.reveal_area(1, 1).len());
 }

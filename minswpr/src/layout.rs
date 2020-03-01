@@ -35,10 +35,10 @@ impl<'a> Layout<'a> {
 }
 
 impl<'a> RenderMut for Layout<'a> {
-    fn render(&mut self, canvas: &mut WindowCanvas, pos: &Point) -> Result<(), String> {
+    fn render(&mut self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
         RenderRect::new(self.dimen(), self.color).render(canvas, pos)?;
 
-        let mut cur = *pos + point!(self.padding, self.padding).as_i32();
+        let mut cur = pos + point!(self.padding, self.padding).as_i32();
 
         let components = &mut self
             .components
@@ -50,7 +50,7 @@ impl<'a> RenderMut for Layout<'a> {
         for component in components {
             component.pos = cur;
             let r = &component.render;
-            r.render(canvas, &cur)?;
+            r.render(canvas, cur)?;
             cur += (0, r.dimen().height() as i32);
         }
 

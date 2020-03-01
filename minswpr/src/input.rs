@@ -19,7 +19,7 @@ pub struct MouseUp<'a> {
     context: &'a Context<'a>,
 }
 
-impl<'a> MouseUp<'a> {
+impl MouseUp<'_> {
     fn left_click_cell(&self, Point { x, y }: Point<u32>) -> GameState {
         let mut board = self.context.board().borrow_mut();
         let num_revealed = board.reveal_from(x, y);
@@ -52,7 +52,7 @@ impl<'a> MouseUp<'a> {
     }
 }
 
-impl<'a> Execute for MouseUp<'a> {
+impl Execute for MouseUp<'_> {
     fn execute(&self) -> Result<GameState, String> {
         let ctx = self.context;
         let game_state = ctx.game_state();
@@ -84,7 +84,7 @@ pub struct KeyDown<'a> {
     context: &'a Context<'a>,
 }
 
-impl<'a> Execute for KeyDown<'a> {
+impl Execute for KeyDown<'_> {
     fn execute(&self) -> Result<GameState, String> {
         match &self.keycode {
             Keycode::F2 => Ok(GameState::Reset),

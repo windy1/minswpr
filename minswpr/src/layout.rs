@@ -34,7 +34,7 @@ impl<'a> Layout<'a> {
     }
 }
 
-impl<'a> RenderMut for Layout<'a> {
+impl RenderMut for Layout<'_> {
     fn render(&mut self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
         RenderRect::new(self.dimen(), self.color).render(canvas, pos)?;
 
@@ -83,22 +83,22 @@ impl<'a> Component<'a> {
     }
 }
 
-impl<'a> PartialOrd for Component<'a> {
+impl PartialOrd for Component<'_> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl<'a> Ord for Component<'a> {
+impl Ord for Component<'_> {
     fn cmp(&self, other: &Self) -> Ordering {
         self.order.cmp(&other.order)
     }
 }
 
-impl<'a> PartialEq for Component<'a> {
+impl PartialEq for Component<'_> {
     fn eq(&self, other: &Self) -> bool {
         self.order == other.order
     }
 }
 
-impl<'a> Eq for Component<'a> {}
+impl Eq for Component<'_> {}

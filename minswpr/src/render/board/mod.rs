@@ -18,7 +18,7 @@ pub struct RenderBoard<'ttf> {
     cell_config: CellConfig,
 }
 
-impl<'ttf> Render for RenderBoard<'ttf> {
+impl Render for RenderBoard<'_> {
     fn render(&self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
         RenderRect::new(self.dimen, self.cell_config.color).render(canvas, pos)?;
         self.draw_cell_borders(canvas, pos)?;

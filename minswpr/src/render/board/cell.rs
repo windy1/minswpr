@@ -16,7 +16,7 @@ pub(super) struct RenderCell<'a> {
     config: &'a CellConfig,
 }
 
-impl<'a> Render for RenderCell<'a> {
+impl Render for RenderCell<'_> {
     fn render(&self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
         let b = self.board.borrow();
         let cell = b.cell(self.board_pos.x, self.board_pos.y);
@@ -52,7 +52,7 @@ impl<'a> Render for RenderCell<'a> {
     }
 }
 
-impl<'a> RenderCell<'a> {
+impl RenderCell<'_> {
     fn fill(&self, canvas: &mut WindowCanvas, pos: Point, color: Color) -> Result<(), String> {
         RenderRect::new(self.config.dimen, color).render(canvas, pos)
     }

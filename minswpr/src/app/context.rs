@@ -26,7 +26,7 @@ impl<'a> Context<'a> {
         &self.board
     }
 
-    pub fn layout(&self) -> &Layout<'a> {
+    pub fn layout(&self) -> &Layout {
         &self.layout
     }
 

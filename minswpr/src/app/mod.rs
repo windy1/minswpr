@@ -42,9 +42,11 @@ impl Minswpr {
     }
 
     pub fn start(&mut self) -> Result<(), String> {
-        let mut fonts = Fonts::new(&self.ttf);
-        fonts.load_from_config(&self.config.fonts)?;
-        let fonts = Rc::new(fonts);
+        let fonts = {
+            let mut f = Fonts::new(&self.ttf);
+            f.load_from_config(&self.config.fonts)?;
+            Rc::new(f)
+        };
 
         let mut ctx = {
             let bc = &self.config.board;

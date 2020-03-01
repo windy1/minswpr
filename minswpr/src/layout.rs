@@ -39,11 +39,7 @@ impl RenderMut for Layout<'_> {
         render_rect!(self.dimen(), self.color, canvas, pos)?;
 
         let mut cur = pos + point!(self.padding, self.padding).as_i32();
-
-        let components = &mut self
-            .components
-            .values_mut()
-            .collect::<Vec<&mut Component>>();
+        let components = &mut self.components.values_mut().collect::<Vec<_>>();
 
         components.sort();
 

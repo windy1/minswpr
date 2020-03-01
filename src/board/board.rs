@@ -123,7 +123,7 @@ impl Board {
         .for_each(|p| self._reveal_from(p.x, p.y, count));
     }
 
-    pub fn reveal_unflagged(&mut self, x: u32, y: u32) -> Vec<Point<u32>> {
+    pub fn reveal_area(&mut self, x: u32, y: u32) -> Vec<Point<u32>> {
         let num_mines = self.count_adjacent_mines(x, y);
         let num_flags = self.count_adjacent_flags(x, y);
 

@@ -37,7 +37,7 @@ impl<'a> MouseUp<'a> {
         let ctx = self.context.unwrap();
         let mut board = ctx.board().borrow_mut();
         let mines_revealed = board
-            .reveal_unflagged(x, y)
+            .reveal_area(x, y)
             .iter()
             .filter(|p| board.cell(p.x, p.y).contains(CellFlags::MINE))
             .count();

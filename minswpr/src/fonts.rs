@@ -6,7 +6,7 @@ use std::path::Path;
 
 #[derive(new)]
 pub struct Fonts<'ttf> {
-    ttf:      &'ttf Sdl2TtfContext,
+    ttf: &'ttf Sdl2TtfContext,
     #[new(default)]
     font_map: HashMap<String, Font<'ttf, 'ttf>>,
 }

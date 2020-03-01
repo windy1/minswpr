@@ -9,10 +9,10 @@ use sdl2::render::WindowCanvas;
 
 #[derive(Builder)]
 pub(super) struct RenderCell<'a> {
-    fonts:     &'a Fonts<'a>,
-    board:     &'a Board,
+    fonts: &'a Fonts<'a>,
+    board: &'a Board,
     board_pos: Point<u32>,
-    config:    &'a CellConfig,
+    config: &'a CellConfig,
 }
 
 impl Render for RenderCell<'_> {

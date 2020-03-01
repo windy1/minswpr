@@ -15,10 +15,10 @@ bitflags! {
 
 #[derive(Debug, Clone)]
 pub struct Board {
-    width:     usize,
-    height:    usize,
+    width: usize,
+    height: usize,
     num_mines: usize,
-    cells:     Vec<CellFlags>,
+    cells: Vec<CellFlags>,
 }
 
 impl Board {

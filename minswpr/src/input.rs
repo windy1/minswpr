@@ -16,7 +16,7 @@ pub trait Input {
 pub struct MouseUp<'a> {
     mouse_btn: MouseButton,
     mouse_pos: Point,
-    context:   &'a Context<'a>,
+    context: &'a Context<'a>,
 }
 
 impl MouseUp<'_> {

@@ -1,5 +1,5 @@
 #[macro_use]
-mod colors;
+mod macros;
 
 pub mod board;
 pub mod control;

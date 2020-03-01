@@ -16,3 +16,10 @@ macro_rules! color {
         ::sdl2::pixels::Color::RGB(0, 0, 255)
     };
 }
+
+#[allow(unused)]
+macro_rules! render_rect {
+    ($dimen:expr, $color:expr, $canvas:expr, $pos:expr) => {
+        crate::render::RenderRect::new($dimen, $color).render($canvas, $pos)
+    };
+}

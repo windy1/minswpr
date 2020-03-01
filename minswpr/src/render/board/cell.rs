@@ -2,7 +2,7 @@ use crate::board::CellFlags;
 use crate::config::CellConfig;
 use crate::fonts::Fonts;
 use crate::math::{Dimen, Point};
-use crate::render::{Render, RenderRect};
+use crate::render::Render;
 use crate::BoardRef;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
@@ -31,7 +31,7 @@ impl Render for RenderCell<'_> {
             } else {
                 config.revealed_color
             };
-            self.fill(canvas, pos, fill_color)?;
+            render_rect!(self.config.dimen, fill_color, canvas, pos)?;
 
             let adjacent_mines = b.count_adjacent_mines(self.board_pos.x, self.board_pos.y);
 
@@ -53,10 +53,6 @@ impl Render for RenderCell<'_> {
 }
 
 impl RenderCell<'_> {
-    fn fill(&self, canvas: &mut WindowCanvas, pos: Point, color: Color) -> Result<(), String> {
-        RenderRect::new(self.config.dimen, color).render(canvas, pos)
-    }
-
     fn draw_centered_rect(
         &self,
         canvas: &mut WindowCanvas,
@@ -66,7 +62,7 @@ impl RenderCell<'_> {
     ) -> Result<(), String> {
         let cell_dimen = self.config.dimen.as_i32();
         let pos = pos + cell_dimen / (2, 2) - dimen.as_i32() / (2, 2);
-        RenderRect::new(dimen, color).render(canvas, pos)
+        render_rect!(dimen, color, canvas, pos)
     }
 
     fn draw_hint(&self, canvas: &mut WindowCanvas, pos: Point, hint: usize) -> Result<(), String> {

@@ -1,4 +1,4 @@
-use super::{Render, RenderRect};
+use super::Render;
 use crate::config::ControlConfig;
 use crate::fonts::Fonts;
 use crate::math::{Dimen, Point};
@@ -17,7 +17,7 @@ pub struct RenderControl<'ttf> {
 
 impl Render for RenderControl<'_> {
     fn render(&self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
-        RenderRect::new(self.dimen, self.color).render(canvas, pos)
+        render_rect!(self.dimen, self.color, canvas, pos)
     }
 
     fn dimen(&self) -> Dimen {

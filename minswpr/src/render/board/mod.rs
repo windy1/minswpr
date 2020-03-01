@@ -1,7 +1,7 @@
 mod cell;
 
 use self::cell::RenderCellBuilder;
-use super::{Render, RenderRect};
+use super::Render;
 use crate::config::CellConfig;
 use crate::fonts::Fonts;
 use crate::math::{Dimen, Point};
@@ -20,7 +20,7 @@ pub struct RenderBoard<'ttf> {
 
 impl Render for RenderBoard<'_> {
     fn render(&self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
-        RenderRect::new(self.dimen, self.cell_config.color).render(canvas, pos)?;
+        render_rect!(self.dimen, self.cell_config.color, canvas, pos)?;
         self.draw_cell_borders(canvas, pos)?;
         self.draw_cells(canvas, pos)
     }

@@ -1,5 +1,5 @@
 use crate::math::{Dimen, Point};
-use crate::render::{Render, RenderMut, RenderRect};
+use crate::render::{Render, RenderMut};
 use sdl2::pixels::Color;
 use sdl2::render::WindowCanvas;
 use std::cmp::Ordering;
@@ -36,7 +36,7 @@ impl<'a> Layout<'a> {
 
 impl RenderMut for Layout<'_> {
     fn render(&mut self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
-        RenderRect::new(self.dimen(), self.color).render(canvas, pos)?;
+        render_rect!(self.dimen(), self.color, canvas, pos)?;
 
         let mut cur = pos + point!(self.padding, self.padding).as_i32();
 

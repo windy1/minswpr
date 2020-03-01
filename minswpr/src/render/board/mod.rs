@@ -12,9 +12,9 @@ use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct RenderBoard<'ttf> {
-    fonts: Rc<Fonts<'ttf>>,
-    board: BoardRef,
-    dimen: Dimen,
+    fonts:       Rc<Fonts<'ttf>>,
+    board:       BoardRef,
+    dimen:       Dimen,
     cell_config: CellConfig,
 }
 

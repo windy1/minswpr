@@ -24,10 +24,10 @@ use std::time::Duration;
 pub type BoardRef = Rc<RefCell<Board>>;
 
 pub struct Minswpr {
-    config: Config,
+    config:     Config,
     event_pump: EventPump,
-    ttf: Sdl2TtfContext,
-    video: VideoSubsystem,
+    ttf:        Sdl2TtfContext,
+    video:      VideoSubsystem,
 }
 
 impl Minswpr {

@@ -11,8 +11,8 @@ pub type RenderRef<'a> = Box<dyn Render + 'a>;
 pub struct Layout<'a> {
     #[new(default)]
     components: HashMap<&'static str, Component<'a>>,
-    padding: u32,
-    color: Color,
+    padding:    u32,
+    color:      Color,
 }
 
 impl<'a> Layout<'a> {
@@ -67,10 +67,10 @@ impl RenderMut for Layout<'_> {
 
 #[derive(new)]
 pub struct Component<'a> {
-    order: i32,
+    order:  i32,
     render: Box<dyn Render + 'a>,
     #[new(default)]
-    pos: Point,
+    pos:    Point,
 }
 
 impl<'a> Component<'a> {

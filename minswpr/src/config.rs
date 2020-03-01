@@ -9,52 +9,52 @@ use std::path::{Path, PathBuf};
 
 #[derive(Deserialize, Clone)]
 pub struct Config {
-    pub window: WindowConfig,
-    pub fonts: HashMap<String, FontConfig>,
+    pub window:  WindowConfig,
+    pub fonts:   HashMap<String, FontConfig>,
     pub control: ControlConfig,
-    pub board: BoardConfig,
+    pub board:   BoardConfig,
 }
 
 #[derive(Deserialize, Clone)]
 pub struct WindowConfig {
-    pub title: String,
-    pub dimen: Dimen,
+    pub title:    String,
+    pub dimen:    Dimen,
     #[serde(deserialize_with = "read_color")]
     pub bg_color: Color,
 }
 
 #[derive(Deserialize, Clone)]
 pub struct ControlConfig {
-    pub height: u32,
+    pub height:        u32,
     pub spacer_height: u32,
 }
 
 #[derive(Deserialize, Clone)]
 pub struct BoardConfig {
-    pub dimen: Dimen<usize>,
+    pub dimen:          Dimen<usize>,
     pub mine_frequency: f64,
-    pub cells: CellConfig,
+    pub cells:          CellConfig,
 }
 
 #[derive(Deserialize, Clone)]
 pub struct CellConfig {
-    pub dimen: Dimen,
+    pub dimen:          Dimen,
     #[serde(deserialize_with = "read_color")]
-    pub color: Color,
-    pub border_width: u32,
+    pub color:          Color,
+    pub border_width:   u32,
     #[serde(deserialize_with = "read_color")]
-    pub border_color: Color,
+    pub border_color:   Color,
     #[serde(deserialize_with = "read_color")]
     pub revealed_color: Color,
-    pub mines: MinesConfig,
-    pub flags: FlagsConfig,
+    pub mines:          MinesConfig,
+    pub flags:          FlagsConfig,
 }
 
 #[derive(Deserialize, Clone)]
 pub struct MinesConfig {
     #[serde(deserialize_with = "read_color")]
-    pub color: Color,
-    pub dimen: Dimen,
+    pub color:          Color,
+    pub dimen:          Dimen,
     #[serde(deserialize_with = "read_color")]
     pub revealed_color: Color,
 }
@@ -69,7 +69,7 @@ pub struct FlagsConfig {
 #[derive(Deserialize, Clone)]
 pub struct FontConfig {
     pub path: PathBuf,
-    pub pt: u16,
+    pub pt:   u16,
 }
 
 pub fn read_config<P>(fname: P) -> Result<Config, String>

@@ -1,8 +1,6 @@
-use super::board::CellFlags;
-use super::math::Point;
+use super::{board::CellFlags, math::Point};
 use crate::{Context, GameState};
-use sdl2::keyboard::Keycode;
-use sdl2::mouse::MouseButton;
+use sdl2::{keyboard::Keycode, mouse::MouseButton};
 
 pub trait Execute {
     fn execute(&self) -> Result<GameState, String>;
@@ -16,7 +14,7 @@ pub trait Input {
 pub struct MouseUp<'a> {
     mouse_btn: MouseButton,
     mouse_pos: Point,
-    context: &'a Context<'a>,
+    context:   &'a Context<'a>,
 }
 
 impl MouseUp<'_> {

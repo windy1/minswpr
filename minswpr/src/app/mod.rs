@@ -3,31 +3,24 @@ pub(super) mod context;
 pub use self::context::*;
 
 use self::{Context, ContextBuilder};
-use crate::board::Board;
-use crate::config::{self, Config};
-use crate::events;
-use crate::fonts::Fonts;
-use crate::layout::{Layout, RenderRef};
-use crate::math::{Dimen, Point};
-use crate::render::board::RenderBoard;
-use crate::render::control::RenderControlBuilder;
-use crate::render::{Render, RenderMut, RenderRect};
-use sdl2::render::WindowCanvas;
-use sdl2::ttf::Sdl2TtfContext;
-use sdl2::{self, EventPump, VideoSubsystem};
-use std::cell::RefCell;
-use std::path::Path;
-use std::rc::Rc;
-use std::thread;
-use std::time::Duration;
+use crate::{board::Board,
+            config::{self, Config},
+            events,
+            fonts::Fonts,
+            layout::{Layout, RenderRef},
+            math::{Dimen, Point},
+            render::{board::RenderBoard, control::RenderControlBuilder, Render, RenderMut,
+                     RenderRect}};
+use sdl2::{self, render::WindowCanvas, ttf::Sdl2TtfContext, EventPump, VideoSubsystem};
+use std::{cell::RefCell, path::Path, rc::Rc, thread, time::Duration};
 
 pub type BoardRef = Rc<RefCell<Board>>;
 
 pub struct Minswpr {
-    config: Config,
+    config:     Config,
     event_pump: EventPump,
-    ttf: Sdl2TtfContext,
-    video: VideoSubsystem,
+    ttf:        Sdl2TtfContext,
+    video:      VideoSubsystem,
 }
 
 impl Minswpr {

@@ -1,12 +1,10 @@
 use crate::config::FontConfig;
-use sdl2::ttf::Font;
-use sdl2::ttf::Sdl2TtfContext;
-use std::collections::HashMap;
-use std::path::Path;
+use sdl2::ttf::{Font, Sdl2TtfContext};
+use std::{collections::HashMap, path::Path};
 
 #[derive(new)]
 pub struct Fonts<'ttf> {
-    ttf: &'ttf Sdl2TtfContext,
+    ttf:      &'ttf Sdl2TtfContext,
     #[new(default)]
     font_map: HashMap<String, Font<'ttf, 'ttf>>,
 }

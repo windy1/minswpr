@@ -1,4 +1,4 @@
 #!/bin/bash
 
-cargo check --manifest-path ./minswpr/Cargo.toml
-cargo test --manifest-path ./minswpr/Cargo.toml
+cargo check
+cargo test

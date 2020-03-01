@@ -161,7 +161,7 @@ impl Board {
             .filter(|(nx, ny)| !(*nx == x && *ny == y))
             .map(|(nx, ny)| (nx as u32, ny as u32))
             .filter(|(nx, ny)| self.get_cell(*nx, *ny).is_some())
-            .map(|(nx, ny)| Point::new(nx, ny))
+            .map(|(nx, ny)| point!(nx, ny))
             .collect()
     }
 

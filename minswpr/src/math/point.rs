@@ -215,7 +215,7 @@ where
     T: MulAssign + Copy,
 {
     fn mul_assign(&mut self, rhs: RawPoint<T>) {
-        self.mul_assign(Point::new(rhs.0, rhs.1))
+        self.mul_assign(Self::new(rhs.0, rhs.1))
     }
 }
 
@@ -226,7 +226,7 @@ where
     type Output = Self;
 
     fn div(self, rhs: Self) -> Self::Output {
-        Point::new(self.x / rhs.x, self.y / rhs.y)
+        Self::new(self.x / rhs.x, self.y / rhs.y)
     }
 }
 
@@ -237,7 +237,7 @@ where
     type Output = Self;
 
     fn div(self, rhs: RawPoint<T>) -> Self::Output {
-        self.div(Point::new(rhs.0, rhs.1))
+        self.div(Self::new(rhs.0, rhs.1))
     }
 }
 
@@ -256,7 +256,7 @@ where
     T: DivAssign + Copy,
 {
     fn div_assign(&mut self, rhs: RawPoint<T>) {
-        self.div_assign(Point::new(rhs.0, rhs.1))
+        self.div_assign(Self::new(rhs.0, rhs.1))
     }
 }
 
@@ -289,10 +289,10 @@ mod tests {
 
     #[test]
     fn test_point_ops() {
-        let p1 = Point::new(0, 0);
-        let p2 = Point::new(1, 2);
-        let p3 = Point::new(3, 4);
-        let p4 = Point::new(4, 6);
+        let p1 = point!(0, 0);
+        let p2 = point!(1, 2);
+        let p3 = point!(3, 4);
+        let p4 = point!(4, 6);
         let r2 = (1, 2);
         let r3 = (3, 4);
         assert_eq!(p2, p1 + p2);

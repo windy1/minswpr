@@ -121,7 +121,7 @@ impl Minswpr {
     fn make_components<'a>(
         fonts: &Rc<Fonts<'a>>,
         context: &Context,
-    ) -> Result<Vec<(&'static str, Option<RenderRef<'a>>)>, String> {
+    ) -> Result<Vec<(&'static str, RenderRef<'a>)>, String> {
         let config = context.config();
         let board = Box::new(RenderBoard::new(
             Rc::clone(fonts),
@@ -133,23 +133,23 @@ impl Minswpr {
         Ok(vec![
             (
                 "control",
-                Some(Box::new(
+                Box::new(
                     RenderControlBuilder::default()
                         .fonts(Rc::clone(&fonts))
                         .board_width(board_width)
                         .color(color!(blue))
                         .config(config.control.clone())
                         .build()?,
-                )),
+                ),
             ),
             (
                 "spacer",
-                Some(Box::new(RenderRect::new(
+                Box::new(RenderRect::new(
                     point!(board_width, config.control.spacer_height),
                     color!(red),
-                ))),
+                )),
             ),
-            ("board", Some(board)),
+            ("board", board),
         ])
     }
 }

@@ -21,9 +21,9 @@ impl<'a> Layout<'a> {
             .insert(key, Component::new(order, component));
     }
 
-    pub fn insert_all(&mut self, mut components: Vec<(&'static str, Option<RenderRef<'a>>)>) {
-        for (i, c) in components.iter_mut().enumerate() {
-            self.insert(c.0, i as i32, c.1.take().unwrap());
+    pub fn insert_all(&mut self, mut components: Vec<(&'static str, RenderRef<'a>)>) {
+        for (i, c) in components.drain(..).enumerate() {
+            self.insert(c.0, i as i32, c.1);
         }
     }
 

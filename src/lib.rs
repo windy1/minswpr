@@ -7,6 +7,8 @@ extern crate derive_new;
 
 #[macro_use]
 pub mod math;
+#[macro_use]
+pub mod render;
 
 mod app;
 pub mod board;
@@ -14,6 +16,5 @@ pub mod events;
 pub mod fonts;
 pub mod input;
 pub mod layout;
-pub mod render;
 
 pub use app::*;

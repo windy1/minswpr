@@ -1,5 +1,7 @@
+#[macro_use]
+mod colors;
+
 pub mod board;
-pub mod colors;
 pub mod control;
 
 use crate::math::{Dimen, Point};

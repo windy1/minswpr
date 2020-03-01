@@ -1,7 +1,6 @@
 use crate::board::CellFlags;
 use crate::fonts::Fonts;
 use crate::math::{Dimen, Point};
-use crate::render::colors;
 use crate::render::{Render, RenderRect};
 use crate::{BoardRef, CellConfig};
 use sdl2::pixels::Color;
@@ -76,7 +75,7 @@ impl<'a> RenderCell<'a> {
             .fonts
             .get("board.cell")?
             .render(&hint.to_string())
-            .blended(colors::GREEN)
+            .blended(color!(green))
             .map_err(|e| e.to_string())?;
 
         let texture = textures

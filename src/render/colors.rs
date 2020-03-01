@@ -1,7 +1,18 @@
-use sdl2::pixels::Color;
-
-pub const WHITE: Color = Color::RGB(255, 255, 255);
-pub const BLACK: Color = Color::RGB(0, 0, 0);
-pub const RED: Color = Color::RGB(255, 0, 0);
-pub const GREEN: Color = Color::RGB(0, 255, 0);
-pub const BLUE: Color = Color::RGB(0, 0, 255);
+#[allow(unused)]
+macro_rules! color {
+    (white) => {
+        :sdl2::pixels::Color::RGB(255, 255, 255)
+    };
+    (black) => {
+        ::sdl2::pixels::Color::RGB(0, 0, 0)
+    };
+    (red) => {
+        ::sdl2::pixels::Color::RGB(255, 0, 0)
+    };
+    (green) => {
+        ::sdl2::pixels::Color::RGB(0, 255, 0)
+    };
+    (blue) => {
+        ::sdl2::pixels::Color::RGB(0, 0, 255)
+    };
+}

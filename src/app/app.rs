@@ -5,7 +5,6 @@ use crate::fonts::Fonts;
 use crate::layout::Layout;
 use crate::math::{Dimen, Point};
 use crate::render::board::RenderBoard;
-use crate::render::colors;
 use crate::render::control::RenderControlBuilder;
 use crate::render::{Render, RenderMut, RenderRect};
 use sdl2::render::WindowCanvas;
@@ -56,7 +55,7 @@ impl Minswpr {
                 .config(self.config.clone())
                 .game_state(GameState::Ready)
                 .board(Self::make_board(bc.dimen, bc.mine_frequency)?)
-                .layout(Layout::new(10, colors::RED))
+                .layout(Layout::new(10, color!(red)))
                 .build()?
         };
 
@@ -141,7 +140,7 @@ impl Minswpr {
                     RenderControlBuilder::default()
                         .fonts(Rc::clone(&fonts))
                         .board_width(board_width)
-                        .color(colors::BLUE)
+                        .color(color!(blue))
                         .config(config.control.clone())
                         .build()?,
                 )),
@@ -150,7 +149,7 @@ impl Minswpr {
                 "spacer",
                 Some(Box::new(RenderRect::new(
                     point!(board_width, config.control.spacer_height),
-                    colors::RED,
+                    color!(red),
                 ))),
             ),
             ("board", Some(board)),

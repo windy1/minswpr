@@ -1,6 +1,7 @@
 #![macro_use]
 
 use serde::Deserialize;
+use std::iter;
 use std::ops;
 
 macro_rules! point {
@@ -17,9 +18,42 @@ pub struct Point<T: Copy = i32> {
     pub y: T,
 }
 
+impl<T: Copy> Into<RawPoint<T>> for Point<T> {
+    fn into(self) -> RawPoint<T> {
+        (self.x, self.y)
+    }
+}
+
+impl<T: Copy> From<RawPoint<T>> for Point<T> {
+    fn from(p: RawPoint<T>) -> Self {
+        point!(p.0, p.1)
+    }
+}
+
 impl Point<u32> {
     pub fn as_i32(&self) -> Point {
         point!(self.x as i32, self.y as i32)
+    }
+}
+
+impl<T> iter::Sum for Point<T>
+where
+    T: iter::Sum<T> + Copy + Default + ops::Add<Output = T>,
+{
+    fn sum<I>(iter: I) -> Self
+    where
+        I: iter::Iterator<Item = Self>,
+    {
+        iter.fold(
+            Point {
+                x: T::default(),
+                y: T::default(),
+            },
+            |a, b| Point {
+                x: a.x + b.x,
+                y: a.y + b.y,
+            },
+        )
     }
 }
 
@@ -175,5 +209,11 @@ mod tests {
         assert_eq!(p4, p2 + p3);
         assert_eq!(p2, p1 + r2);
         assert_eq!(p4, p2 + r3);
+    }
+
+    #[test]
+    fn test_point_sum() {
+        let p = vec![point!(1, 2), point!(3, 4), point!(5, 6)];
+        assert_eq!(point!(9, 12), p.iter().cloned().sum());
     }
 }

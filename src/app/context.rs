@@ -25,12 +25,16 @@ impl<'a> Context<'a> {
         &self.layout
     }
 
+    pub fn layout_mut(&mut self) -> &mut Layout<'a> {
+        &mut self.layout
+    }
+
     pub fn set_game_state(&mut self, game_state: GameState) {
         self.game_state = game_state
     }
 
     pub fn get_cell_at(&self, x: i32, y: i32, pos: &Point) -> Option<Point<u32>> {
-        let base_dimen = &self.layout.get("board").unwrap().dimen();
+        let base_dimen = &self.layout.get("board").unwrap().render().dimen();
         let min_x = pos.x;
         let min_y = pos.y;
         let max_x = min_x + base_dimen.width() as i32;

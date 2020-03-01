@@ -5,7 +5,9 @@ use crate::fonts::Fonts;
 use crate::layout::Layout;
 use crate::math::{Dimen, Point};
 use crate::render::board::RenderBoard;
-use crate::render::Render;
+use crate::render::colors;
+use crate::render::control::RenderControlBuilder;
+use crate::render::{Render, RenderMut};
 use sdl2::render::WindowCanvas;
 use sdl2::ttf::Sdl2TtfContext;
 use sdl2::{self, EventPump, Sdl, VideoSubsystem};
@@ -52,6 +54,7 @@ impl Minswpr {
 
     pub fn start(&mut self) -> Result<(), String> {
         let bc = &self.config.board;
+        let layout_pos = point!(10, 10);
 
         let mut fonts = Fonts::new(&self.ttf);
         fonts.load_from_config(&self.config.fonts)?;
@@ -59,13 +62,23 @@ impl Minswpr {
 
         let board = Self::make_board(bc.dimen, bc.mine_frequency)?;
 
-        let mut layout = Layout::new();
+        let mut layout = Layout::new(10, colors::RED);
+
         let board_render = RenderBoard::new(
             Rc::clone(&fonts),
             Rc::clone(&board),
             self.config.board.cells.clone(),
         );
-        layout.insert("board", 0, Box::new(board_render));
+
+        let control_render = RenderControlBuilder::default()
+            .fonts(Rc::clone(&fonts))
+            .board_width(board_render.dimen().width())
+            .color(colors::BLUE)
+            .config(self.config.control.clone())
+            .build()?;
+
+        layout.insert("control", 0, Box::new(control_render));
+        layout.insert("board", 1, Box::new(board_render));
 
         let mut ctx = ContextBuilder::default()
             .config(self.config.clone())
@@ -99,7 +112,7 @@ impl Minswpr {
             self.canvas.set_draw_color(self.config.window.bg_color);
             self.canvas.clear();
 
-            ctx.layout().render(&mut self.canvas, &point!(10, 10))?;
+            ctx.layout_mut().render(&mut self.canvas, &layout_pos)?;
 
             self.canvas.present();
 

@@ -7,6 +7,9 @@ bg_color = "#ffffff"
 # "board.cell" = { path = "/usr/share/fonts/truetype/ubuntu/Ubuntu-M.ttf", pt = 12 }
 "board.cell" = { path = "/Library/Fonts/Arial.ttf", pt = 12 }
 
+[control]
+height = 50
+
 [board]
 dimen = { x = 9, y = 9 }
 mine_frequency = 0.123

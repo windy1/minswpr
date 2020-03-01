@@ -61,7 +61,7 @@ impl<'a> Execute for MouseUp<'a> {
         let Point { x, y } = self.mouse_pos;
         println!("mouse_up = {:?}", point!(x, y));
 
-        let board_pos = point!(10, 10); // TODO: temporary
+        let board_pos = ctx.layout().get("board")?.pos();
 
         match ctx.get_cell_at(x, y, &board_pos) {
             Some(p) => match &self.mouse_btn {

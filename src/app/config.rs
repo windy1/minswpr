@@ -11,6 +11,7 @@ use std::path::{Path, PathBuf};
 pub struct Config {
     pub window: WindowConfig,
     pub fonts: HashMap<String, FontConfig>,
+    pub control: ControlConfig,
     pub board: BoardConfig,
 }
 
@@ -20,6 +21,11 @@ pub struct WindowConfig {
     pub dimen: Dimen,
     #[serde(deserialize_with = "read_color")]
     pub bg_color: Color,
+}
+
+#[derive(Deserialize, Clone)]
+pub struct ControlConfig {
+    pub height: u32,
 }
 
 #[derive(Deserialize, Clone)]

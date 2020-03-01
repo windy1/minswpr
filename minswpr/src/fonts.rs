@@ -15,8 +15,7 @@ pub struct Fonts<'ttf> {
 
 impl Fonts<'_> {
     pub fn load(&mut self, key: &str, fname: &Path, size: u16) -> Result<(), String> {
-        let font = self.ttf.load_font(fname, size)?;
-        self.font_map.insert(key.to_string(), font);
+        self.font_map.insert(key.to_string(), self.ttf.load_font(fname, size)?);
         Ok(())
     }
 

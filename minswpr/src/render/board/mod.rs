@@ -120,7 +120,7 @@ impl<'ttf> RenderBoard<'ttf> {
         RenderCellBuilder::default()
             .fonts(fonts)
             .board(Rc::clone(&self.board))
-            .board_pos(&point!(x, y))
+            .board_pos(point!(x, y))
             .config(&self.cell_config)
             .build()?
             .render(canvas, screen_pos)

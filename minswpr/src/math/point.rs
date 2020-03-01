@@ -1,8 +1,10 @@
 #![macro_use]
 
 use serde::Deserialize;
-use std::iter;
-use std::ops;
+use std::convert::TryInto;
+use std::iter::{Iterator, Sum};
+use std::num::TryFromIntError;
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 macro_rules! point {
     ($x:expr, $y: expr) => {
@@ -13,9 +15,50 @@ macro_rules! point {
 pub type RawPoint<T = i32> = (T, T);
 
 #[derive(new, Debug, Eq, PartialEq, Copy, Clone, Hash, Deserialize, Default)]
-pub struct Point<T: Copy = i32> {
+pub struct Point<T = i32>
+where
+    T: Copy,
+{
     pub x: T,
     pub y: T,
+}
+
+impl Point<u32> {
+    pub fn as_i32(self) -> Point {
+        self.into()
+    }
+}
+
+impl Point {
+    pub fn try_as_u32(self) -> Result<Point<u32>, TryFromIntError> {
+        self.try_into()
+    }
+}
+
+impl Into<Point> for Point<u32> {
+    fn into(self) -> Point {
+        point!(self.x as i32, self.y as i32)
+    }
+}
+
+impl Into<RawPoint> for Point<u32> {
+    fn into(self) -> RawPoint {
+        (self.into(): Point).into()
+    }
+}
+
+impl TryInto<Point<u32>> for Point<i32> {
+    type Error = TryFromIntError;
+    fn try_into(self) -> Result<Point<u32>, Self::Error> {
+        Ok(point!(self.x.try_into()?, self.y.try_into()?))
+    }
+}
+
+impl TryInto<RawPoint<u32>> for Point<i32> {
+    type Error = TryFromIntError;
+    fn try_into(self) -> Result<RawPoint<u32>, Self::Error> {
+        Ok((self.try_into()?: Point<u32>).into())
+    }
 }
 
 impl<T: Copy> Into<RawPoint<T>> for Point<T> {
@@ -30,19 +73,13 @@ impl<T: Copy> From<RawPoint<T>> for Point<T> {
     }
 }
 
-impl Point<u32> {
-    pub fn as_i32(&self) -> Point {
-        point!(self.x as i32, self.y as i32)
-    }
-}
-
-impl<T> iter::Sum for Point<T>
+impl<T> Sum for Point<T>
 where
-    T: iter::Sum<T> + Copy + Default + ops::Add<Output = T>,
+    T: Sum<T> + Copy + Default + Add<Output = T>,
 {
     fn sum<I>(iter: I) -> Self
     where
-        I: iter::Iterator<Item = Self>,
+        I: Iterator<Item = Self>,
     {
         iter.fold(
             Point {
@@ -57,117 +94,157 @@ where
     }
 }
 
-impl<T: ops::Add<Output = T> + Copy> ops::Add for Point<T> {
+impl<T> Add for Point<T>
+where
+    T: Add<Output = T> + Copy,
+{
     type Output = Self;
-
     fn add(self, rhs: Self) -> Self::Output {
         Self::new(self.x + rhs.x, self.y + rhs.y)
     }
 }
 
-impl<T: ops::Add<Output = T> + Copy> ops::Add<RawPoint<T>> for Point<T> {
+impl<T> Add<RawPoint<T>> for Point<T>
+where
+    T: Add<Output = T> + Copy,
+{
     type Output = Self;
-
     fn add(self, rhs: RawPoint<T>) -> Self::Output {
         self.add(Self::new(rhs.0, rhs.1))
     }
 }
 
-impl<T: ops::AddAssign + Copy> ops::AddAssign for Point<T> {
+impl<T> AddAssign for Point<T>
+where
+    T: AddAssign + Copy,
+{
     fn add_assign(&mut self, rhs: Self) {
         self.x += rhs.x;
         self.y += rhs.y;
     }
 }
 
-impl<T: ops::AddAssign + Copy> ops::AddAssign<RawPoint<T>> for Point<T> {
+impl<T> AddAssign<RawPoint<T>> for Point<T>
+where
+    T: AddAssign + Copy,
+{
     fn add_assign(&mut self, rhs: RawPoint<T>) {
         self.add_assign(Self::new(rhs.0, rhs.1))
     }
 }
 
-impl<T: ops::Sub<Output = T> + Copy> ops::Sub for Point<T> {
+impl<T> Sub for Point<T>
+where
+    T: Sub<Output = T> + Copy,
+{
     type Output = Self;
-
     fn sub(self, rhs: Self) -> Self::Output {
         Self::new(self.x - rhs.x, self.y - rhs.y)
     }
 }
 
-impl<T: ops::Sub<Output = T> + Copy> ops::Sub<RawPoint<T>> for Point<T> {
+impl<T> Sub<RawPoint<T>> for Point<T>
+where
+    T: Sub<Output = T> + Copy,
+{
     type Output = Self;
-
     fn sub(self, rhs: RawPoint<T>) -> Self::Output {
         self.sub(Self::new(rhs.0, rhs.1))
     }
 }
 
-impl<T: ops::SubAssign + Copy> ops::SubAssign for Point<T> {
+impl<T> SubAssign for Point<T>
+where
+    T: SubAssign + Copy,
+{
     fn sub_assign(&mut self, rhs: Self) {
         self.x -= rhs.x;
         self.y -= rhs.y;
     }
 }
 
-impl<T: ops::SubAssign + Copy> ops::SubAssign<RawPoint<T>> for Point<T> {
+impl<T> SubAssign<RawPoint<T>> for Point<T>
+where
+    T: SubAssign + Copy,
+{
     fn sub_assign(&mut self, rhs: RawPoint<T>) {
         self.sub_assign(Self::new(rhs.0, rhs.1))
     }
 }
 
-impl<T: ops::Mul<Output = T> + Copy> ops::Mul for Point<T> {
+impl<T> Mul for Point<T>
+where
+    T: Mul<Output = T> + Copy,
+{
     type Output = Self;
-
     fn mul(self, rhs: Self) -> Self::Output {
         Self::new(self.x * rhs.x, self.y * rhs.y)
     }
 }
 
-impl<T: ops::Mul<Output = T> + Copy> ops::Mul<RawPoint<T>> for Point<T> {
+impl<T> Mul<RawPoint<T>> for Point<T>
+where
+    T: Mul<Output = T> + Copy,
+{
     type Output = Self;
-
     fn mul(self, rhs: RawPoint<T>) -> Self::Output {
         self.mul(Self::new(rhs.0, rhs.1))
     }
 }
 
-impl<T: ops::MulAssign + Copy> ops::MulAssign for Point<T> {
+impl<T> MulAssign for Point<T>
+where
+    T: MulAssign + Copy,
+{
     fn mul_assign(&mut self, rhs: Self) {
         self.x *= rhs.x;
         self.y *= rhs.y;
     }
 }
 
-impl<T: ops::MulAssign + Copy> ops::MulAssign<RawPoint<T>> for Point<T> {
+impl<T> MulAssign<RawPoint<T>> for Point<T>
+where
+    T: MulAssign + Copy,
+{
     fn mul_assign(&mut self, rhs: RawPoint<T>) {
         self.mul_assign(Point::new(rhs.0, rhs.1))
     }
 }
 
-impl<T: ops::Div<Output = T> + Copy> ops::Div for Point<T> {
+impl<T> Div for Point<T>
+where
+    T: Div<Output = T> + Copy,
+{
     type Output = Self;
-
     fn div(self, rhs: Self) -> Self::Output {
         Point::new(self.x / rhs.x, self.y / rhs.y)
     }
 }
 
-impl<T: ops::Div<Output = T> + Copy> ops::Div<RawPoint<T>> for Point<T> {
+impl<T> Div<RawPoint<T>> for Point<T>
+where
+    T: Div<Output = T> + Copy,
+{
     type Output = Self;
-
     fn div(self, rhs: RawPoint<T>) -> Self::Output {
         self.div(Point::new(rhs.0, rhs.1))
     }
 }
 
-impl<T: ops::DivAssign + Copy> ops::DivAssign for Point<T> {
+impl<T> DivAssign for Point<T>
+where
+    T: DivAssign + Copy,
+{
     fn div_assign(&mut self, rhs: Self) {
         self.x /= rhs.x;
         self.y /= rhs.y;
     }
 }
 
-impl<T: ops::DivAssign + Copy> ops::DivAssign<RawPoint<T>> for Point<T> {
+impl<T> DivAssign<RawPoint<T>> for Point<T>
+where
+    T: DivAssign + Copy,
+{
     fn div_assign(&mut self, rhs: RawPoint<T>) {
         self.div_assign(Point::new(rhs.0, rhs.1))
     }
@@ -175,7 +252,10 @@ impl<T: ops::DivAssign + Copy> ops::DivAssign<RawPoint<T>> for Point<T> {
 
 pub type Dimen<T = u32> = Point<T>;
 
-impl<T: Copy> Dimen<T> {
+impl<T> Dimen<T>
+where
+    T: Copy,
+{
     pub fn width(&self) -> T {
         self.x
     }

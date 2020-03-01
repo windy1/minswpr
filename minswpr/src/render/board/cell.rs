@@ -11,7 +11,7 @@ use sdl2::render::WindowCanvas;
 pub(super) struct RenderCell<'a> {
     fonts: &'a Fonts<'a>,
     board: BoardRef,
-    board_pos: &'a Point<u32>,
+    board_pos: Point<u32>,
     config: &'a CellConfig,
 }
 

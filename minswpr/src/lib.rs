@@ -1,3 +1,5 @@
+#![feature(type_ascription)]
+
 #[macro_use]
 extern crate minswpr_derive;
 #[macro_use]

@@ -9,7 +9,7 @@ pub trait Execute {
 }
 
 pub trait Input {
-    fn context<'a>(&'a self) -> &'a Context;
+    fn context(&self) -> &Context;
 }
 
 #[derive(new, Input)]

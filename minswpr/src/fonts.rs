@@ -25,7 +25,7 @@ impl<'ttf> Fonts<'ttf> {
         Ok(())
     }
 
-    pub fn get(&self, key: &str) -> Result<&Font<'ttf, 'ttf>, String> {
+    pub fn get(&self, key: &str) -> Result<&Font, String> {
         self.font_map
             .get(key)
             .ok_or_else(|| format!("missing required font `{}`", key))

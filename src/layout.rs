@@ -1,7 +1,6 @@
 use crate::math::{Dimen, Point};
-use crate::render::{Render, RenderMut};
+use crate::render::{Render, RenderMut, RenderRect};
 use sdl2::pixels::Color;
-use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
 use std::cmp::Ordering;
 use std::collections::HashMap;
@@ -37,7 +36,7 @@ impl<'a> Layout<'a> {
 
 impl<'a> RenderMut for Layout<'a> {
     fn render(&mut self, canvas: &mut WindowCanvas, pos: &Point) -> Result<(), String> {
-        self.pad(canvas, pos)?;
+        RenderRect::new(self.dimen(), self.color).render(canvas, pos)?;
 
         let mut cur = *pos + point!(self.padding, self.padding).as_i32();
 
@@ -63,15 +62,6 @@ impl<'a> RenderMut for Layout<'a> {
         let width = values().map(|c| c.render.dimen().width()).max().unwrap();
         values().fold(point!(width, 0), |a, b| a + (0, b.render.dimen().height()))
             + (self.padding * 2, self.padding * 2)
-    }
-}
-
-impl<'a> Layout<'a> {
-    fn pad(&self, canvas: &mut WindowCanvas, pos: &Point) -> Result<(), String> {
-        canvas.set_draw_color(self.color);
-        let Dimen { x: w, y: h } = self.dimen();
-        canvas.fill_rect(Rect::new(pos.x, pos.y, w, h))?;
-        Ok(())
     }
 }
 

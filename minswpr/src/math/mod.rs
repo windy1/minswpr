@@ -6,6 +6,7 @@ use rand::distributions::uniform::{SampleBorrow, SampleUniform};
 use rand::Rng;
 use std::collections::HashSet;
 use std::hash::Hash;
+use std::num::ParseIntError;
 
 pub fn gen_rand_unique<T, B>(n: usize, lo: B, hi: B) -> Vec<T>
 where
@@ -21,8 +22,8 @@ where
     res.drain().collect()
 }
 
-pub fn hex_to_rgb(hex: &str) -> Result<(u8, u8, u8), String> {
-    let hex = u32::from_str_radix(hex, 16).map_err(|e| e.to_string())?;
+pub fn hex_to_rgb(hex: &str) -> Result<(u8, u8, u8), ParseIntError> {
+    let hex = u32::from_str_radix(hex, 16)?;
     Ok((
         ((hex >> 16) & 0xff) as u8,
         ((hex >> 8) & 0xff) as u8,
@@ -32,6 +33,8 @@ pub fn hex_to_rgb(hex: &str) -> Result<(u8, u8, u8), String> {
 
 #[cfg(test)]
 mod tests {
+    use std::num::ParseIntError;
+
     #[test]
     fn test_gen_rand_unique() {
         let res = super::gen_rand_unique(100, 0, 1000);
@@ -45,7 +48,7 @@ mod tests {
     }
 
     #[test]
-    fn test_hex_to_rgb() -> Result<(), String> {
+    fn test_hex_to_rgb() -> Result<(), ParseIntError> {
         assert_eq!((255, 0, 0), super::hex_to_rgb("ff0000")?);
         assert_eq!((0, 255, 0), super::hex_to_rgb("00ff00")?);
         assert_eq!((0, 0, 255), super::hex_to_rgb("0000ff")?);

@@ -1,25 +1,24 @@
-use crate::board::CellFlags;
+use crate::board::{Board, CellFlags};
 use crate::config::CellConfig;
 use crate::fonts::Fonts;
 use crate::math::{Dimen, Point};
 use crate::render::Render;
-use crate::BoardRef;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
 
-#[derive(Clone, Builder)]
+#[derive(Builder)]
 pub(super) struct RenderCell<'a> {
     fonts: &'a Fonts<'a>,
-    board: BoardRef,
+    board: &'a Board,
     board_pos: Point<u32>,
     config: &'a CellConfig,
 }
 
 impl Render for RenderCell<'_> {
     fn render(&self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
-        let b = self.board.borrow();
-        let cell = b.cell(self.board_pos.x, self.board_pos.y);
+        // let b = self.board.borrow();
+        let cell = self.board.cell(self.board_pos.x, self.board_pos.y);
         let config = &self.config;
         let mines = &config.mines;
         let flags = &config.flags;
@@ -33,7 +32,9 @@ impl Render for RenderCell<'_> {
             };
             render_rect!(self.config.dimen, fill_color, canvas, pos)?;
 
-            let adjacent_mines = b.count_adjacent_mines(self.board_pos.x, self.board_pos.y);
+            let adjacent_mines = self
+                .board
+                .count_adjacent_mines(self.board_pos.x, self.board_pos.y);
 
             if is_mine {
                 self.draw_centered_rect(canvas, pos, mines.dimen, mines.color)?;

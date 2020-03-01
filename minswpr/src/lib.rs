@@ -1,4 +1,6 @@
 #[macro_use]
+extern crate minswpr_derive;
+#[macro_use]
 extern crate bitflags;
 #[macro_use]
 extern crate derive_builder;

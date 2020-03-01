@@ -1,4 +1,4 @@
-use super::input::{Execute, KeyDown, MouseUpBuilder};
+use super::input::{Execute, KeyDown, MouseUp};
 use super::math::Point;
 use super::{Context, GameState};
 use sdl2::event::Event;
@@ -25,14 +25,9 @@ fn handle_mouse_up(
     x: i32,
     y: i32,
 ) -> Result<GameState, String> {
-    MouseUpBuilder::default()
-        .mouse_btn(mouse_btn)
-        .mouse_pos(Point::new(x, y))
-        .context(Some(context))
-        .build()?
-        .execute()
+    MouseUp::new(mouse_btn, point!(x, y), context).execute()
 }
 
 fn handle_key_down(context: &Context, keycode: Keycode) -> Result<GameState, String> {
-    KeyDown::new(keycode, *context.game_state()).execute()
+    KeyDown::new(keycode, context).execute()
 }

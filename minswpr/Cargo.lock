@@ -150,10 +150,19 @@ dependencies = [
  "derive-new",
  "derive_builder",
  "itertools",
+ "minswpr_derive",
  "rand",
  "sdl2",
  "serde",
  "toml",
+]
+
+[[package]]
+name = "minswpr_derive"
+version = "0.1.0"
+dependencies = [
+ "quote",
+ "syn",
 ]
 
 [[package]]

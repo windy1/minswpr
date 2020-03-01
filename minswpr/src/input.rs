@@ -8,37 +8,36 @@ pub trait Execute {
     fn execute(&self) -> Result<GameState, String>;
 }
 
-pub trait Input<'a> {
-    fn context() -> &'a Context<'a>;
+pub trait Input {
+    fn context<'a>(&'a self) -> &'a Context;
 }
 
-#[derive(Builder)]
+#[derive(new, Input)]
 pub struct MouseUp<'a> {
     mouse_btn: MouseButton,
     mouse_pos: Point,
-    context: Option<&'a Context<'a>>,
+    context: &'a Context<'a>,
 }
 
 impl<'a> MouseUp<'a> {
     fn left_click_cell(&self, Point { x, y }: Point<u32>) -> GameState {
-        let ctx = self.context.unwrap();
-        let mut board = ctx.board().borrow_mut();
+        let mut board = self.context.board().borrow_mut();
         let num_revealed = board.reveal_from(x, y);
         if num_revealed > 0 && board.cell(x, y).contains(CellFlags::MINE) {
             GameState::Over
         } else {
-            *ctx.game_state()
+            *self.context.game_state()
         }
     }
 
     fn right_click_cell(&self, Point { x, y }: Point<u32>) -> GameState {
-        let ctx = self.context.unwrap();
+        let ctx = self.context;
         ctx.board().borrow_mut().toggle_flag(x, y);
         *ctx.game_state()
     }
 
     fn middle_click_cell(&self, Point { x, y }: Point<u32>) -> GameState {
-        let ctx = self.context.unwrap();
+        let ctx = self.context;
         let mut board = ctx.board().borrow_mut();
         let mines_revealed = board
             .reveal_area(x, y)
@@ -55,7 +54,7 @@ impl<'a> MouseUp<'a> {
 
 impl<'a> Execute for MouseUp<'a> {
     fn execute(&self) -> Result<GameState, String> {
-        let ctx = self.context.unwrap();
+        let ctx = self.context;
         let game_state = ctx.game_state();
 
         if let GameState::Over = game_state {
@@ -79,28 +78,17 @@ impl<'a> Execute for MouseUp<'a> {
     }
 }
 
-impl<'a> Default for MouseUp<'a> {
-    fn default() -> Self {
-        Self {
-            mouse_btn: MouseButton::Unknown,
-            mouse_pos: point!(0, 0),
-            context: None,
-        }
-    }
-}
-
-#[derive(new)]
-pub struct KeyDown {
+#[derive(new, Input)]
+pub struct KeyDown<'a> {
     keycode: Keycode,
-    game_state: GameState,
+    context: &'a Context<'a>,
 }
 
-impl Execute for KeyDown {
+impl<'a> Execute for KeyDown<'a> {
     fn execute(&self) -> Result<GameState, String> {
-        let game_state = &self.game_state;
         match &self.keycode {
             Keycode::F2 => Ok(GameState::Reset),
-            _ => Ok(*game_state),
+            _ => Ok(*self.context.game_state()),
         }
     }
 }

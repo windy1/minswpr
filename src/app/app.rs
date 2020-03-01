@@ -1,4 +1,4 @@
-use super::{Config, ContextBuilder};
+use super::{Config, Context, ContextBuilder};
 use crate::board::Board;
 use crate::events;
 use crate::fonts::Fonts;
@@ -10,7 +10,7 @@ use crate::render::control::RenderControlBuilder;
 use crate::render::{Render, RenderMut, RenderRect};
 use sdl2::render::WindowCanvas;
 use sdl2::ttf::Sdl2TtfContext;
-use sdl2::{self, EventPump, Sdl, VideoSubsystem};
+use sdl2::{self, EventPump, VideoSubsystem};
 use std::cell::RefCell;
 use std::path::Path;
 use std::rc::Rc;
@@ -23,28 +23,21 @@ pub struct Minswpr {
     config: Config,
     event_pump: EventPump,
     ttf: Sdl2TtfContext,
-    canvas: WindowCanvas,
-    _sdl: Sdl,
-    _video: VideoSubsystem,
+    video: VideoSubsystem,
 }
 
 impl Minswpr {
     pub fn new(config: Config) -> Result<Self, String> {
-        let win = &config.window;
-
         let sdl = sdl2::init()?;
         let video = sdl.video()?;
         let event_pump = sdl.event_pump()?;
         let ttf = sdl2::ttf::init().map_err(|e| e.to_string())?;
-        let canvas = Self::make_canvas(&video, &win.title, win.dimen)?;
 
         Ok(Self {
             config,
             event_pump,
             ttf,
-            canvas,
-            _sdl: sdl,
-            _video: video,
+            video,
         })
     }
 
@@ -53,50 +46,30 @@ impl Minswpr {
     }
 
     pub fn start(&mut self) -> Result<(), String> {
-        let bc = &self.config.board;
-        let layout_pos = point!(10, 10);
-
         let mut fonts = Fonts::new(&self.ttf);
         fonts.load_from_config(&self.config.fonts)?;
         let fonts = Rc::new(fonts);
 
-        let board = Self::make_board(bc.dimen, bc.mine_frequency)?;
+        let mut ctx = {
+            let bc = &self.config.board;
+            ContextBuilder::default()
+                .config(self.config.clone())
+                .game_state(GameState::Ready)
+                .board(Self::make_board(bc.dimen, bc.mine_frequency)?)
+                .layout(Layout::new(10, colors::RED))
+                .build()?
+        };
 
-        let mut layout = Layout::new(10, colors::RED);
+        let components = Self::make_components(&fonts, &ctx)?;
+        ctx.layout_mut().insert_all(components);
 
-        let board_render = RenderBoard::new(
-            Rc::clone(&fonts),
-            Rc::clone(&board),
-            self.config.board.cells.clone(),
-        );
+        let mut canvas =
+            Self::make_canvas(&self.video, &self.config.window.title, ctx.layout().dimen())?;
 
-        let board_width = board_render.dimen().width();
+        let layout_pos = point!(0, 0);
 
-        let control_render = RenderControlBuilder::default()
-            .fonts(Rc::clone(&fonts))
-            .board_width(board_width)
-            .color(colors::BLUE)
-            .config(self.config.control.clone())
-            .build()?;
-
-        let spacer = RenderRect::new(
-            point!(board_width, self.config.control.spacer_height),
-            colors::RED,
-        );
-
-        layout.insert("control", 0, Box::new(control_render));
-        layout.insert("spacer", 1, Box::new(spacer));
-        layout.insert("board", 2, Box::new(board_render));
-
-        let mut ctx = ContextBuilder::default()
-            .config(self.config.clone())
-            .game_state(GameState::Ready)
-            .board(board)
-            .layout(layout)
-            .build()?;
-
-        self.canvas.clear();
-        self.canvas.present();
+        canvas.clear();
+        canvas.present();
 
         'main: loop {
             for event in self.event_pump.poll_iter() {
@@ -117,12 +90,12 @@ impl Minswpr {
 
             ctx.set_game_state(game_state);
 
-            self.canvas.set_draw_color(self.config.window.bg_color);
-            self.canvas.clear();
+            canvas.set_draw_color(self.config.window.bg_color);
+            canvas.clear();
 
-            ctx.layout_mut().render(&mut self.canvas, &layout_pos)?;
+            ctx.layout_mut().render(&mut canvas, &layout_pos)?;
 
-            self.canvas.present();
+            canvas.present();
 
             thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
         }
@@ -147,6 +120,41 @@ impl Minswpr {
 
     fn make_board(Dimen { x: w, y: h }: Dimen<usize>, mf: f64) -> Result<BoardRef, String> {
         Ok(Rc::new(RefCell::new(Board::new(w, h, mf)?)))
+    }
+
+    fn make_components<'ttf, 'a>(
+        fonts: &Rc<Fonts<'ttf>>,
+        context: &'a Context<'a>,
+    ) -> Result<Vec<(&'static str, Option<Box<dyn Render + 'ttf>>)>, String> {
+        let config = context.config();
+        let board = Box::new(RenderBoard::new(
+            Rc::clone(fonts),
+            Rc::clone(context.board()),
+            config.board.cells.clone(),
+        ));
+        let board_width = board.dimen().width();
+
+        Ok(vec![
+            (
+                "control",
+                Some(Box::new(
+                    RenderControlBuilder::default()
+                        .fonts(Rc::clone(&fonts))
+                        .board_width(board_width)
+                        .color(colors::BLUE)
+                        .config(config.control.clone())
+                        .build()?,
+                )),
+            ),
+            (
+                "spacer",
+                Some(Box::new(RenderRect::new(
+                    point!(board_width, config.control.spacer_height),
+                    colors::RED,
+                ))),
+            ),
+            ("board", Some(board)),
+        ])
     }
 }
 

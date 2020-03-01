@@ -17,6 +17,10 @@ impl<'a> Context<'a> {
         &self.game_state
     }
 
+    pub fn set_game_state(&mut self, game_state: GameState) {
+        self.game_state = game_state
+    }
+
     pub fn board(&self) -> &BoardRef {
         &self.board
     }
@@ -29,8 +33,8 @@ impl<'a> Context<'a> {
         &mut self.layout
     }
 
-    pub fn set_game_state(&mut self, game_state: GameState) {
-        self.game_state = game_state
+    pub fn config(&self) -> &Config {
+        &self.config
     }
 
     pub fn get_cell_at(&self, x: i32, y: i32, pos: &Point) -> Option<Point<u32>> {

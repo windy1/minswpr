@@ -6,6 +6,8 @@ use sdl2::render::WindowCanvas;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 
+type RenderRef<'a> = Box<dyn Render + 'a>;
+
 #[derive(new)]
 pub struct Layout<'a> {
     #[new(default)]
@@ -15,9 +17,15 @@ pub struct Layout<'a> {
 }
 
 impl<'a> Layout<'a> {
-    pub fn insert(&mut self, key: &'static str, order: i32, component: Box<dyn Render + 'a>) {
+    pub fn insert(&mut self, key: &'static str, order: i32, component: RenderRef<'a>) {
         self.components
             .insert(key, Component::new(order, component));
+    }
+
+    pub fn insert_all(&mut self, mut components: Vec<(&'static str, Option<RenderRef<'a>>)>) {
+        for (i, c) in components.iter_mut().enumerate() {
+            self.insert(c.0, i as i32, c.1.take().unwrap());
+        }
     }
 
     pub fn get(&self, key: &'static str) -> Result<&Component, String> {

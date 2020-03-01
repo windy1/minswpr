@@ -14,7 +14,7 @@ fn impl_input(ast: &DeriveInput) -> TokenStream {
     let generics = &ast.generics;
     let gen = quote! {
         impl #generics crate::input::Input for #name #generics {
-            fn context<'ctx>(&'ctx self) -> &crate::Context<'ctx> {
+            fn context(&self) -> &crate::Context {
                 &self.context
             }
         }

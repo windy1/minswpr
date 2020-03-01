@@ -8,6 +8,10 @@ pub trait Execute {
     fn execute(&self) -> Result<GameState, String>;
 }
 
+pub trait Input<'a> {
+    fn context() -> &'a Context<'a>;
+}
+
 #[derive(Builder)]
 pub struct MouseUp<'a> {
     mouse_btn: MouseButton,

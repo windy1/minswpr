@@ -7,10 +7,12 @@ use std::fmt;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+pub type FontsConfig = HashMap<String, FontConfig>;
+
 #[derive(Deserialize, Clone)]
 pub struct Config {
     pub window: WindowConfig,
-    pub fonts: HashMap<String, FontConfig>,
+    pub fonts: FontsConfig,
     pub control: ControlConfig,
     pub board: BoardConfig,
 }

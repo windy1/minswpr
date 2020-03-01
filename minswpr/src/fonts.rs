@@ -1,14 +1,16 @@
-use crate::config::FontConfig;
+use crate::config::FontsConfig;
 use sdl2::ttf::Font;
 use sdl2::ttf::Sdl2TtfContext;
 use std::collections::HashMap;
 use std::path::Path;
 
+type FontMap<'ttf> = HashMap<String, Font<'ttf, 'ttf>>;
+
 #[derive(new)]
 pub struct Fonts<'ttf> {
     ttf: &'ttf Sdl2TtfContext,
     #[new(default)]
-    font_map: HashMap<String, Font<'ttf, 'ttf>>,
+    font_map: FontMap<'ttf>,
 }
 
 impl Fonts<'_> {
@@ -18,7 +20,7 @@ impl Fonts<'_> {
         Ok(())
     }
 
-    pub fn load_from_config(&mut self, config: &HashMap<String, FontConfig>) -> Result<(), String> {
+    pub fn load_from_config(&mut self, config: &FontsConfig) -> Result<(), String> {
         for (k, f) in config {
             self.load(k, &f.path, f.pt)?;
         }

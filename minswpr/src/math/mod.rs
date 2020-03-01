@@ -1,11 +1,11 @@
 mod point;
 
+pub use self::point::*;
+
 use rand::distributions::uniform::{SampleBorrow, SampleUniform};
 use rand::Rng;
 use std::collections::HashSet;
 use std::hash::Hash;
-
-pub use self::point::*;
 
 pub fn gen_rand_unique<T, B>(n: usize, lo: B, hi: B) -> Vec<T>
 where

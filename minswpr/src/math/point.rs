@@ -1,13 +1,13 @@
 #![macro_use]
 
 use serde::Deserialize;
-use std::{convert::TryInto,
-          iter::{Iterator, Sum},
-          num::TryFromIntError,
-          ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign}};
+use std::convert::TryInto;
+use std::iter::{Iterator, Sum};
+use std::num::TryFromIntError;
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 macro_rules! point {
-    ($x:expr, $y:expr) => {
+    ($x:expr, $y: expr) => {
         Point::new($x, $y)
     };
 }
@@ -49,7 +49,6 @@ impl Into<RawPoint> for Point<u32> {
 
 impl TryInto<Point<u32>> for Point<i32> {
     type Error = TryFromIntError;
-
     fn try_into(self) -> Result<Point<u32>, Self::Error> {
         Ok(point!(self.x.try_into()?, self.y.try_into()?))
     }
@@ -57,7 +56,6 @@ impl TryInto<Point<u32>> for Point<i32> {
 
 impl TryInto<RawPoint<u32>> for Point<i32> {
     type Error = TryFromIntError;
-
     fn try_into(self) -> Result<RawPoint<u32>, Self::Error> {
         Ok((self.try_into()?: Point<u32>).into())
     }
@@ -101,7 +99,6 @@ where
     T: Add<Output = T> + Copy,
 {
     type Output = Self;
-
     fn add(self, rhs: Self) -> Self::Output {
         Self::new(self.x + rhs.x, self.y + rhs.y)
     }
@@ -112,7 +109,6 @@ where
     T: Add<Output = T> + Copy,
 {
     type Output = Self;
-
     fn add(self, rhs: RawPoint<T>) -> Self::Output {
         self.add(Self::new(rhs.0, rhs.1))
     }
@@ -142,7 +138,6 @@ where
     T: Sub<Output = T> + Copy,
 {
     type Output = Self;
-
     fn sub(self, rhs: Self) -> Self::Output {
         Self::new(self.x - rhs.x, self.y - rhs.y)
     }
@@ -153,7 +148,6 @@ where
     T: Sub<Output = T> + Copy,
 {
     type Output = Self;
-
     fn sub(self, rhs: RawPoint<T>) -> Self::Output {
         self.sub(Self::new(rhs.0, rhs.1))
     }
@@ -183,7 +177,6 @@ where
     T: Mul<Output = T> + Copy,
 {
     type Output = Self;
-
     fn mul(self, rhs: Self) -> Self::Output {
         Self::new(self.x * rhs.x, self.y * rhs.y)
     }
@@ -194,7 +187,6 @@ where
     T: Mul<Output = T> + Copy,
 {
     type Output = Self;
-
     fn mul(self, rhs: RawPoint<T>) -> Self::Output {
         self.mul(Self::new(rhs.0, rhs.1))
     }
@@ -224,7 +216,6 @@ where
     T: Div<Output = T> + Copy,
 {
     type Output = Self;
-
     fn div(self, rhs: Self) -> Self::Output {
         Point::new(self.x / rhs.x, self.y / rhs.y)
     }
@@ -235,7 +226,6 @@ where
     T: Div<Output = T> + Copy,
 {
     type Output = Self;
-
     fn div(self, rhs: RawPoint<T>) -> Self::Output {
         self.div(Point::new(rhs.0, rhs.1))
     }

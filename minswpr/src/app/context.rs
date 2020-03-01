@@ -1,14 +1,16 @@
 use super::{BoardRef, GameState};
-use crate::{config::Config, layout::Layout, math::Point};
+use crate::config::Config;
+use crate::layout::Layout;
+use crate::math::Point;
 use std::cmp;
 
 #[derive(Builder)]
 #[builder(pattern = "owned")]
 pub struct Context<'a> {
-    config:     Config,
+    config: Config,
     game_state: GameState,
-    board:      BoardRef,
-    layout:     Layout<'a>,
+    board: BoardRef,
+    layout: Layout<'a>,
 }
 
 impl<'a> Context<'a> {

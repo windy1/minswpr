@@ -5,7 +5,9 @@ pub mod board;
 pub mod control;
 
 use crate::math::{Dimen, Point};
-use sdl2::{pixels::Color, rect::Rect, render::WindowCanvas};
+use sdl2::pixels::Color;
+use sdl2::rect::Rect;
+use sdl2::render::WindowCanvas;
 
 pub trait Render {
     fn render(&self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String>;

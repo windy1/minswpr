@@ -1,7 +1,9 @@
-use super::{input::{Execute, KeyDown, MouseUp},
-            math::Point,
-            Context, GameState};
-use sdl2::{event::Event, keyboard::Keycode, mouse::MouseButton};
+use super::input::{Execute, KeyDown, MouseUp};
+use super::math::Point;
+use super::{Context, GameState};
+use sdl2::event::Event;
+use sdl2::keyboard::Keycode;
+use sdl2::mouse::MouseButton;
 
 pub fn handle_event(context: &Context, event: Event) -> Result<GameState, String> {
     match event {

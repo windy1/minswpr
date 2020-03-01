@@ -1,15 +1,16 @@
 use super::Render;
-use crate::{config::ControlConfig,
-            fonts::Fonts,
-            math::{Dimen, Point}};
-use sdl2::{pixels::Color, render::WindowCanvas};
+use crate::config::ControlConfig;
+use crate::fonts::Fonts;
+use crate::math::{Dimen, Point};
+use sdl2::pixels::Color;
+use sdl2::render::WindowCanvas;
 use std::rc::Rc;
 
 pub struct RenderControl<'ttf> {
     #[allow(dead_code)]
-    fonts:  Rc<Fonts<'ttf>>,
-    dimen:  Dimen,
-    color:  Color,
+    fonts: Rc<Fonts<'ttf>>,
+    dimen: Dimen,
+    color: Color,
     #[allow(dead_code)]
     config: ControlConfig,
 }
@@ -26,9 +27,9 @@ impl Render for RenderControl<'_> {
 
 #[derive(Default)]
 pub struct RenderControlBuilder<'ttf> {
-    fonts:  Option<Rc<Fonts<'ttf>>>,
-    dimen:  Dimen,
-    color:  Option<Color>,
+    fonts: Option<Rc<Fonts<'ttf>>>,
+    dimen: Dimen,
+    color: Option<Color>,
     config: Option<ControlConfig>,
 }
 
@@ -56,12 +57,12 @@ impl<'ttf> RenderControlBuilder<'ttf> {
 
     pub fn build(self) -> Result<RenderControl<'ttf>, String> {
         let r = RenderControl {
-            fonts:  match self.fonts {
+            fonts: match self.fonts {
                 Some(f) => f,
                 None => return Err("`fonts` must be initialized".to_string()),
             },
-            dimen:  self.dimen,
-            color:  match self.color {
+            dimen: self.dimen,
+            color: match self.color {
                 Some(c) => c,
                 None => return Err("`color` must be initialized".to_string()),
             },

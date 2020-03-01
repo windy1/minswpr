@@ -15,10 +15,10 @@ bitflags! {
 
 #[derive(Debug, Clone)]
 pub struct Board {
-    width:     usize,
-    height:    usize,
+    width: usize,
+    height: usize,
     num_mines: usize,
-    cells:     Vec<CellFlags>,
+    cells: Vec<CellFlags>,
 }
 
 impl Board {
@@ -132,8 +132,7 @@ impl Board {
 
         // this function only accepts cells that have at least 1 adjacent mine
         // and...
-        // the player must have flagged an amount of cells equal to the amount of
-        // adjacent mines
+        // the player must have flagged an amount of cells equal to the amount of adjacent mines
         if num_mines == 0 || num_flags != num_mines {
             return Vec::default();
         }

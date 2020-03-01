@@ -1,16 +1,18 @@
-use crate::{board::{Board, CellFlags},
-            config::CellConfig,
-            fonts::Fonts,
-            math::{Dimen, Point},
-            render::Render};
-use sdl2::{pixels::Color, rect::Rect, render::WindowCanvas};
+use crate::board::{Board, CellFlags};
+use crate::config::CellConfig;
+use crate::fonts::Fonts;
+use crate::math::{Dimen, Point};
+use crate::render::Render;
+use sdl2::pixels::Color;
+use sdl2::rect::Rect;
+use sdl2::render::WindowCanvas;
 
 #[derive(Builder)]
 pub(super) struct RenderCell<'a> {
-    fonts:     &'a Fonts<'a>,
-    board:     &'a Board,
+    fonts: &'a Fonts<'a>,
+    board: &'a Board,
     board_pos: Point<u32>,
-    config:    &'a CellConfig,
+    config: &'a CellConfig,
 }
 
 impl Render for RenderCell<'_> {

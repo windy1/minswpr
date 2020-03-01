@@ -5,7 +5,7 @@ use sdl2::render::WindowCanvas;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 
-type RenderRef<'a> = Box<dyn Render + 'a>;
+pub type RenderRef<'a> = Box<dyn Render + 'a>;
 
 #[derive(new)]
 pub struct Layout<'a> {

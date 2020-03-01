@@ -1,4 +1,4 @@
-use crate::FontConfig;
+use crate::config::FontConfig;
 use sdl2::ttf::Font;
 use sdl2::ttf::Sdl2TtfContext;
 use std::collections::HashMap;

@@ -1,7 +1,7 @@
 use super::{Render, RenderRect};
+use crate::config::ControlConfig;
 use crate::fonts::Fonts;
 use crate::math::{Dimen, Point};
-use crate::ControlConfig;
 use sdl2::pixels::Color;
 use sdl2::render::WindowCanvas;
 use std::rc::Rc;

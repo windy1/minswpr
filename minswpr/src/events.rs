@@ -13,9 +13,9 @@ pub fn handle_event(context: &Context, event: Event) -> Result<GameState, String
         } => self::handle_mouse_up(context, mouse_btn, x, y),
         Event::KeyDown { keycode, .. } => match keycode {
             Some(k) => self::handle_key_down(context, k),
-            None => Ok(*context.game_state()),
+            None => Ok(context.game_state()),
         },
-        _ => Ok(*context.game_state()),
+        _ => Ok(context.game_state()),
     }
 }
 

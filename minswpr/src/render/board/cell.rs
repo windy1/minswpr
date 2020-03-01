@@ -1,8 +1,9 @@
 use crate::board::CellFlags;
+use crate::config::CellConfig;
 use crate::fonts::Fonts;
 use crate::math::{Dimen, Point};
 use crate::render::{Render, RenderRect};
-use crate::{BoardRef, CellConfig};
+use crate::BoardRef;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;

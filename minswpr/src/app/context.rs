@@ -1,4 +1,5 @@
-use super::{BoardRef, Config, GameState};
+use super::{BoardRef, GameState};
+use crate::config::Config;
 use crate::layout::Layout;
 use crate::math::Point;
 use std::cmp;
@@ -13,8 +14,8 @@ pub struct Context<'a> {
 }
 
 impl<'a> Context<'a> {
-    pub fn game_state(&self) -> &GameState {
-        &self.game_state
+    pub fn game_state(&self) -> GameState {
+        self.game_state
     }
 
     pub fn set_game_state(&mut self, game_state: GameState) {
@@ -37,7 +38,7 @@ impl<'a> Context<'a> {
         &self.config
     }
 
-    pub fn get_cell_at(&self, x: i32, y: i32, pos: &Point) -> Option<Point<u32>> {
+    pub fn get_cell_at(&self, x: i32, y: i32, pos: Point) -> Option<Point<u32>> {
         let base_dimen = &self.layout.get("board").unwrap().render().dimen();
         let min_x = pos.x;
         let min_y = pos.y;
@@ -54,7 +55,7 @@ impl<'a> Context<'a> {
         let board = self.board.borrow();
         let screen_pos = point!(x, y);
 
-        let mut c = (screen_pos - *pos) / (*cell_dimen + (border_width, border_width));
+        let mut c = (screen_pos - pos) / (*cell_dimen + (border_width, border_width));
         c.x = cmp::min(c.x, board.width() as i32 - 1);
         c.y = cmp::min(c.y, board.height() as i32 - 1);
 

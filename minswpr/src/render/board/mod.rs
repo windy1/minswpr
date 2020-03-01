@@ -2,9 +2,10 @@ mod cell;
 
 use self::cell::RenderCellBuilder;
 use super::{Render, RenderRect};
+use crate::config::CellConfig;
 use crate::fonts::Fonts;
 use crate::math::{Dimen, Point};
-use crate::{BoardRef, CellConfig};
+use crate::BoardRef;
 use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
 use std::rc::Rc;

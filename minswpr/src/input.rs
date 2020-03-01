@@ -1,6 +1,6 @@
 use super::board::CellFlags;
 use super::math::Point;
-use super::{Context, GameState};
+use crate::{Context, GameState};
 use sdl2::keyboard::Keycode;
 use sdl2::mouse::MouseButton;
 
@@ -26,14 +26,14 @@ impl<'a> MouseUp<'a> {
         if num_revealed > 0 && board.cell(x, y).contains(CellFlags::MINE) {
             GameState::Over
         } else {
-            *self.context.game_state()
+            self.context.game_state()
         }
     }
 
     fn right_click_cell(&self, Point { x, y }: Point<u32>) -> GameState {
         let ctx = self.context;
         ctx.board().borrow_mut().toggle_flag(x, y);
-        *ctx.game_state()
+        ctx.game_state()
     }
 
     fn middle_click_cell(&self, Point { x, y }: Point<u32>) -> GameState {
@@ -47,7 +47,7 @@ impl<'a> MouseUp<'a> {
         if mines_revealed > 0 {
             GameState::Over
         } else {
-            *ctx.game_state()
+            ctx.game_state()
         }
     }
 }
@@ -58,7 +58,7 @@ impl<'a> Execute for MouseUp<'a> {
         let game_state = ctx.game_state();
 
         if let GameState::Over = game_state {
-            return Ok(*game_state);
+            return Ok(game_state);
         }
 
         let Point { x, y } = self.mouse_pos;
@@ -66,14 +66,14 @@ impl<'a> Execute for MouseUp<'a> {
 
         let board_pos = ctx.layout().get("board")?.pos();
 
-        match ctx.get_cell_at(x, y, &board_pos) {
+        match ctx.get_cell_at(x, y, *board_pos) {
             Some(p) => match &self.mouse_btn {
                 MouseButton::Left => Ok(self.left_click_cell(p)),
                 MouseButton::Right => Ok(self.right_click_cell(p)),
                 MouseButton::Middle => Ok(self.middle_click_cell(p)),
-                _ => Ok(*game_state),
+                _ => Ok(game_state),
             },
-            None => Ok(*game_state),
+            None => Ok(game_state),
         }
     }
 }
@@ -88,7 +88,7 @@ impl<'a> Execute for KeyDown<'a> {
     fn execute(&self) -> Result<GameState, String> {
         match &self.keycode {
             Keycode::F2 => Ok(GameState::Reset),
-            _ => Ok(*self.context.game_state()),
+            _ => Ok(self.context.game_state()),
         }
     }
 }

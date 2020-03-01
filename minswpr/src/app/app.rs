@@ -41,7 +41,9 @@ impl Minswpr {
     }
 
     pub fn from_config<P: AsRef<Path>>(fname: P) -> Result<Self, String> {
-        Self::new(super::read_config(fname)?)
+        let config = super::read_config(fname)
+            .map_err(|e| format!("could not load configuration file: `{}`", e))?;
+        Self::new(config)
     }
 
     pub fn start(&mut self) -> Result<(), String> {

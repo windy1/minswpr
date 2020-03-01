@@ -7,7 +7,7 @@ use crate::math::{Dimen, Point};
 use crate::render::board::RenderBoard;
 use crate::render::colors;
 use crate::render::control::RenderControlBuilder;
-use crate::render::{Render, RenderMut};
+use crate::render::{Render, RenderMut, RenderRect};
 use sdl2::render::WindowCanvas;
 use sdl2::ttf::Sdl2TtfContext;
 use sdl2::{self, EventPump, Sdl, VideoSubsystem};
@@ -70,15 +70,23 @@ impl Minswpr {
             self.config.board.cells.clone(),
         );
 
+        let board_width = board_render.dimen().width();
+
         let control_render = RenderControlBuilder::default()
             .fonts(Rc::clone(&fonts))
-            .board_width(board_render.dimen().width())
+            .board_width(board_width)
             .color(colors::BLUE)
             .config(self.config.control.clone())
             .build()?;
 
+        let spacer = RenderRect::new(
+            point!(board_width, self.config.control.spacer_height),
+            colors::RED,
+        );
+
         layout.insert("control", 0, Box::new(control_render));
-        layout.insert("board", 1, Box::new(board_render));
+        layout.insert("spacer", 1, Box::new(spacer));
+        layout.insert("board", 2, Box::new(board_render));
 
         let mut ctx = ContextBuilder::default()
             .config(self.config.clone())

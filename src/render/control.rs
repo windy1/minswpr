@@ -1,9 +1,8 @@
-use super::Render;
+use super::{Render, RenderRect};
 use crate::fonts::Fonts;
 use crate::math::{Dimen, Point};
 use crate::ControlConfig;
 use sdl2::pixels::Color;
-use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
 use std::rc::Rc;
 
@@ -18,23 +17,11 @@ pub struct RenderControl<'ttf> {
 
 impl<'ttf> Render for RenderControl<'ttf> {
     fn render(&self, canvas: &mut WindowCanvas, pos: &Point) -> Result<(), String> {
-        self.draw_base(canvas, pos)
+        RenderRect::new(self.dimen, self.color).render(canvas, pos)
     }
 
     fn dimen(&self) -> Dimen {
         self.dimen
-    }
-}
-
-impl<'ttf> RenderControl<'ttf> {
-    fn draw_base(&self, canvas: &mut WindowCanvas, pos: &Point) -> Result<(), String> {
-        canvas.set_draw_color(self.color);
-        canvas.fill_rect(Rect::new(
-            pos.x,
-            pos.y,
-            self.dimen.width(),
-            self.dimen.height(),
-        ))
     }
 }
 

@@ -9,6 +9,7 @@ bg_color = "#ffffff"
 
 [control]
 height = 50
+spacer_height = 10
 
 [board]
 dimen = { x = 9, y = 9 }

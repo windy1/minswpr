@@ -26,6 +26,7 @@ pub struct WindowConfig {
 #[derive(Deserialize, Clone)]
 pub struct ControlConfig {
     pub height: u32,
+    pub spacer_height: u32,
 }
 
 #[derive(Deserialize, Clone)]

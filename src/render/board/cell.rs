@@ -2,7 +2,7 @@ use crate::board::CellFlags;
 use crate::fonts::Fonts;
 use crate::math::{Dimen, Point};
 use crate::render::colors;
-use crate::render::Render;
+use crate::render::{Render, RenderRect};
 use crate::{BoardRef, CellConfig};
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
@@ -54,14 +54,7 @@ impl<'a> Render for RenderCell<'a> {
 
 impl<'a> RenderCell<'a> {
     fn fill(&self, canvas: &mut WindowCanvas, pos: &Point, color: &Color) -> Result<(), String> {
-        let cell_dimen = &self.config.dimen;
-        canvas.set_draw_color(*color);
-        canvas.fill_rect(Rect::new(
-            pos.x,
-            pos.y,
-            cell_dimen.width(),
-            cell_dimen.height(),
-        ))
+        RenderRect::new(self.config.dimen, *color).render(canvas, pos)
     }
 
     fn draw_centered_rect(
@@ -72,16 +65,8 @@ impl<'a> RenderCell<'a> {
         color: &Color,
     ) -> Result<(), String> {
         let cell_dimen = self.config.dimen.as_i32();
-        let dimen = dimen.as_i32();
-        let pos = *pos + cell_dimen / (2, 2) - dimen / (2, 2);
-
-        canvas.set_draw_color(*color);
-        canvas.fill_rect(Rect::new(
-            pos.x,
-            pos.y,
-            dimen.width() as u32,
-            dimen.height() as u32,
-        ))
+        let pos = *pos + cell_dimen / (2, 2) - dimen.as_i32() / (2, 2);
+        RenderRect::new(*dimen, *color).render(canvas, &pos)
     }
 
     fn draw_hint(&self, canvas: &mut WindowCanvas, pos: &Point, hint: usize) -> Result<(), String> {

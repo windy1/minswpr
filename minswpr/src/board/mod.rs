@@ -89,12 +89,11 @@ impl Board {
         // make sure the cell hasn't been previously revealed
         // or..
         // make sure the cell isn't flagged
-        let cell = self
+        let cell = match self
             .get_cell_mut(x, y)
             .filter(|c| !c.contains(CellFlags::REVEALED))
-            .filter(|c| !c.contains(CellFlags::FLAG));
-
-        let cell = match cell {
+            .filter(|c| !c.contains(CellFlags::FLAG))
+        {
             Some(c) => c,
             None => return,
         };

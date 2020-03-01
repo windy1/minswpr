@@ -78,8 +78,8 @@ impl<'a> Component<'a> {
         &self.pos
     }
 
-    pub fn render(&self) -> &Box<dyn Render + 'a> {
-        &self.render
+    pub fn render(&self) -> &(dyn Render + 'a) {
+        &*self.render
     }
 }
 

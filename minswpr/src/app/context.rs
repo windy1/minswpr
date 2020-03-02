@@ -1,6 +1,6 @@
 use super::{BoardRef, GameState};
 use crate::config::Config;
-use crate::layout::Layout;
+use crate::layout::{Layout, LayoutBase};
 use crate::math::Point;
 use std::cmp;
 
@@ -10,7 +10,7 @@ pub struct Context<'a> {
     config: Config,
     game_state: GameState,
     board: BoardRef,
-    layout: Layout<'a>,
+    layout: LayoutBase<'a>,
 }
 
 impl<'a> Context<'a> {
@@ -26,11 +26,11 @@ impl<'a> Context<'a> {
         &self.board
     }
 
-    pub fn layout(&self) -> &Layout {
+    pub fn layout(&self) -> &LayoutBase {
         &self.layout
     }
 
-    pub fn layout_mut(&mut self) -> &mut Layout<'a> {
+    pub fn layout_mut(&mut self) -> &mut LayoutBase<'a> {
         &mut self.layout
     }
 

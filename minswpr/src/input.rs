@@ -1,5 +1,6 @@
 use super::board::CellFlags;
 use super::math::Point;
+use crate::layout::Layout;
 use crate::{Context, GameState};
 use sdl2::keyboard::Keycode;
 use sdl2::mouse::MouseButton;

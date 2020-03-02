@@ -7,7 +7,7 @@ use crate::board::Board;
 use crate::config::{self, Config};
 use crate::events;
 use crate::fonts::Fonts;
-use crate::layout::{Layout, RenderRef};
+use crate::layout::{Layout, LayoutBase, RenderRef};
 use crate::math::{Dimen, Point};
 use crate::render::board::RenderBoard;
 use crate::render::control::RenderControl;
@@ -56,7 +56,7 @@ impl Minswpr {
                 .config(self.config.clone())
                 .game_state(GameState::Ready)
                 .board(Self::make_board(bc.dimen, bc.mine_frequency)?)
-                .layout(Layout::new(self.config.layout.clone()))
+                .layout(LayoutBase::new(self.config.layout.clone()))
                 .build()?
         };
 

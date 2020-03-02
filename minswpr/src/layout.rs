@@ -6,34 +6,49 @@ use std::cmp::Ordering;
 use std::collections::HashMap;
 
 pub type RenderRef<'a> = Box<dyn Render + 'a>;
+pub type ComponentMap<'a> = HashMap<&'static str, Component<'a>>;
 
-#[derive(new)]
-pub struct Layout<'a> {
-    #[new(default)]
-    components: HashMap<&'static str, Component<'a>>,
-    config: LayoutConfig,
-}
+pub trait Layout<'a> {
+    fn components(&self) -> &ComponentMap;
 
-impl<'a> Layout<'a> {
-    pub fn insert(&mut self, key: &'static str, order: i32, component: RenderRef<'a>) {
-        self.components
+    fn components_mut(&mut self) -> &mut ComponentMap<'a>;
+
+    fn insert(&mut self, key: &'static str, order: i32, component: RenderRef<'a>) {
+        self.components_mut()
             .insert(key, Component::new(order, component));
     }
 
-    pub fn insert_all(&mut self, mut components: Vec<(&'static str, RenderRef<'a>)>) {
+    fn insert_all(&mut self, mut components: Vec<(&'static str, RenderRef<'a>)>) {
         for (i, c) in components.drain(..).enumerate() {
             self.insert(c.0, i as i32, c.1);
         }
     }
 
-    pub fn get(&self, key: &'static str) -> Result<&Component, String> {
-        self.components
+    fn get(&self, key: &'static str) -> Result<&Component, String> {
+        self.components()
             .get(key)
             .ok_or_else(|| format!("missing required layout component `{}`", key))
     }
 }
 
-impl RenderMut for Layout<'_> {
+#[derive(new)]
+pub struct LayoutBase<'a> {
+    #[new(default)]
+    components: ComponentMap<'a>,
+    config: LayoutConfig,
+}
+
+impl<'a> Layout<'a> for LayoutBase<'a> {
+    fn components(&self) -> &ComponentMap {
+        &self.components
+    }
+
+    fn components_mut(&mut self) -> &mut ComponentMap<'a> {
+        &mut self.components
+    }
+}
+
+impl RenderMut for LayoutBase<'_> {
     fn render(&mut self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
         let c = &self.config;
         render_rect!(self.dimen(), c.color, canvas, pos)?;

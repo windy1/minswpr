@@ -1,14 +1,17 @@
 use super::Render;
 use crate::config::ControlConfig;
 use crate::fonts::Fonts;
+use crate::layout::ComponentMap;
 use crate::math::{Dimen, Point};
 use sdl2::render::WindowCanvas;
 use std::rc::Rc;
 
-pub struct RenderControl<'ttf> {
+#[derive(Layout)]
+pub struct RenderControl<'a> {
     #[allow(dead_code)]
-    fonts: Rc<Fonts<'ttf>>,
+    fonts: Rc<Fonts<'a>>,
     dimen: Dimen,
+    components: ComponentMap<'a>,
     #[allow(dead_code)]
     config: ControlConfig,
 }
@@ -29,6 +32,7 @@ impl<'ttf> RenderControl<'ttf> {
         Self {
             fonts,
             dimen,
+            components: Default::default(),
             config,
         }
     }

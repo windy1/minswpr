@@ -31,21 +31,11 @@ pub trait Layout<'a> {
     }
 }
 
-#[derive(new)]
+#[derive(new, Layout)]
 pub struct LayoutBase<'a> {
     #[new(default)]
     components: ComponentMap<'a>,
     config: LayoutConfig,
-}
-
-impl<'a> Layout<'a> for LayoutBase<'a> {
-    fn components(&self) -> &ComponentMap {
-        &self.components
-    }
-
-    fn components_mut(&mut self) -> &mut ComponentMap<'a> {
-        &mut self.components
-    }
 }
 
 impl Render for LayoutBase<'_> {

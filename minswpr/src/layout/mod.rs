@@ -32,7 +32,7 @@ pub trait Layout<'a> {
 
     fn insert(&mut self, key: &'static str, order: i32, component: RenderRef<'a>) {
         self.components_mut()
-            .insert(key, Component::new(order, component));
+            .insert(key, Component::new(key, order, component));
     }
 
     fn insert_all(&mut self, mut components: Vec<(&'static str, RenderRef<'a>)>) {
@@ -45,6 +45,21 @@ pub trait Layout<'a> {
         self.components()
             .get(key)
             .ok_or_else(|| format!("missing required layout component `{}`", key))
+    }
+
+    fn get_at(&self, x: i32, y: i32) -> Option<&Component> {
+        for component in self.components().values() {
+            let Point { x: min_x, y: min_y } = component.pos;
+            let cd = component.render.dimen();
+            let max_x = min_x + cd.width() as i32;
+            let max_y = min_y + cd.height() as i32;
+
+            if x >= min_x && x <= max_x && y >= min_y && y <= max_y {
+                return Some(component);
+            }
+        }
+
+        None
     }
 }
 
@@ -105,6 +120,7 @@ impl Default for Orientation {
 
 #[derive(new)]
 pub struct Component<'a> {
+    id: &'static str,
     order: i32,
     render: Box<dyn Render + 'a>,
     #[new(default)]
@@ -112,11 +128,15 @@ pub struct Component<'a> {
 }
 
 impl<'a> Component<'a> {
+    pub fn id(&self) -> &'static str {
+        self.id
+    }
+
     pub fn pos(&self) -> &Point {
         &self.pos
     }
 
-    pub fn render(&self) -> &(dyn Render + 'a) {
+    pub fn render(&self) -> &dyn Render {
         &*self.render
     }
 }

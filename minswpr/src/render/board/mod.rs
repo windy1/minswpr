@@ -11,27 +11,15 @@ use sdl2::render::WindowCanvas;
 use std::rc::Rc;
 
 #[derive(Clone)]
-pub struct RenderBoard<'ttf> {
-    fonts: Rc<Fonts<'ttf>>,
+pub struct RenderBoard<'a> {
+    fonts: Rc<Fonts<'a>>,
     board: BoardRef,
     dimen: Dimen,
     cell_config: CellConfig,
 }
 
-impl Render for RenderBoard<'_> {
-    fn render(&mut self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
-        render_rect!(self.dimen, self.cell_config.color, canvas, pos)?;
-        self.draw_cell_borders(canvas, pos)?;
-        self.draw_cells(canvas, pos)
-    }
-
-    fn dimen(&self) -> Dimen {
-        self.dimen
-    }
-}
-
-impl<'ttf> RenderBoard<'ttf> {
-    pub fn new(fonts: Rc<Fonts<'ttf>>, board: BoardRef, cell_config: CellConfig) -> Self {
+impl<'a> RenderBoard<'a> {
+    pub fn new(fonts: Rc<Fonts<'a>>, board: BoardRef, cell_config: CellConfig) -> Self {
         let cell_dimen = cell_config.dimen.as_i32();
         let border_width = cell_config.border_width as i32;
 
@@ -52,7 +40,21 @@ impl<'ttf> RenderBoard<'ttf> {
             dimen,
         }
     }
+}
 
+impl Render for RenderBoard<'_> {
+    fn render(&mut self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
+        render_rect!(self.dimen, self.cell_config.color, canvas, pos)?;
+        self.draw_cell_borders(canvas, pos)?;
+        self.draw_cells(canvas, pos)
+    }
+
+    fn dimen(&self) -> Dimen {
+        self.dimen
+    }
+}
+
+impl<'a> RenderBoard<'a> {
     fn draw_cell_borders(&self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
         canvas.set_draw_color(self.cell_config.border_color);
 

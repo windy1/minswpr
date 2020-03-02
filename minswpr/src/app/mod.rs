@@ -7,7 +7,7 @@ use crate::board::Board;
 use crate::config::{self, Config};
 use crate::events;
 use crate::fonts::Fonts;
-use crate::layout::{Layout, LayoutBase, RenderRef};
+use crate::layout::{Layout, LayoutBase};
 use crate::math::{Dimen, Point};
 use crate::render::board::RenderBoard;
 use crate::render::control::RenderControl;
@@ -42,13 +42,13 @@ impl Minswpr {
     }
 
     pub fn start(&mut self) -> Result<(), String> {
+        let win = &self.config.window;
+
         let fonts = {
             let mut f = Fonts::new(&self.ttf);
             f.load_from_config(&self.config.fonts)?;
             Rc::new(f)
         };
-
-        let win = &self.config.window;
 
         let mut ctx = {
             let bc = &self.config.board;
@@ -124,17 +124,15 @@ impl Minswpr {
     fn make_components<'a>(
         fonts: &Rc<Fonts<'a>>,
         context: &Context,
-    ) -> Result<Vec<(&'static str, RenderRef<'a>)>, String> {
+    ) -> Result<Vec<(&'static str, Box<dyn Render + 'a>)>, String> {
         let config = context.config();
         let cc = &config.control;
-
         let board = Box::new(RenderBoard::new(
             Rc::clone(fonts),
             Rc::clone(context.board()),
             config.board.cells.clone(),
         ));
         let board_width = board.dimen().width();
-
         Ok(vec![
             (
                 "control",

@@ -17,10 +17,32 @@ pub trait Input {
 pub struct MouseUp<'a> {
     mouse_btn: MouseButton,
     mouse_pos: Point,
+    // context: &'a Context<'a>,
     context: &'a Context<'a>,
 }
 
 impl MouseUp<'_> {
+    fn click_cell(&self, x: i32, y: i32) -> GameState {
+        let ctx = self.context;
+        let game_state = ctx.game_state();
+
+        if let GameState::Over = game_state {
+            return game_state;
+        }
+
+        let board_pos = ctx.layout().get("board").unwrap().pos();
+
+        match ctx.get_cell_at(x, y, *board_pos) {
+            Some(p) => match &self.mouse_btn {
+                MouseButton::Left => self.left_click_cell(p),
+                MouseButton::Right => self.right_click_cell(p),
+                MouseButton::Middle => self.middle_click_cell(p),
+                _ => game_state,
+            },
+            None => game_state,
+        }
+    }
+
     fn left_click_cell(&self, Point { x, y }: Point<u32>) -> GameState {
         let mut board = self.context.board().borrow_mut();
         let num_revealed = board.reveal_from(x, y);
@@ -57,21 +79,14 @@ impl Execute for MouseUp<'_> {
     fn execute(&self) -> Result<GameState, String> {
         let ctx = self.context;
         let game_state = ctx.game_state();
-
-        if let GameState::Over = game_state {
-            return Ok(game_state);
-        }
-
         let Point { x, y } = self.mouse_pos;
+
         println!("mouse_up = {:?}", point!(x, y));
 
-        let board_pos = ctx.layout().get("board")?.pos();
-
-        match ctx.get_cell_at(x, y, *board_pos) {
-            Some(p) => match &self.mouse_btn {
-                MouseButton::Left => Ok(self.left_click_cell(p)),
-                MouseButton::Right => Ok(self.right_click_cell(p)),
-                MouseButton::Middle => Ok(self.middle_click_cell(p)),
+        match ctx.layout().get_at(x, y) {
+            Some(c) => match c.id() {
+                "board" => Ok(self.click_cell(x, y)),
+                "control" => Ok(game_state),
                 _ => Ok(game_state),
             },
             None => Ok(game_state),

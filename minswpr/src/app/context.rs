@@ -1,6 +1,6 @@
 use super::{BoardRef, GameState};
 use crate::config::Config;
-use crate::layout::{Layout, LayoutBase};
+use crate::layout::LayoutBase;
 use crate::math::Point;
 use std::cmp;
 
@@ -39,16 +39,6 @@ impl<'a> Context<'a> {
     }
 
     pub fn get_cell_at(&self, x: i32, y: i32, pos: Point) -> Option<Point<u32>> {
-        let base_dimen = &self.layout.get("board").unwrap().render().dimen();
-        let min_x = pos.x;
-        let min_y = pos.y;
-        let max_x = min_x + base_dimen.width() as i32;
-        let max_y = min_y + base_dimen.height() as i32;
-
-        if x < min_x || x > max_x || y < min_y || y > max_y {
-            return None;
-        }
-
         let cell_config = &self.config.board.cells;
         let cell_dimen = &cell_config.dimen.as_i32();
         let border_width = cell_config.border_width as i32;

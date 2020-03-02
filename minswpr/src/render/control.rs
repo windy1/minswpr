@@ -1,7 +1,7 @@
 use super::{Margins, Render, RenderRect};
 use crate::config::ControlConfig;
 use crate::fonts::Fonts;
-use crate::layout::{self, ComponentMap, Layout, Orientation, RenderRef};
+use crate::layout::{self, ComponentMap, Layout, Orientation};
 use crate::math::{Dimen, Point};
 use sdl2::pixels::Color;
 use sdl2::render::WindowCanvas;
@@ -30,7 +30,7 @@ impl<'a> RenderControl<'a> {
         r
     }
 
-    fn make_components(&self) -> Vec<(&'static str, RenderRef<'a>)> {
+    fn make_components(&self) -> Vec<(&'static str, Box<dyn Render>)> {
         let w = self.dimen.width();
         let p = self.padding();
 

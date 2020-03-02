@@ -1,5 +1,8 @@
+use minswpr::config;
 use minswpr::Minswpr;
 
 fn main() -> Result<(), String> {
-    Minswpr::from("minswpr.toml").start()
+    let config = config::resolve()?;
+    println!("using config: `{}`", config.display());
+    Minswpr::from(config).start()
 }

@@ -16,6 +16,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "cc"
+version = "1.0.50"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "95e28fa049fda1c330bcf9d723be7663a899c4679724b34c81e9f5a326aab8cd"
+
+[[package]]
 name = "cfg-if"
 version = "0.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -150,10 +156,12 @@ dependencies = [
  "derive-new",
  "derive_builder",
  "itertools",
+ "lazy_static",
  "minswpr_derive",
  "rand",
  "sdl2",
  "serde",
+ "sys-info",
  "toml",
 ]
 
@@ -287,6 +295,16 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-xid",
+]
+
+[[package]]
+name = "sys-info"
+version = "0.5.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "58283a48c9212afcade2069f8bbf7ded6a7bdbf4888d2defba72244c8e5f423c"
+dependencies = [
+ "cc",
+ "libc",
 ]
 
 [[package]]

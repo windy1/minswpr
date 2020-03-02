@@ -6,6 +6,11 @@ use std::collections::HashMap;
 use std::fmt;
 use std::fs;
 use std::path::{Path, PathBuf};
+use sys_info;
+
+lazy_static! {
+    static ref DEFAULT_CONFIG: &'static Path = Path::new("minswpr.toml");
+}
 
 pub type FontsConfig = HashMap<String, FontConfig>;
 
@@ -92,6 +97,23 @@ where
 {
     let s = fs::read_to_string(fname).map_err(|e| e.to_string())?;
     Ok(toml::from_str(&s).map_err(|e| e.to_string())?)
+}
+
+pub fn resolve() -> Result<PathBuf, String> {
+    let for_os = |os: &str| -> PathBuf {
+        let p = PathBuf::from(&format!("minswpr.{}.toml", os));
+        if p.exists() {
+            p
+        } else {
+            DEFAULT_CONFIG.to_path_buf()
+        }
+    };
+
+    Ok(for_os(
+        &sys_info::os_type()
+            .map_err(|e| format!("could not resolve config file: `{}`", e))?
+            .to_lowercase(),
+    ))
 }
 
 fn read_color<'de, D>(des: D) -> Result<Color, D::Error>

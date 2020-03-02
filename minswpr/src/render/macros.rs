@@ -15,6 +15,15 @@ macro_rules! color {
     (blue) => {
         ::sdl2::pixels::Color::RGB(0, 0, 255)
     };
+    (cyan) => {
+        ::sdl2::pixles::Color::RGB(0, 255, 255)
+    };
+    (magenta) => {
+        ::sdl2::pixels::Color::RGB(255, 0, 255)
+    };
+    (yellow) => {
+        ::sdl2::pixels::Color::RGB(255, 255, 0)
+    };
 }
 
 #[allow(unused)]

@@ -56,6 +56,7 @@ where
         render_rect!(layout.dimen(), c, canvas, pos)?;
     }
 
+    let orien = layout.orientation();
     let padding = layout.padding();
     let mut cur = pos + point!(padding, padding).as_i32();
     let mut components = layout.components_mut().values_mut().collect::<Vec<_>>();
@@ -66,10 +67,15 @@ where
         let r = &mut component.render;
         let m = r.margins();
 
-        cur += point!(m.left, m.top).as_i32();
-        component.pos = cur;
+        component.pos = cur + point!(m.left, m.top).as_i32();
         r.render(canvas, component.pos)?;
-        cur += point!(0, r.dimen().height()).as_i32() + point!(m.right, m.bottom).as_i32();
+
+        let d = r.dimen();
+
+        cur += match &orien {
+            Orientation::Vertical => point!(0, d.height() + m.bottom + m.top).as_i32(),
+            Orientation::Horizontal => point!(d.width() + m.right + m.left, 0).as_i32(),
+        };
     }
 
     Ok(())

@@ -9,12 +9,21 @@ bg_color = "#ffffff"
 [layout]
 padding = 5
 color = "#000000"
+guides = true
 
 [control]
 height = 35
 spacer_height = 5
 spacer_color = "#000000"
 color = "#c0c0c0"
+padding = 5
+flag_counter_dimen = { x = 40, y = 25 }
+flag_counter_color = "#000000"
+stopwatch_dimen = { x = 40, y = 25 }
+stopwatch_color = "#000000"
+reset_button_dimen = { x = 25, y = 25 }
+reset_button_color = "#ffff00"
+
 
 [board]
 dimen = { x = 9, y = 9 }

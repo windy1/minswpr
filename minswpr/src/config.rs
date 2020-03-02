@@ -35,6 +35,7 @@ pub struct LayoutConfig {
     pub padding: u32,
     #[serde(deserialize_with = "read_color")]
     pub color: Color,
+    pub guides: bool,
 }
 
 #[derive(Deserialize, Clone)]
@@ -45,6 +46,16 @@ pub struct ControlConfig {
     pub spacer_color: Color,
     #[serde(deserialize_with = "read_color")]
     pub color: Color,
+    pub padding: u32,
+    pub flag_counter_dimen: Dimen,
+    #[serde(deserialize_with = "read_color")]
+    pub flag_counter_color: Color,
+    pub stopwatch_dimen: Dimen,
+    #[serde(deserialize_with = "read_color")]
+    pub stopwatch_color: Color,
+    pub reset_button_dimen: Dimen,
+    #[serde(deserialize_with = "read_color")]
+    pub reset_button_color: Color,
 }
 
 #[derive(Deserialize, Clone)]

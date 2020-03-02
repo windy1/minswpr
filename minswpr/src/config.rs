@@ -6,7 +6,6 @@ use std::collections::HashMap;
 use std::fmt;
 use std::fs;
 use std::path::{Path, PathBuf};
-use sys_info;
 
 lazy_static! {
     static ref DEFAULT_CONFIG: &'static Path = Path::new("minswpr.toml");

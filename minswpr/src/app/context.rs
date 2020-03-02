@@ -1,8 +1,13 @@
 use super::{BoardRef, GameState};
 use crate::config::Config;
-use crate::layout::LayoutBase;
+use crate::fonts::Fonts;
+use crate::layout::{Layout, LayoutBase, RenderRef};
 use crate::math::Point;
+use crate::render::board::RenderBoard;
+use crate::render::control::RenderControl;
+use crate::render::{Render, RenderRect};
 use std::cmp;
+use std::rc::Rc;
 
 #[derive(Builder)]
 #[builder(pattern = "owned")]
@@ -36,6 +41,38 @@ impl<'a> Context<'a> {
 
     pub fn config(&self) -> &Config {
         &self.config
+    }
+
+    pub fn make_components(&mut self, fonts: &Rc<Fonts<'a>>) {
+        let cc = &self.config.control;
+
+        let board = Box::new(RenderBoard::new(
+            Rc::clone(fonts),
+            Rc::clone(&self.board),
+            self.config.board.cells.clone(),
+        ));
+        let board_width = board.dimen().width();
+
+        let v: Vec<(&'static str, RenderRef<'a>)> = vec![
+            (
+                "control",
+                Box::new(RenderControl::new(
+                    Rc::clone(&fonts),
+                    cc.clone(),
+                    board_width,
+                )),
+            ),
+            (
+                "spacer",
+                Box::new(RenderRect::new(
+                    point!(board_width, cc.spacer_height),
+                    cc.spacer_color,
+                )),
+            ),
+            ("board", board),
+        ];
+
+        self.layout.insert_all(v)
     }
 
     pub fn get_cell_at(&self, x: i32, y: i32, pos: Point) -> Option<Point<u32>> {

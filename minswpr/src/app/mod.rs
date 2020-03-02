@@ -2,16 +2,14 @@ pub(super) mod context;
 
 pub use self::context::*;
 
-use self::{Context, ContextBuilder};
+use self::ContextBuilder;
 use crate::board::Board;
 use crate::config::{self, Config};
 use crate::events;
 use crate::fonts::Fonts;
-use crate::layout::{Layout, LayoutBase, RenderRef};
+use crate::layout::LayoutBase;
 use crate::math::{Dimen, Point};
-use crate::render::board::RenderBoard;
-use crate::render::control::RenderControl;
-use crate::render::{Render, RenderRect};
+use crate::render::Render;
 use sdl2::render::WindowCanvas;
 use sdl2::ttf::Sdl2TtfContext;
 use sdl2::{self, EventPump, VideoSubsystem};
@@ -50,23 +48,20 @@ impl Minswpr {
             Rc::new(f)
         };
 
-        let mut ctx = {
-            let bc = &self.config.board;
-            ContextBuilder::default()
-                .config(self.config.clone())
-                .game_state(GameState::Ready)
-                .board(Self::make_board(bc.dimen, bc.mine_frequency)?)
-                .layout(LayoutBase::new(self.config.layout.clone()))
-                .build()?
-        };
+        let mut ctx = ContextBuilder::default()
+            .config(self.config.clone())
+            .game_state(GameState::Ready)
+            .board(self.make_board()?)
+            .layout(LayoutBase::new(self.config.layout.clone()))
+            .build()?;
 
-        let components = Self::make_components(&fonts, &ctx)?;
-        ctx.layout_mut().insert_all(components);
+        lazy_static! {
+            static ref LAYOUT_POS: Point = point!(0, 0);
+        }
 
-        let mut canvas = Self::make_canvas(&self.video, &win.title, ctx.layout().dimen())?;
+        ctx.make_components(&fonts);
 
-        let layout_pos = point!(0, 0);
-
+        let mut canvas = self.make_canvas(ctx.layout().dimen())?;
         canvas.clear();
         canvas.present();
 
@@ -91,9 +86,7 @@ impl Minswpr {
 
             canvas.set_draw_color(win.bg_color);
             canvas.clear();
-
-            ctx.layout_mut().render(&mut canvas, layout_pos)?;
-
+            ctx.layout_mut().render(&mut canvas, *LAYOUT_POS)?;
             canvas.present();
 
             thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
@@ -102,13 +95,10 @@ impl Minswpr {
         Ok(())
     }
 
-    fn make_canvas(
-        video: &VideoSubsystem,
-        title: &str,
-        dimen: Dimen,
-    ) -> Result<WindowCanvas, String> {
-        Ok(video
-            .window(title, dimen.width(), dimen.height())
+    fn make_canvas(&self, dimen: Dimen) -> Result<WindowCanvas, String> {
+        Ok(self
+            .video
+            .window(&self.config.window.title, dimen.width(), dimen.height())
             .position_centered()
             .build()
             .map_err(|e| e.to_string())?
@@ -117,40 +107,10 @@ impl Minswpr {
             .map_err(|e| e.to_string())?)
     }
 
-    fn make_board(Dimen { x: w, y: h }: Dimen<usize>, mf: f64) -> Result<BoardRef, String> {
-        Ok(Rc::new(RefCell::new(Board::new(w, h, mf)?)))
-    }
-
-    fn make_components<'a>(
-        fonts: &Rc<Fonts<'a>>,
-        context: &Context,
-    ) -> Result<Vec<(&'static str, RenderRef<'a>)>, String> {
-        let config = context.config();
-        let cc = &config.control;
-        let board = Box::new(RenderBoard::new(
-            Rc::clone(fonts),
-            Rc::clone(context.board()),
-            config.board.cells.clone(),
-        ));
-        let board_width = board.dimen().width();
-        Ok(vec![
-            (
-                "control",
-                Box::new(RenderControl::new(
-                    Rc::clone(&fonts),
-                    cc.clone(),
-                    board_width,
-                )),
-            ),
-            (
-                "spacer",
-                Box::new(RenderRect::new(
-                    point!(board_width, cc.spacer_height),
-                    cc.spacer_color,
-                )),
-            ),
-            ("board", board),
-        ])
+    fn make_board(&self) -> Result<BoardRef, String> {
+        let bc = &self.config.board;
+        let Dimen { x: w, y: h } = bc.dimen;
+        Ok(Rc::new(RefCell::new(Board::new(w, h, bc.mine_frequency)?)))
     }
 }
 

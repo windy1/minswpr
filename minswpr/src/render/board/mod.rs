@@ -19,7 +19,7 @@ pub struct RenderBoard<'ttf> {
 }
 
 impl Render for RenderBoard<'_> {
-    fn render(&self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
+    fn render(&mut self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
         render_rect!(self.dimen, self.cell_config.color, canvas, pos)?;
         self.draw_cell_borders(canvas, pos)?;
         self.draw_cells(canvas, pos)

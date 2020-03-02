@@ -1,6 +1,6 @@
 use crate::config::LayoutConfig;
 use crate::math::{Dimen, Point};
-use crate::render::{Render, RenderMut};
+use crate::render::Render;
 use sdl2::render::WindowCanvas;
 use std::cmp::Ordering;
 use std::collections::HashMap;
@@ -48,7 +48,7 @@ impl<'a> Layout<'a> for LayoutBase<'a> {
     }
 }
 
-impl RenderMut for LayoutBase<'_> {
+impl Render for LayoutBase<'_> {
     fn render(&mut self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
         let c = &self.config;
         render_rect!(self.dimen(), c.color, canvas, pos)?;
@@ -60,7 +60,7 @@ impl RenderMut for LayoutBase<'_> {
 
         for component in components {
             component.pos = cur;
-            let r = &component.render;
+            let r = &mut component.render;
             r.render(canvas, cur)?;
             cur += (0, r.dimen().height() as i32);
         }

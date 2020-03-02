@@ -11,7 +11,7 @@ use crate::layout::{Layout, LayoutBase, RenderRef};
 use crate::math::{Dimen, Point};
 use crate::render::board::RenderBoard;
 use crate::render::control::RenderControl;
-use crate::render::{Render, RenderMut, RenderRect};
+use crate::render::{Render, RenderRect};
 use sdl2::render::WindowCanvas;
 use sdl2::ttf::Sdl2TtfContext;
 use sdl2::{self, EventPump, VideoSubsystem};

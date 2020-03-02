@@ -10,11 +10,6 @@ use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
 
 pub trait Render {
-    fn render(&self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String>;
-    fn dimen(&self) -> Dimen;
-}
-
-pub trait RenderMut {
     fn render(&mut self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String>;
     fn dimen(&self) -> Dimen;
 }
@@ -26,7 +21,7 @@ pub struct RenderRect {
 }
 
 impl Render for RenderRect {
-    fn render(&self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
+    fn render(&mut self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
         canvas.set_draw_color(self.color);
         canvas.fill_rect(Rect::new(
             pos.x,

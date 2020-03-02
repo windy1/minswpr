@@ -16,7 +16,7 @@ pub(super) struct RenderCell<'a> {
 }
 
 impl Render for RenderCell<'_> {
-    fn render(&self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
+    fn render(&mut self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
         let cell = self.board.cell(self.board_pos.x, self.board_pos.y);
         let config = &self.config;
         let mines = &config.mines;

@@ -21,25 +21,3 @@ fn impl_input(ast: &DeriveInput) -> TokenStream {
     };
     gen.into()
 }
-
-#[proc_macro_derive(Layout)]
-pub fn layout_macro_derive(input: TokenStream) -> TokenStream {
-    impl_layout(&syn::parse(input).unwrap())
-}
-
-fn impl_layout(ast: &DeriveInput) -> TokenStream {
-    let name = &ast.ident;
-    let generics = &ast.generics;
-    let gen = quote! {
-        impl #generics crate::layout::Layout #generics for #name #generics {
-            fn components(&self) -> &crate::layout::ComponentMap {
-                &self.components
-            }
-
-            fn components_mut(&mut self) -> &mut crate::layout::ComponentMap #generics {
-                &mut self.components
-            }
-        }
-    };
-    gen.into()
-}

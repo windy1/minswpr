@@ -1,6 +1,6 @@
+use crate::config::LayoutConfig;
 use crate::math::{Dimen, Point};
 use crate::render::{Render, RenderMut};
-use sdl2::pixels::Color;
 use sdl2::render::WindowCanvas;
 use std::cmp::Ordering;
 use std::collections::HashMap;
@@ -11,8 +11,7 @@ pub type RenderRef<'a> = Box<dyn Render + 'a>;
 pub struct Layout<'a> {
     #[new(default)]
     components: HashMap<&'static str, Component<'a>>,
-    padding: u32,
-    color: Color,
+    config: LayoutConfig,
 }
 
 impl<'a> Layout<'a> {
@@ -36,9 +35,10 @@ impl<'a> Layout<'a> {
 
 impl RenderMut for Layout<'_> {
     fn render(&mut self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
-        render_rect!(self.dimen(), self.color, canvas, pos)?;
+        let c = &self.config;
+        render_rect!(self.dimen(), c.color, canvas, pos)?;
 
-        let mut cur = pos + point!(self.padding, self.padding).as_i32();
+        let mut cur = pos + point!(c.padding, c.padding).as_i32();
         let components = &mut self.components.values_mut().collect::<Vec<_>>();
 
         components.sort();
@@ -54,10 +54,11 @@ impl RenderMut for Layout<'_> {
     }
 
     fn dimen(&self) -> Dimen {
+        let c = &self.config;
         let values = || self.components.values();
         let width = values().map(|c| c.render.dimen().width()).max().unwrap();
         values().fold(point!(width, 0), |a, b| a + (0, b.render.dimen().height()))
-            + (self.padding * 2, self.padding * 2)
+            + (c.padding * 2, c.padding * 2)
     }
 }
 

@@ -10,7 +10,7 @@ use crate::fonts::Fonts;
 use crate::layout::{Layout, RenderRef};
 use crate::math::{Dimen, Point};
 use crate::render::board::RenderBoard;
-use crate::render::control::RenderControlBuilder;
+use crate::render::control::RenderControl;
 use crate::render::{Render, RenderMut, RenderRect};
 use sdl2::render::WindowCanvas;
 use sdl2::ttf::Sdl2TtfContext;
@@ -48,21 +48,22 @@ impl Minswpr {
             Rc::new(f)
         };
 
+        let win = &self.config.window;
+
         let mut ctx = {
             let bc = &self.config.board;
             ContextBuilder::default()
                 .config(self.config.clone())
                 .game_state(GameState::Ready)
                 .board(Self::make_board(bc.dimen, bc.mine_frequency)?)
-                .layout(Layout::new(10, color!(red)))
+                .layout(Layout::new(self.config.layout.clone()))
                 .build()?
         };
 
         let components = Self::make_components(&fonts, &ctx)?;
         ctx.layout_mut().insert_all(components);
 
-        let mut canvas =
-            Self::make_canvas(&self.video, &self.config.window.title, ctx.layout().dimen())?;
+        let mut canvas = Self::make_canvas(&self.video, &win.title, ctx.layout().dimen())?;
 
         let layout_pos = point!(0, 0);
 
@@ -88,7 +89,7 @@ impl Minswpr {
 
             ctx.set_game_state(game_state);
 
-            canvas.set_draw_color(self.config.window.bg_color);
+            canvas.set_draw_color(win.bg_color);
             canvas.clear();
 
             ctx.layout_mut().render(&mut canvas, layout_pos)?;
@@ -125,6 +126,8 @@ impl Minswpr {
         context: &Context,
     ) -> Result<Vec<(&'static str, RenderRef<'a>)>, String> {
         let config = context.config();
+        let cc = &config.control;
+
         let board = Box::new(RenderBoard::new(
             Rc::clone(fonts),
             Rc::clone(context.board()),
@@ -135,20 +138,17 @@ impl Minswpr {
         Ok(vec![
             (
                 "control",
-                Box::new(
-                    RenderControlBuilder::default()
-                        .fonts(Rc::clone(&fonts))
-                        .board_width(board_width)
-                        .color(color!(blue))
-                        .config(config.control.clone())
-                        .build()?,
-                ),
+                Box::new(RenderControl::new(
+                    Rc::clone(&fonts),
+                    cc.clone(),
+                    board_width,
+                )),
             ),
             (
                 "spacer",
                 Box::new(RenderRect::new(
-                    point!(board_width, config.control.spacer_height),
-                    color!(red),
+                    point!(board_width, cc.spacer_height),
+                    cc.spacer_color,
                 )),
             ),
             ("board", board),

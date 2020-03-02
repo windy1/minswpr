@@ -15,6 +15,7 @@ pub struct Config {
     pub fonts: FontsConfig,
     pub control: ControlConfig,
     pub board: BoardConfig,
+    pub layout: LayoutConfig,
 }
 
 #[derive(Deserialize, Clone)]
@@ -26,9 +27,20 @@ pub struct WindowConfig {
 }
 
 #[derive(Deserialize, Clone)]
+pub struct LayoutConfig {
+    pub padding: u32,
+    #[serde(deserialize_with = "read_color")]
+    pub color: Color,
+}
+
+#[derive(Deserialize, Clone)]
 pub struct ControlConfig {
     pub height: u32,
     pub spacer_height: u32,
+    #[serde(deserialize_with = "read_color")]
+    pub spacer_color: Color,
+    #[serde(deserialize_with = "read_color")]
+    pub color: Color,
 }
 
 #[derive(Deserialize, Clone)]

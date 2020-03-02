@@ -2,7 +2,6 @@ use super::Render;
 use crate::config::ControlConfig;
 use crate::fonts::Fonts;
 use crate::math::{Dimen, Point};
-use sdl2::pixels::Color;
 use sdl2::render::WindowCanvas;
 use std::rc::Rc;
 
@@ -10,14 +9,13 @@ pub struct RenderControl<'ttf> {
     #[allow(dead_code)]
     fonts: Rc<Fonts<'ttf>>,
     dimen: Dimen,
-    color: Color,
     #[allow(dead_code)]
     config: ControlConfig,
 }
 
 impl Render for RenderControl<'_> {
     fn render(&self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
-        render_rect!(self.dimen, self.color, canvas, pos)
+        render_rect!(self.dimen, self.config.color, canvas, pos)
     }
 
     fn dimen(&self) -> Dimen {
@@ -25,52 +23,13 @@ impl Render for RenderControl<'_> {
     }
 }
 
-#[derive(Default)]
-pub struct RenderControlBuilder<'ttf> {
-    fonts: Option<Rc<Fonts<'ttf>>>,
-    dimen: Dimen,
-    color: Option<Color>,
-    config: Option<ControlConfig>,
-}
-
-impl<'ttf> RenderControlBuilder<'ttf> {
-    pub fn fonts(mut self, fonts: Rc<Fonts<'ttf>>) -> Self {
-        self.fonts = Some(fonts);
-        self
-    }
-
-    pub fn board_width(mut self, board_width: u32) -> Self {
-        self.dimen.set_width(board_width);
-        self
-    }
-
-    pub fn color(mut self, color: Color) -> Self {
-        self.color = Some(color);
-        self
-    }
-
-    pub fn config(mut self, config: ControlConfig) -> Self {
-        self.dimen.set_height(config.height);
-        self.config = Some(config);
-        self
-    }
-
-    pub fn build(self) -> Result<RenderControl<'ttf>, String> {
-        let r = RenderControl {
-            fonts: match self.fonts {
-                Some(f) => f,
-                None => return Err("`fonts` must be initialized".to_string()),
-            },
-            dimen: self.dimen,
-            color: match self.color {
-                Some(c) => c,
-                None => return Err("`color` must be initialized".to_string()),
-            },
-            config: match self.config {
-                Some(c) => c,
-                None => return Err("`config` must be initialized".to_string()),
-            },
-        };
-        Ok(r)
+impl<'ttf> RenderControl<'ttf> {
+    pub fn new(fonts: Rc<Fonts<'ttf>>, config: ControlConfig, board_width: u32) -> Self {
+        let dimen = point!(board_width, config.height);
+        Self {
+            fonts,
+            dimen,
+            config,
+        }
     }
 }

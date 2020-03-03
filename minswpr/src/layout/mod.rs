@@ -143,14 +143,14 @@ impl Layout {
 
     fn component_max_height(&self) -> u32 {
         self.component_values()
-            .map(|c| c.render.dimen().width())
+            .map(|c| c.render.dimen().height())
             .max()
             .unwrap_or_else(|| 0)
     }
 
     fn component_max_width(&self) -> u32 {
         self.component_values()
-            .map(|c| c.render.dimen().height())
+            .map(|c| c.render.dimen().width())
             .max()
             .unwrap_or_else(|| 0)
     }

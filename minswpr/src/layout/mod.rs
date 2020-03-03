@@ -1,9 +1,8 @@
 use crate::math::{Dimen, Point};
 use crate::render::{DrawContext, Render};
 use sdl2::pixels::Color;
-use sdl2::render::WindowCanvas;
 use std::cmp::Ordering;
-use std::collections::HashMap;
+use std::collections::{hash_map, HashMap};
 use std::fmt;
 
 use self::Orientation::*;
@@ -23,14 +22,6 @@ pub struct Layout {
 }
 
 impl Layout {
-    // pub fn components(&self) -> &ComponentMap {
-    //     &self.components
-    // }
-    //
-    // pub fn components_mut(&mut self) -> &mut ComponentMap<'a> {
-    //     &mut self.components
-    // }
-
     pub fn color(&self) -> Option<Color> {
         self.color
     }
@@ -112,30 +103,22 @@ impl Render for Layout {
     }
 
     fn dimen(&self) -> Dimen {
-        let padding = self.padding;
-        let values = || self.components.values();
+        let (d, acc): (Dimen, Box<dyn Fn(Dimen, Dimen) -> Dimen>) = match self.orientation {
+            Vertical => (
+                point!(self.component_max_width(), 0),
+                Box::new(|a, b| a + (0, b.height())),
+            ),
+            Horizontal => (
+                point!(0, self.component_max_height()),
+                Box::new(|a, b| a + (b.width(), 0)),
+            ),
+        };
 
-        let margins: Dimen = values()
-            .map(|c| c.render.margins())
-            .map(|m| point!(m.left + m.right, m.top + m.bottom))
-            .sum();
-
-        match self.orientation {
-            Vertical => {
-                let width = values().map(|c| c.render.dimen().width()).max().unwrap();
-                values().fold(point!(width, 0), |a, b| a + (0, b.render.dimen().height()))
-                    + (padding * 2, padding * 2)
-                    + margins
-            }
-            Horizontal => {
-                let height = values().map(|c| c.render.dimen().height()).max().unwrap();
-                values().fold(point!(0, height), |a, b| a + (b.render.dimen().width(), 0))
-                    + (padding * 2, padding * 2)
-                    + margins
-            }
-        }
+        self.calc_dimen(d, acc)
     }
 }
+
+type ComponentValues<'a> = hash_map::Values<'a, &'static str, Component>;
 
 impl Layout {
     fn draw_guides(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
@@ -152,6 +135,38 @@ impl Layout {
             ctx,
             pos + point!(0, h / 2).as_i32()
         )
+    }
+
+    fn component_values(&self) -> ComponentValues {
+        self.components.values()
+    }
+
+    fn component_max_height(&self) -> u32 {
+        self.component_values()
+            .map(|c| c.render.dimen().width())
+            .max()
+            .unwrap_or_else(|| 0)
+    }
+
+    fn component_max_width(&self) -> u32 {
+        self.component_values()
+            .map(|c| c.render.dimen().height())
+            .max()
+            .unwrap_or_else(|| 0)
+    }
+
+    fn calc_dimen(&self, initial: Dimen, acc: impl Fn(Dimen, Dimen) -> Dimen) -> Dimen {
+        let margins: Dimen = self
+            .component_values()
+            .map(|c| c.render.margins())
+            .map(|m| point!(m.left + m.right, m.top + m.bottom))
+            .sum();
+
+        self.component_values()
+            .map(|c| c.render.dimen())
+            .fold(initial, |a, b| acc(a, b))
+            + (self.padding * 2, self.padding * 2)
+            + margins
     }
 }
 

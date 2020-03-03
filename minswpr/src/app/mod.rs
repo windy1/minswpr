@@ -1,6 +1,7 @@
 pub(super) mod context;
 
 pub use self::context::*;
+use crate::layout::Layout;
 
 use self::ContextBuilder;
 use crate::board::Board;
@@ -9,8 +10,9 @@ use crate::events;
 use crate::fonts::Fonts;
 use crate::layout::LayoutBuilder;
 use crate::math::{Dimen, Point};
-use crate::render::{CanvasRef, DrawContext, Render};
-use sdl2::render::WindowCanvas;
+use crate::render::board::RenderBoard;
+use crate::render::control;
+use crate::render::{CanvasRef, DrawContext, Render, RenderRect};
 use sdl2::ttf::Sdl2TtfContext;
 use sdl2::{self, EventPump, VideoSubsystem};
 use std::cell::RefCell;
@@ -23,9 +25,9 @@ pub type BoardRef = Rc<RefCell<Board>>;
 
 pub struct Minswpr {
     config: Config,
-    event_pump: EventPump,
     ttf: Sdl2TtfContext,
     video: VideoSubsystem,
+    event_pump: EventPump,
 }
 
 impl Minswpr {
@@ -33,24 +35,20 @@ impl Minswpr {
         let sdl = sdl2::init()?;
         Ok(Self {
             config,
-            event_pump: sdl.event_pump()?,
             ttf: sdl2::ttf::init().map_err(|e| e.to_string())?,
             video: sdl.video()?,
+            event_pump: sdl.event_pump()?,
         })
     }
 
     pub fn start(&mut self) -> Result<(), String> {
-        let lc = &self.config.layout;
+        let board = self.make_board()?;
+
         let mut ctx = ContextBuilder::default()
             .config(self.config.clone())
             .game_state(GameState::Ready)
-            .board(self.make_board()?)
-            .layout(
-                LayoutBuilder::default()
-                    .color(Some(lc.color))
-                    .padding(lc.padding)
-                    .build()?,
-            )
+            .board(Rc::clone(&board))
+            .layout(self.make_layout(&board)?)
             .build()?;
 
         lazy_static! {
@@ -60,18 +58,14 @@ impl Minswpr {
         let fonts = {
             let mut f = Fonts::new(&self.ttf);
             f.load_from_config(&self.config.fonts)?;
-            Rc::new(f)
+            f
         };
 
-        ctx.make_components(&fonts);
-
         let draw = DrawContext::new(self.make_canvas(ctx.layout().dimen())?, &fonts);
-
-        {
-            let mut c = draw.canvas();
+        draw.with_canvas(|mut c| {
             c.clear();
             c.present();
-        }
+        });
 
         'main: loop {
             for event in self.event_pump.poll_iter() {
@@ -92,20 +86,54 @@ impl Minswpr {
 
             ctx.set_game_state(game_state);
 
-            {
-                let mut c = draw.canvas();
+            draw.with_canvas(|mut c| {
                 c.set_draw_color(self.config.window.bg_color);
                 c.clear();
-            }
+            });
 
             ctx.layout_mut().render(&draw, *LAYOUT_POS)?;
-
             draw.canvas().present();
 
             thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
         }
 
         Ok(())
+    }
+
+    fn make_board(&self) -> Result<BoardRef, String> {
+        let bc = &self.config.board;
+        let Dimen { x: w, y: h } = bc.dimen;
+        Ok(Rc::new(RefCell::new(Board::new(w, h, bc.mine_frequency)?)))
+    }
+
+    fn make_layout(&self, board: &BoardRef) -> Result<Layout, String> {
+        let lc = &self.config.layout;
+        let mut layout = LayoutBuilder::default()
+            .color(Some(lc.color))
+            .padding(lc.padding)
+            .build()?;
+
+        let cc = &self.config.control;
+
+        let board = Box::new(RenderBoard::new(
+            Rc::clone(&board),
+            self.config.board.cells.clone(),
+        ));
+        let board_width = board.dimen().width();
+
+        layout.insert_all(vec![
+            ("control", Box::new(control::make_layout(&cc, board_width))),
+            (
+                "spacer",
+                Box::new(RenderRect::new(
+                    point!(board_width, cc.spacer_height),
+                    cc.spacer_color,
+                )),
+            ),
+            ("board", board),
+        ]);
+
+        Ok(layout)
     }
 
     fn make_canvas(&self, dimen: Dimen) -> Result<CanvasRef, String> {
@@ -119,12 +147,6 @@ impl Minswpr {
                 .build()
                 .map_err(|e| e.to_string())?,
         )))
-    }
-
-    fn make_board(&self) -> Result<BoardRef, String> {
-        let bc = &self.config.board;
-        let Dimen { x: w, y: h } = bc.dimen;
-        Ok(Rc::new(RefCell::new(Board::new(w, h, bc.mine_frequency)?)))
     }
 }
 

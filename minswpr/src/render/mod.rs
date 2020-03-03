@@ -26,6 +26,13 @@ impl DrawContext<'_> {
         self.canvas.borrow_mut()
     }
 
+    pub fn with_canvas<T>(&self, f: T)
+    where
+        T: FnOnce(CanvasRefMut),
+    {
+        f(self.canvas.borrow_mut())
+    }
+
     pub fn fonts(&self) -> &Fonts {
         self.fonts
     }

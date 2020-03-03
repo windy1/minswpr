@@ -16,7 +16,7 @@ pub trait Input {
 pub struct MouseUp<'a> {
     mouse_btn: MouseButton,
     mouse_pos: Point,
-    context: &'a Context<'a>,
+    context: &'a Context,
 }
 
 impl MouseUp<'_> {
@@ -95,7 +95,7 @@ impl Execute for MouseUp<'_> {
 #[derive(new, Input)]
 pub struct KeyDown<'a> {
     keycode: Keycode,
-    context: &'a Context<'a>,
+    context: &'a Context,
 }
 
 impl Execute for KeyDown<'_> {

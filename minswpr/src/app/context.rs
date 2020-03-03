@@ -1,7 +1,7 @@
 use super::{BoardRef, GameState};
 use crate::config::Config;
 use crate::fonts::Fonts;
-use crate::layout::{Layout, RenderRef};
+use crate::layout::Layout;
 use crate::math::Point;
 use crate::render::board::RenderBoard;
 use crate::render::control;
@@ -11,14 +11,14 @@ use std::rc::Rc;
 
 #[derive(Builder)]
 #[builder(pattern = "owned")]
-pub struct Context<'a> {
+pub struct Context {
     config: Config,
     game_state: GameState,
     board: BoardRef,
-    layout: Layout<'a>,
+    layout: Layout,
 }
 
-impl<'a> Context<'a> {
+impl Context {
     pub fn game_state(&self) -> GameState {
         self.game_state
     }
@@ -35,7 +35,7 @@ impl<'a> Context<'a> {
         &self.layout
     }
 
-    pub fn layout_mut(&mut self) -> &mut Layout<'a> {
+    pub fn layout_mut(&mut self) -> &mut Layout {
         &mut self.layout
     }
 
@@ -43,17 +43,16 @@ impl<'a> Context<'a> {
         &self.config
     }
 
-    pub fn make_components(&mut self, fonts: &Rc<Fonts<'a>>) {
+    pub fn make_components(&mut self, fonts: &Rc<Fonts>) {
         let cc = &self.config.control;
 
         let board = Box::new(RenderBoard::new(
-            Rc::clone(fonts),
             Rc::clone(&self.board),
             self.config.board.cells.clone(),
         ));
         let board_width = board.dimen().width();
 
-        let v: Vec<(&'static str, RenderRef<'a>)> = vec![
+        let v: Vec<(&'static str, Box<dyn Render>)> = vec![
             ("control", Box::new(control::make_layout(&cc, board_width))),
             (
                 "spacer",

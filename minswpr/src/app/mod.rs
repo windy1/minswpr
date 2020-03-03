@@ -9,7 +9,7 @@ use crate::events;
 use crate::fonts::Fonts;
 use crate::layout::LayoutBuilder;
 use crate::math::{Dimen, Point};
-use crate::render::Render;
+use crate::render::{CanvasRef, DrawContext, Render};
 use sdl2::render::WindowCanvas;
 use sdl2::ttf::Sdl2TtfContext;
 use sdl2::{self, EventPump, VideoSubsystem};
@@ -40,14 +40,7 @@ impl Minswpr {
     }
 
     pub fn start(&mut self) -> Result<(), String> {
-        let fonts = {
-            let mut f = Fonts::new(&self.ttf);
-            f.load_from_config(&self.config.fonts)?;
-            Rc::new(f)
-        };
-
         let lc = &self.config.layout;
-
         let mut ctx = ContextBuilder::default()
             .config(self.config.clone())
             .game_state(GameState::Ready)
@@ -64,11 +57,21 @@ impl Minswpr {
             static ref LAYOUT_POS: Point = point!(0, 0);
         }
 
+        let fonts = {
+            let mut f = Fonts::new(&self.ttf);
+            f.load_from_config(&self.config.fonts)?;
+            Rc::new(f)
+        };
+
         ctx.make_components(&fonts);
 
-        let mut canvas = self.make_canvas(ctx.layout().dimen())?;
-        canvas.clear();
-        canvas.present();
+        let draw = DrawContext::new(self.make_canvas(ctx.layout().dimen())?, &fonts);
+
+        {
+            let mut c = draw.canvas();
+            c.clear();
+            c.present();
+        }
 
         'main: loop {
             for event in self.event_pump.poll_iter() {
@@ -89,10 +92,15 @@ impl Minswpr {
 
             ctx.set_game_state(game_state);
 
-            canvas.set_draw_color(self.config.window.bg_color);
-            canvas.clear();
-            ctx.layout_mut().render(&mut canvas, *LAYOUT_POS)?;
-            canvas.present();
+            {
+                let mut c = draw.canvas();
+                c.set_draw_color(self.config.window.bg_color);
+                c.clear();
+            }
+
+            ctx.layout_mut().render(&draw, *LAYOUT_POS)?;
+
+            draw.canvas().present();
 
             thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
         }
@@ -100,16 +108,17 @@ impl Minswpr {
         Ok(())
     }
 
-    fn make_canvas(&self, dimen: Dimen) -> Result<WindowCanvas, String> {
-        Ok(self
-            .video
-            .window(&self.config.window.title, dimen.width(), dimen.height())
-            .position_centered()
-            .build()
-            .map_err(|e| e.to_string())?
-            .into_canvas()
-            .build()
-            .map_err(|e| e.to_string())?)
+    fn make_canvas(&self, dimen: Dimen) -> Result<CanvasRef, String> {
+        Ok(Rc::new(RefCell::new(
+            self.video
+                .window(&self.config.window.title, dimen.width(), dimen.height())
+                .position_centered()
+                .build()
+                .map_err(|e| e.to_string())?
+                .into_canvas()
+                .build()
+                .map_err(|e| e.to_string())?,
+        )))
     }
 
     fn make_board(&self) -> Result<BoardRef, String> {

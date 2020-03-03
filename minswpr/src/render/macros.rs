@@ -28,7 +28,7 @@ macro_rules! color {
 
 #[allow(unused)]
 macro_rules! render_rect {
-    ($dimen:expr, $color:expr, $canvas:expr, $pos:expr) => {
-        crate::render::RenderRect::new($dimen, $color).render($canvas, $pos)
+    ($dimen:expr, $color:expr, $ctx:expr, $pos:expr) => {
+        crate::render::RenderRect::new($dimen, $color).render($ctx, $pos)
     };
 }

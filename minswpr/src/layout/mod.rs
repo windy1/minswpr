@@ -1,5 +1,5 @@
 use crate::math::{Dimen, Point};
-use crate::render::Render;
+use crate::render::{DrawContext, Render};
 use sdl2::pixels::Color;
 use sdl2::render::WindowCanvas;
 use std::cmp::Ordering;
@@ -8,14 +8,10 @@ use std::fmt;
 
 use self::Orientation::*;
 
-pub type RenderRef<'a> = Box<dyn Render + 'a>;
-pub type ComponentMap<'a> = HashMap<&'static str, Component<'a>>;
-
 #[derive(Builder)]
-#[builder(pattern = "owned")]
-pub struct Layout<'a> {
+pub struct Layout {
     #[builder(setter(skip))]
-    components: ComponentMap<'a>,
+    components: HashMap<&'static str, Component>,
     #[builder(default)]
     color: Option<Color>,
     #[builder(default)]
@@ -26,14 +22,14 @@ pub struct Layout<'a> {
     guides: bool,
 }
 
-impl<'a> Layout<'a> {
-    pub fn components(&self) -> &ComponentMap {
-        &self.components
-    }
-
-    pub fn components_mut(&mut self) -> &mut ComponentMap<'a> {
-        &mut self.components
-    }
+impl Layout {
+    // pub fn components(&self) -> &ComponentMap {
+    //     &self.components
+    // }
+    //
+    // pub fn components_mut(&mut self) -> &mut ComponentMap<'a> {
+    //     &mut self.components
+    // }
 
     pub fn color(&self) -> Option<Color> {
         self.color
@@ -47,25 +43,25 @@ impl<'a> Layout<'a> {
         self.orientation
     }
 
-    pub fn insert(&mut self, key: &'static str, order: i32, component: RenderRef<'a>) {
-        self.components_mut()
+    pub fn insert(&mut self, key: &'static str, order: i32, component: Box<dyn Render>) {
+        self.components
             .insert(key, Component::new(key, order, component));
     }
 
-    pub fn insert_all(&mut self, mut components: Vec<(&'static str, RenderRef<'a>)>) {
+    pub fn insert_all(&mut self, mut components: Vec<(&'static str, Box<dyn Render>)>) {
         for (i, c) in components.drain(..).enumerate() {
             self.insert(c.0, i as i32, c.1);
         }
     }
 
     pub fn get(&self, key: &'static str) -> Result<&Component, String> {
-        self.components()
+        self.components
             .get(key)
             .ok_or_else(|| format!("missing required layout component `{}`", key))
     }
 
     pub fn get_at(&self, x: i32, y: i32) -> Option<&Component> {
-        for component in self.components().values() {
+        for component in self.components.values() {
             let Point { x: min_x, y: min_y } = component.pos;
             let cd = component.render.dimen();
             let max_x = min_x + cd.width() as i32;
@@ -78,28 +74,12 @@ impl<'a> Layout<'a> {
 
         None
     }
-
-    fn draw_guides(&mut self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
-        let Dimen { x: w, y: h } = self.dimen();
-        render_rect!(
-            point!(1, h),
-            color!(magenta),
-            canvas,
-            pos + point!(w / 2, 0).as_i32()
-        )?;
-        render_rect!(
-            point!(w, 1),
-            color!(magenta),
-            canvas,
-            pos + point!(0, h / 2).as_i32()
-        )
-    }
 }
 
-impl Render for Layout<'_> {
-    fn render(&mut self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
+impl Render for Layout {
+    fn render(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
         if let Some(c) = self.color {
-            render_rect!(self.dimen(), c, canvas, pos)?;
+            render_rect!(self.dimen(), c, ctx, pos)?;
         }
 
         let orien = self.orientation;
@@ -114,7 +94,7 @@ impl Render for Layout<'_> {
             let m = r.margins();
 
             component.pos = cur + point!(m.left, m.top).as_i32();
-            r.render(canvas, component.pos)?;
+            r.render(ctx, component.pos)?;
 
             let d = r.dimen();
 
@@ -125,7 +105,7 @@ impl Render for Layout<'_> {
         }
 
         if self.guides {
-            self.draw_guides(canvas, pos)
+            self.draw_guides(ctx, pos)
         } else {
             Ok(())
         }
@@ -157,6 +137,24 @@ impl Render for Layout<'_> {
     }
 }
 
+impl Layout {
+    fn draw_guides(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
+        let Dimen { x: w, y: h } = self.dimen();
+        render_rect!(
+            point!(1, h),
+            color!(magenta),
+            ctx,
+            pos + point!(w / 2, 0).as_i32()
+        )?;
+        render_rect!(
+            point!(w, 1),
+            color!(magenta),
+            ctx,
+            pos + point!(0, h / 2).as_i32()
+        )
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 pub enum Orientation {
     Vertical,
@@ -170,15 +168,15 @@ impl Default for Orientation {
 }
 
 #[derive(new)]
-pub struct Component<'a> {
+pub struct Component {
     id: &'static str,
     order: i32,
-    render: Box<dyn Render + 'a>,
+    render: Box<dyn Render>,
     #[new(default)]
     pos: Point,
 }
 
-impl<'a> Component<'a> {
+impl Component {
     pub fn id(&self) -> &'static str {
         self.id
     }
@@ -192,27 +190,27 @@ impl<'a> Component<'a> {
     }
 }
 
-impl PartialOrd for Component<'_> {
+impl PartialOrd for Component {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl Ord for Component<'_> {
+impl Ord for Component {
     fn cmp(&self, other: &Self) -> Ordering {
         self.order.cmp(&other.order)
     }
 }
 
-impl PartialEq for Component<'_> {
+impl PartialEq for Component {
     fn eq(&self, other: &Self) -> bool {
         self.order == other.order
     }
 }
 
-impl Eq for Component<'_> {}
+impl Eq for Component {}
 
-impl fmt::Debug for Component<'_> {
+impl fmt::Debug for Component {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,

@@ -2,21 +2,20 @@ use crate::board::{Board, CellFlags};
 use crate::config::CellConfig;
 use crate::fonts::Fonts;
 use crate::math::{Dimen, Point};
-use crate::render::Render;
+use crate::render::{DrawContext, Render};
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
 
 #[derive(Builder)]
 pub(super) struct RenderCell<'a> {
-    fonts: &'a Fonts<'a>,
     board: &'a Board,
     board_pos: Point<u32>,
     config: &'a CellConfig,
 }
 
 impl Render for RenderCell<'_> {
-    fn render(&mut self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
+    fn render(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
         let cell = self.board.cell(self.board_pos.x, self.board_pos.y);
         let config = &self.config;
         let mines = &config.mines;
@@ -29,19 +28,19 @@ impl Render for RenderCell<'_> {
             } else {
                 config.revealed_color
             };
-            render_rect!(self.config.dimen, fill_color, canvas, pos)?;
+            render_rect!(self.config.dimen, fill_color, ctx, pos)?;
 
             let adjacent_mines = self
                 .board
                 .count_adjacent_mines(self.board_pos.x, self.board_pos.y);
 
             if is_mine {
-                self.draw_centered_rect(canvas, pos, mines.dimen, mines.color)?;
+                self.draw_centered_rect(&ctx, pos, mines.dimen, mines.color)?;
             } else if adjacent_mines > 0 {
-                self.draw_hint(canvas, pos, adjacent_mines)?;
+                self.draw_hint(ctx, pos, adjacent_mines)?;
             }
         } else if cell.contains(CellFlags::FLAG) {
-            self.draw_centered_rect(canvas, pos, flags.dimen, flags.color)?;
+            self.draw_centered_rect(&ctx, pos, flags.dimen, flags.color)?;
         }
 
         Ok(())
@@ -55,21 +54,22 @@ impl Render for RenderCell<'_> {
 impl RenderCell<'_> {
     fn draw_centered_rect(
         &self,
-        canvas: &mut WindowCanvas,
+        ctx: &DrawContext,
         pos: Point,
         dimen: Dimen,
         color: Color,
     ) -> Result<(), String> {
         let cell_dimen = self.config.dimen.as_i32();
         let pos = pos + cell_dimen / (2, 2) - dimen.as_i32() / (2, 2);
-        render_rect!(dimen, color, canvas, pos)
+        render_rect!(dimen, color, ctx, pos)
     }
 
-    fn draw_hint(&self, canvas: &mut WindowCanvas, pos: Point, hint: usize) -> Result<(), String> {
+    fn draw_hint(&self, ctx: &DrawContext, pos: Point, hint: usize) -> Result<(), String> {
+        let mut canvas = ctx.canvas();
         let textures = canvas.texture_creator();
 
-        let surface = self
-            .fonts
+        let surface = ctx
+            .fonts()
             .get("board.cell")?
             .render(&hint.to_string())
             .blended(color!(green))

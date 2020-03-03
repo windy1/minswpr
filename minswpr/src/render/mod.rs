@@ -4,13 +4,35 @@ mod macros;
 pub mod board;
 pub mod control;
 
+use crate::fonts::Fonts;
 use crate::math::{Dimen, Point};
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
+use std::cell::{RefCell, RefMut};
+use std::rc::Rc;
+
+pub type CanvasRefMut<'a> = RefMut<'a, WindowCanvas>;
+pub type CanvasRef = Rc<RefCell<WindowCanvas>>;
+
+#[derive(new)]
+pub struct DrawContext<'a> {
+    canvas: CanvasRef,
+    fonts: &'a Fonts<'a>,
+}
+
+impl DrawContext<'_> {
+    pub fn canvas(&self) -> CanvasRefMut {
+        self.canvas.borrow_mut()
+    }
+
+    pub fn fonts(&self) -> &Fonts {
+        self.fonts
+    }
+}
 
 pub trait Render {
-    fn render(&mut self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String>;
+    fn render(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String>;
 
     fn dimen(&self) -> Dimen;
 
@@ -38,7 +60,8 @@ impl RenderRect {
 }
 
 impl Render for RenderRect {
-    fn render(&mut self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
+    fn render(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
+        let mut canvas = ctx.canvas();
         canvas.set_draw_color(self.color);
         canvas.fill_rect(Rect::new(
             pos.x,

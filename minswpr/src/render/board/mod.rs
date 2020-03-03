@@ -1,7 +1,7 @@
 mod cell;
 
 use self::cell::RenderCellBuilder;
-use super::Render;
+use super::{DrawContext, Render};
 use crate::config::CellConfig;
 use crate::fonts::Fonts;
 use crate::math::{Dimen, Point};
@@ -11,15 +11,14 @@ use sdl2::render::WindowCanvas;
 use std::rc::Rc;
 
 #[derive(Clone)]
-pub struct RenderBoard<'a> {
-    fonts: Rc<Fonts<'a>>,
+pub struct RenderBoard {
     board: BoardRef,
     dimen: Dimen,
     cell_config: CellConfig,
 }
 
-impl<'a> RenderBoard<'a> {
-    pub fn new(fonts: Rc<Fonts<'a>>, board: BoardRef, cell_config: CellConfig) -> Self {
+impl RenderBoard {
+    pub fn new(board: BoardRef, cell_config: CellConfig) -> Self {
         let cell_dimen = cell_config.dimen.as_i32();
         let border_width = cell_config.border_width as i32;
 
@@ -34,7 +33,6 @@ impl<'a> RenderBoard<'a> {
         let dimen = point!(board_px_dimen.x as u32, board_px_dimen.y as u32);
 
         Self {
-            fonts,
             board,
             cell_config,
             dimen,
@@ -42,11 +40,11 @@ impl<'a> RenderBoard<'a> {
     }
 }
 
-impl Render for RenderBoard<'_> {
-    fn render(&mut self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
-        render_rect!(self.dimen, self.cell_config.color, canvas, pos)?;
-        self.draw_cell_borders(canvas, pos)?;
-        self.draw_cells(canvas, pos)
+impl Render for RenderBoard {
+    fn render(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
+        render_rect!(self.dimen, self.cell_config.color, ctx, pos)?;
+        self.draw_cell_borders(ctx, pos)?;
+        self.draw_cells(ctx, pos)
     }
 
     fn dimen(&self) -> Dimen {
@@ -54,8 +52,9 @@ impl Render for RenderBoard<'_> {
     }
 }
 
-impl<'a> RenderBoard<'a> {
-    fn draw_cell_borders(&self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
+impl RenderBoard {
+    fn draw_cell_borders(&self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
+        let mut canvas = ctx.canvas();
         canvas.set_draw_color(self.cell_config.border_color);
 
         let cell_config = &self.cell_config;
@@ -89,14 +88,24 @@ impl<'a> RenderBoard<'a> {
         Ok(())
     }
 
-    fn draw_cells(&self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
+    fn draw_cells(&self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
         let b = self.board.borrow();
         for x in 0..b.width() as u32 {
             for y in 0..b.height() as u32 {
-                self.draw_cell(canvas, pos, &self.fonts, x, y)?;
+                self.draw_cell(ctx, pos, x, y)?;
             }
         }
         Ok(())
+    }
+
+    fn draw_cell(&self, ctx: &DrawContext, pos: Point, x: u32, y: u32) -> Result<(), String> {
+        let screen_pos = Self::calc_cell_screen_pos(point!(x, y), pos, &self.cell_config);
+        RenderCellBuilder::default()
+            .board(&self.board.borrow())
+            .board_pos(point!(x, y))
+            .config(&self.cell_config)
+            .build()?
+            .render(ctx, screen_pos)
     }
 
     fn calc_cell_screen_pos(cell_pos: Point<u32>, board_pos: Point, config: &CellConfig) -> Point {
@@ -109,23 +118,5 @@ impl<'a> RenderBoard<'a> {
         let origin = point!(board_pos.x + border_width, board_pos.y + border_width);
 
         origin + delta_pos
-    }
-
-    fn draw_cell(
-        &self,
-        canvas: &mut WindowCanvas,
-        pos: Point,
-        fonts: &Fonts,
-        x: u32,
-        y: u32,
-    ) -> Result<(), String> {
-        let screen_pos = Self::calc_cell_screen_pos(point!(x, y), pos, &self.cell_config);
-        RenderCellBuilder::default()
-            .fonts(fonts)
-            .board(&self.board.borrow())
-            .board_pos(point!(x, y))
-            .config(&self.cell_config)
-            .build()?
-            .render(canvas, screen_pos)
     }
 }

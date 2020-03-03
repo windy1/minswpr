@@ -2,7 +2,7 @@ use super::{Margins, RenderRect};
 use crate::config::ControlConfig;
 use crate::layout::{Layout, LayoutBuilder, Orientation};
 
-pub fn make_layout<'a>(config: &ControlConfig, board_width: u32) -> Layout<'a> {
+pub fn make_layout(config: &ControlConfig, board_width: u32) -> Layout {
     let p = config.padding;
 
     let mut layout = LayoutBuilder::default()

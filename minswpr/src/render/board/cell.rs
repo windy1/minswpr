@@ -1,11 +1,9 @@
 use crate::board::{Board, CellFlags};
 use crate::config::CellConfig;
-use crate::fonts::Fonts;
 use crate::math::{Dimen, Point};
 use crate::render::{DrawContext, Render};
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
-use sdl2::render::WindowCanvas;
 
 #[derive(Builder)]
 pub(super) struct RenderCell<'a> {

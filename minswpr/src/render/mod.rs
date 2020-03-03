@@ -26,10 +26,7 @@ impl DrawContext<'_> {
         self.canvas.borrow_mut()
     }
 
-    pub fn with_canvas<T>(&self, f: T)
-    where
-        T: FnOnce(CanvasRefMut),
-    {
+    pub fn with_canvas(&self, f: impl FnOnce(CanvasRefMut)) {
         f(self.canvas.borrow_mut())
     }
 

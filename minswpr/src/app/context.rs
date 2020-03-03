@@ -1,10 +1,10 @@
 use super::{BoardRef, GameState};
 use crate::config::Config;
 use crate::fonts::Fonts;
-use crate::layout::{Layout, LayoutBase, RenderRef};
+use crate::layout::{Layout, RenderRef};
 use crate::math::Point;
 use crate::render::board::RenderBoard;
-use crate::render::control::RenderControl;
+use crate::render::control;
 use crate::render::{Render, RenderRect};
 use std::cmp;
 use std::rc::Rc;
@@ -15,7 +15,7 @@ pub struct Context<'a> {
     config: Config,
     game_state: GameState,
     board: BoardRef,
-    layout: LayoutBase<'a>,
+    layout: Layout<'a>,
 }
 
 impl<'a> Context<'a> {
@@ -31,11 +31,11 @@ impl<'a> Context<'a> {
         &self.board
     }
 
-    pub fn layout(&self) -> &LayoutBase {
+    pub fn layout(&self) -> &Layout {
         &self.layout
     }
 
-    pub fn layout_mut(&mut self) -> &mut LayoutBase<'a> {
+    pub fn layout_mut(&mut self) -> &mut Layout<'a> {
         &mut self.layout
     }
 
@@ -54,14 +54,7 @@ impl<'a> Context<'a> {
         let board_width = board.dimen().width();
 
         let v: Vec<(&'static str, RenderRef<'a>)> = vec![
-            (
-                "control",
-                Box::new(RenderControl::new(
-                    Rc::clone(&fonts),
-                    cc.clone(),
-                    board_width,
-                )),
-            ),
+            ("control", Box::new(control::make_layout(&cc, board_width))),
             (
                 "spacer",
                 Box::new(RenderRect::new(

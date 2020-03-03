@@ -7,7 +7,7 @@ use crate::board::Board;
 use crate::config::{self, Config};
 use crate::events;
 use crate::fonts::Fonts;
-use crate::layout::LayoutBase;
+use crate::layout::LayoutBuilder;
 use crate::math::{Dimen, Point};
 use crate::render::Render;
 use sdl2::render::WindowCanvas;
@@ -40,19 +40,24 @@ impl Minswpr {
     }
 
     pub fn start(&mut self) -> Result<(), String> {
-        let win = &self.config.window;
-
         let fonts = {
             let mut f = Fonts::new(&self.ttf);
             f.load_from_config(&self.config.fonts)?;
             Rc::new(f)
         };
 
+        let lc = &self.config.layout;
+
         let mut ctx = ContextBuilder::default()
             .config(self.config.clone())
             .game_state(GameState::Ready)
             .board(self.make_board()?)
-            .layout(LayoutBase::new(self.config.layout.clone()))
+            .layout(
+                LayoutBuilder::default()
+                    .color(Some(lc.color))
+                    .padding(lc.padding)
+                    .build()?,
+            )
             .build()?;
 
         lazy_static! {
@@ -84,7 +89,7 @@ impl Minswpr {
 
             ctx.set_game_state(game_state);
 
-            canvas.set_draw_color(win.bg_color);
+            canvas.set_draw_color(self.config.window.bg_color);
             canvas.clear();
             ctx.layout_mut().render(&mut canvas, *LAYOUT_POS)?;
             canvas.present();

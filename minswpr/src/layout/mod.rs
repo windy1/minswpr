@@ -1,7 +1,3 @@
-mod base;
-
-pub use self::base::*;
-
 use crate::math::{Dimen, Point};
 use crate::render::Render;
 use sdl2::pixels::Color;
@@ -10,44 +6,65 @@ use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::fmt;
 
+use self::Orientation::*;
+
 pub type RenderRef<'a> = Box<dyn Render + 'a>;
 pub type ComponentMap<'a> = HashMap<&'static str, Component<'a>>;
 
-pub trait Layout<'a> {
-    fn components(&self) -> &ComponentMap;
+#[derive(Builder)]
+#[builder(pattern = "owned")]
+pub struct Layout<'a> {
+    #[builder(setter(skip))]
+    components: ComponentMap<'a>,
+    #[builder(default)]
+    color: Option<Color>,
+    #[builder(default)]
+    padding: u32,
+    #[builder(default)]
+    orientation: Orientation,
+    #[builder(default)]
+    guides: bool,
+}
 
-    fn components_mut(&mut self) -> &mut ComponentMap<'a>;
-
-    fn color(&self) -> Option<Color> {
-        None
+impl<'a> Layout<'a> {
+    pub fn components(&self) -> &ComponentMap {
+        &self.components
     }
 
-    fn padding(&self) -> u32 {
-        0
+    pub fn components_mut(&mut self) -> &mut ComponentMap<'a> {
+        &mut self.components
     }
 
-    fn orientation(&self) -> Orientation {
-        Default::default()
+    pub fn color(&self) -> Option<Color> {
+        self.color
     }
 
-    fn insert(&mut self, key: &'static str, order: i32, component: RenderRef<'a>) {
+    pub fn padding(&self) -> u32 {
+        self.padding
+    }
+
+    pub fn orientation(&self) -> Orientation {
+        self.orientation
+    }
+
+    pub fn insert(&mut self, key: &'static str, order: i32, component: RenderRef<'a>) {
         self.components_mut()
             .insert(key, Component::new(key, order, component));
     }
 
-    fn insert_all(&mut self, mut components: Vec<(&'static str, RenderRef<'a>)>) {
+    pub fn insert_all(&mut self, mut components: Vec<(&'static str, RenderRef<'a>)>) {
         for (i, c) in components.drain(..).enumerate() {
             self.insert(c.0, i as i32, c.1);
         }
     }
 
-    fn get(&self, key: &'static str) -> Result<&Component, String> {
+    pub fn get(&self, key: &'static str) -> Result<&Component, String> {
         self.components()
             .get(key)
             .ok_or_else(|| format!("missing required layout component `{}`", key))
     }
 
-    fn get_at(&self, x: i32, y: i32) -> Option<&Component> {
+    pub fn get_at(&self, x: i32, y: i32) -> Option<&Component> {
         for component in self.components().values() {
             let Point { x: min_x, y: min_y } = component.pos;
             let cd = component.render.dimen();
@@ -61,52 +78,86 @@ pub trait Layout<'a> {
 
         None
     }
+
+    pub fn draw_guides(&mut self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
+        let Dimen { x: w, y: h } = self.dimen();
+        render_rect!(
+            point!(1, h),
+            color!(magenta),
+            canvas,
+            pos + point!(w / 2, 0).as_i32()
+        )?;
+        render_rect!(
+            point!(w, 1),
+            color!(magenta),
+            canvas,
+            pos + point!(0, h / 2).as_i32()
+        )
+    }
 }
 
-pub fn do_render<'a, T>(layout: &mut T, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String>
-where
-    T: Layout<'a> + Render,
-{
-    if let Some(c) = layout.color() {
-        render_rect!(layout.dimen(), c, canvas, pos)?;
+impl Render for Layout<'_> {
+    fn render(&mut self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
+        if let Some(c) = self.color {
+            render_rect!(self.dimen(), c, canvas, pos)?;
+        }
+
+        let orien = self.orientation;
+        let padding = self.padding;
+        let mut cur = pos + point!(padding, padding).as_i32();
+        let mut components = self.components.values_mut().collect::<Vec<_>>();
+
+        components.sort();
+
+        for component in components {
+            let r = &mut component.render;
+            let m = r.margins();
+
+            component.pos = cur + point!(m.left, m.top).as_i32();
+            r.render(canvas, component.pos)?;
+
+            let d = r.dimen();
+
+            cur += match &orien {
+                Vertical => point!(0, d.height() + m.bottom + m.top).as_i32(),
+                Horizontal => point!(d.width() + m.right + m.left, 0).as_i32(),
+            };
+        }
+
+        if self.guides {
+            self.draw_guides(canvas, pos)
+        } else {
+            Ok(())
+        }
     }
 
-    let orien = layout.orientation();
-    let padding = layout.padding();
-    let mut cur = pos + point!(padding, padding).as_i32();
-    let mut components = layout.components_mut().values_mut().collect::<Vec<_>>();
+    fn dimen(&self) -> Dimen {
+        let padding = self.padding;
+        let values = || self.components.values();
 
-    components.sort();
+        let margins: Dimen = values()
+            .map(|c| c.render.margins())
+            .map(|m| point!(m.left + m.right, m.top + m.bottom))
+            .sum();
 
-    for component in components {
-        let r = &mut component.render;
-        let m = r.margins();
-
-        component.pos = cur + point!(m.left, m.top).as_i32();
-        r.render(canvas, component.pos)?;
-
-        let d = r.dimen();
-
-        cur += match &orien {
-            Orientation::Vertical => point!(0, d.height() + m.bottom + m.top).as_i32(),
-            Orientation::Horizontal => point!(d.width() + m.right + m.left, 0).as_i32(),
-        };
+        match self.orientation {
+            Vertical => {
+                let width = values().map(|c| c.render.dimen().width()).max().unwrap();
+                values().fold(point!(width, 0), |a, b| a + (0, b.render.dimen().height()))
+                    + (padding * 2, padding * 2)
+                    + margins
+            }
+            Horizontal => {
+                let height = values().map(|c| c.render.dimen().height()).max().unwrap();
+                values().fold(point!(0, height), |a, b| a + (b.render.dimen().width(), 0))
+                    + (padding * 2, padding * 2)
+                    + margins
+            }
+        }
     }
-
-    Ok(())
 }
 
-pub fn calc_dimen<'a, T>(layout: &T) -> Dimen
-where
-    T: Layout<'a>,
-{
-    let padding = layout.padding();
-    let values = || layout.components().values();
-    let width = values().map(|c| c.render.dimen().width()).max().unwrap();
-    values().fold(point!(width, 0), |a, b| a + (0, b.render.dimen().height()))
-        + (padding * 2, padding * 2)
-}
-
+#[derive(Debug, Clone, Copy)]
 pub enum Orientation {
     Vertical,
     Horizontal,

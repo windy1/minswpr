@@ -1,5 +1,6 @@
 use super::board::CellFlags;
 use super::math::Point;
+use crate::layout::Layout;
 use crate::{Context, GameState};
 use sdl2::keyboard::Keycode;
 use sdl2::mouse::MouseButton;
@@ -71,6 +72,21 @@ impl MouseUp<'_> {
             ctx.game_state()
         }
     }
+
+    fn click_control(&self, x: i32, y: i32) -> GameState {
+        self.context
+            .layout()
+            .get("control")
+            .unwrap()
+            .draw_ref()
+            .as_ref()
+            .downcast_ref::<Layout>()
+            .expect("Draw downcast to Layout failed on `control`")
+            .get_at(x, y)
+            .filter(|c| c.id() == "reset_button")
+            .and_then(|_| Some(GameState::Reset))
+            .unwrap_or_else(|| self.context.game_state())
+    }
 }
 
 impl Execute for MouseUp<'_> {
@@ -84,7 +100,7 @@ impl Execute for MouseUp<'_> {
         match ctx.layout().get_at(x, y) {
             Some(c) => match c.id() {
                 "board" => Ok(self.click_cell(x, y)),
-                "control" => Ok(game_state),
+                "control" => Ok(self.click_control(x, y)),
                 _ => Ok(game_state),
             },
             None => Ok(game_state),

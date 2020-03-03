@@ -9,6 +9,7 @@ use crate::math::{Dimen, Point};
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
+use std::any::Any;
 use std::cell::{RefCell, RefMut};
 use std::rc::Rc;
 
@@ -35,7 +36,7 @@ impl DrawContext<'_> {
     }
 }
 
-pub trait Draw {
+pub trait Draw: AsRef<dyn Any> {
     fn draw(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String>;
 
     fn dimen(&self) -> Dimen;
@@ -45,7 +46,7 @@ pub trait Draw {
     }
 }
 
-#[derive(new)]
+#[derive(new, AsAny)]
 pub struct DrawRect {
     dimen: Dimen,
     color: Color,

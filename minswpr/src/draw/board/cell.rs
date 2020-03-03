@@ -12,8 +12,8 @@ pub(super) struct DrawCell<'a> {
     config: &'a CellConfig,
 }
 
-impl Draw for DrawCell<'_> {
-    fn draw(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
+impl DrawCell<'_> {
+    pub fn draw(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
         let cell = self.board.cell(self.board_pos.x, self.board_pos.y);
         let config = &self.config;
         let mines = &config.mines;
@@ -44,12 +44,6 @@ impl Draw for DrawCell<'_> {
         Ok(())
     }
 
-    fn dimen(&self) -> Dimen {
-        self.config.dimen
-    }
-}
-
-impl DrawCell<'_> {
     fn draw_centered_rect(
         &self,
         ctx: &DrawContext,

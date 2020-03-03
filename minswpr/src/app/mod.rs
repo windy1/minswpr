@@ -51,10 +51,6 @@ impl Minswpr {
             .layout(self.make_layout(&board)?)
             .build()?;
 
-        lazy_static! {
-            static ref LAYOUT_POS: Point = point!(0, 0);
-        }
-
         let fonts = {
             let mut f = Fonts::new(&self.ttf);
             f.load_from_config(&self.config.fonts)?;
@@ -66,6 +62,10 @@ impl Minswpr {
             c.clear();
             c.present();
         });
+
+        lazy_static! {
+            static ref LAYOUT_POS: Point = point!(0, 0);
+        }
 
         'main: loop {
             for event in self.event_pump.poll_iter() {

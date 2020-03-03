@@ -7,7 +7,7 @@ use std::fmt;
 
 use self::Orientation::*;
 
-#[derive(Builder)]
+#[derive(Builder, AsAny)]
 pub struct Layout {
     #[builder(setter(skip))]
     components: HashMap<&'static str, Component>,

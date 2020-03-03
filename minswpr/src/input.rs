@@ -84,7 +84,7 @@ impl MouseUp<'_> {
             .expect("Draw downcast to Layout failed on `control`")
             .get_at(x, y)
             .filter(|c| c.id() == "reset_button")
-            .and_then(|_| Some(GameState::Reset))
+            .map(|_| GameState::Reset)
             .unwrap_or_else(|| self.context.game_state())
     }
 }

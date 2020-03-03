@@ -79,7 +79,7 @@ impl<'a> Layout<'a> {
         None
     }
 
-    pub fn draw_guides(&mut self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
+    fn draw_guides(&mut self, canvas: &mut WindowCanvas, pos: Point) -> Result<(), String> {
         let Dimen { x: w, y: h } = self.dimen();
         render_rect!(
             point!(1, h),

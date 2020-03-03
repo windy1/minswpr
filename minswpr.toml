@@ -5,6 +5,8 @@ bg_color = "#ffffff"
 
 [fonts]
 "board.cell" = { path = "/Library/Fonts/Arial.ttf", pt = 12 }
+"control.flag_counter" = { path = "/usr/share/fonts/truetype/ubuntu/Ubuntu-M.ttf", pt = 22 }
+"control.stopwatch" = { path = "/usr/share/fonts/truetype/ubuntu/Ubuntu-M.ttf", pt = 22 }
 
 [layout]
 padding = 5

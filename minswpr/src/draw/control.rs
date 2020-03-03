@@ -1,17 +1,31 @@
 use super::{Draw, DrawRect, Margins};
 use crate::config::{ControlConfig, LedDisplayConfig};
+use crate::draw::text::TextResult;
+use crate::draw::text::{self, Text};
 use crate::draw::DrawContext;
 use crate::layout::{Layout, LayoutBuilder, Orientation};
 use crate::math::{Dimen, Point};
+use crate::utils;
+use crate::BoardRef;
+use sdl2::rect::Rect;
+use std::rc::Rc;
+
+use self::LedDisplayKind::*;
 
 #[derive(new, AsAny)]
 pub struct DrawLedDisplay {
+    kind: LedDisplayKind,
     config: LedDisplayConfig,
+}
+
+pub enum LedDisplayKind {
+    FlagCounter { board: BoardRef },
+    Stopwatch,
 }
 
 impl Draw for DrawLedDisplay {
     fn draw(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
-        render_rect!(self.dimen(), self.config.color, ctx, pos)
+        self.draw_text(ctx, pos)
     }
 
     fn dimen(&self) -> Dimen {
@@ -20,12 +34,33 @@ impl Draw for DrawLedDisplay {
 }
 
 impl DrawLedDisplay {
-    fn draw_text(&mut self, _ctx: &DrawContext, _pos: Point) -> Result<(), String> {
-        Ok(())
+    fn draw_text(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
+        let text = self.make_text(ctx)?;
+        let tq = text.query();
+        let pos = pos + point!(self.dimen().width(), 0).as_i32() - point!(tq.width, 0).as_i32();
+
+        ctx.canvas().copy(
+            text.texture(),
+            None,
+            Some(Rect::new(pos.x, pos.y, tq.width, tq.height)),
+        )
+    }
+
+    fn make_text<'a>(&self, ctx: &'a DrawContext<'a>) -> TextResult<'a> {
+        text::make_text(ctx, match &self.kind {
+            FlagCounter { board } => {
+                let flags_remaining =
+                    utils::borrow_safe(&board, |b| b.num_mines() as i32 - b.count_flags() as i32);
+                Text::new(flags_remaining, "control.flag_counter", color!(red))
+            }
+            Stopwatch => Text::new(0, "control.stopwatch", color!(red)),
+        })
     }
 }
 
-pub fn make_layout(config: &ControlConfig, board_width: u32) -> Layout {
+pub fn make_layout(config: &ControlConfig, board_width: u32, board: &BoardRef) -> Layout {
+    // TODO: Return result type
+
     let p = config.padding;
 
     let mut layout = LayoutBuilder::default()
@@ -44,7 +79,15 @@ pub fn make_layout(config: &ControlConfig, board_width: u32) -> Layout {
     layout.insert_all(vec![
         (
             "flag_counter",
-            Box::new(DrawLedDisplay::new(config.flag_counter.clone())),
+            Box::new(
+                self::make_led_display(
+                    FlagCounter {
+                        board: Rc::clone(board),
+                    },
+                    &config.flag_counter,
+                )
+                .unwrap(),
+            ),
         ),
         (
             "reset_button",
@@ -56,9 +99,21 @@ pub fn make_layout(config: &ControlConfig, board_width: u32) -> Layout {
         ),
         (
             "stopwatch",
-            Box::new(DrawLedDisplay::new(config.stopwatch.clone())),
+            Box::new(self::make_led_display(Stopwatch, &config.stopwatch).unwrap()),
         ),
     ]);
 
     layout
+}
+
+pub fn make_led_display(kind: LedDisplayKind, config: &LedDisplayConfig) -> Result<Layout, String> {
+    let mut layout = LayoutBuilder::default()
+        .color(Some(config.color))
+        .padding(config.padding)
+        .build()?;
+
+    let text = Box::new(DrawLedDisplay::new(kind, config.clone()));
+    layout.insert("text", 0, text);
+
+    Ok(layout)
 }

@@ -120,14 +120,17 @@ impl Minswpr {
 
         let cc = &self.config.control;
 
-        let board = Box::new(DrawBoard::new(
+        let board_draw = Box::new(DrawBoard::new(
             Rc::clone(&board),
             self.config.board.cells.clone(),
         ));
-        let board_width = board.dimen().width();
+        let board_width = board_draw.dimen().width();
 
         layout.insert_all(vec![
-            ("control", Box::new(control::make_layout(&cc, board_width))),
+            (
+                "control",
+                Box::new(control::make_layout(&cc, board_width, &board)),
+            ),
             (
                 "spacer",
                 Box::new(DrawRect::new(
@@ -135,7 +138,7 @@ impl Minswpr {
                     cc.spacer_color,
                 )),
             ),
-            ("board", board),
+            ("board", board_draw),
         ]);
 
         Ok(layout)

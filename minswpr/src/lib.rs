@@ -26,3 +26,15 @@ pub mod layout;
 
 pub use app::context::*;
 pub use app::*;
+
+pub mod utils {
+    use std::cell::{Ref, RefCell};
+    use std::rc::Rc;
+
+    pub fn borrow_safe<T, F, R>(a: &Rc<RefCell<T>>, f: F) -> R
+    where
+        F: FnOnce(Ref<T>) -> R,
+    {
+        f(a.borrow())
+    }
+}

@@ -59,6 +59,7 @@ pub struct LedDisplayConfig {
     pub dimen: Dimen,
     #[serde(deserialize_with = "read_color")]
     pub color: Color,
+    pub padding: u32,
 }
 
 #[derive(Deserialize, Clone)]

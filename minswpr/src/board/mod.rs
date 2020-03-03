@@ -79,6 +79,13 @@ impl Board {
         }
     }
 
+    pub fn count_flags(&self) -> usize {
+        self.cells
+            .iter()
+            .filter(|c| c.contains(CellFlags::FLAG))
+            .count()
+    }
+
     pub fn reveal_from(&mut self, x: u32, y: u32) -> u32 {
         let mut count = 0;
         self._reveal_from(x, y, &mut count);

@@ -1,5 +1,5 @@
+use crate::draw::{Draw, DrawContext};
 use crate::math::{Dimen, Point};
-use crate::render::{DrawContext, Render};
 use sdl2::pixels::Color;
 use std::cmp::Ordering;
 use std::collections::{hash_map, HashMap};
@@ -34,12 +34,12 @@ impl Layout {
         self.orientation
     }
 
-    pub fn insert(&mut self, key: &'static str, order: i32, component: Box<dyn Render>) {
+    pub fn insert(&mut self, key: &'static str, order: i32, component: Box<dyn Draw>) {
         self.components
             .insert(key, Component::new(key, order, component));
     }
 
-    pub fn insert_all(&mut self, mut components: Vec<(&'static str, Box<dyn Render>)>) {
+    pub fn insert_all(&mut self, mut components: Vec<(&'static str, Box<dyn Draw>)>) {
         for (i, c) in components.drain(..).enumerate() {
             self.insert(c.0, i as i32, c.1);
         }
@@ -54,7 +54,7 @@ impl Layout {
     pub fn get_at(&self, x: i32, y: i32) -> Option<&Component> {
         for component in self.components.values() {
             let Point { x: min_x, y: min_y } = component.pos;
-            let cd = component.render.dimen();
+            let cd = component.draw_ref.dimen();
             let max_x = min_x + cd.width() as i32;
             let max_y = min_y + cd.height() as i32;
 
@@ -67,8 +67,8 @@ impl Layout {
     }
 }
 
-impl Render for Layout {
-    fn render(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
+impl Draw for Layout {
+    fn draw(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
         if let Some(c) = self.color {
             render_rect!(self.dimen(), c, ctx, pos)?;
         }
@@ -81,11 +81,11 @@ impl Render for Layout {
         components.sort();
 
         for component in components {
-            let r = &mut component.render;
+            let r = &mut component.draw_ref;
             let m = r.margins();
 
             component.pos = cur + point!(m.left, m.top).as_i32();
-            r.render(ctx, component.pos)?;
+            r.draw(ctx, component.pos)?;
 
             let d = r.dimen();
 
@@ -143,14 +143,14 @@ impl Layout {
 
     fn component_max_height(&self) -> u32 {
         self.component_values()
-            .map(|c| c.render.dimen().width())
+            .map(|c| c.draw_ref.dimen().width())
             .max()
             .unwrap_or_else(|| 0)
     }
 
     fn component_max_width(&self) -> u32 {
         self.component_values()
-            .map(|c| c.render.dimen().height())
+            .map(|c| c.draw_ref.dimen().height())
             .max()
             .unwrap_or_else(|| 0)
     }
@@ -158,12 +158,12 @@ impl Layout {
     fn calc_dimen(&self, initial: Dimen, acc: impl Fn(Dimen, Dimen) -> Dimen) -> Dimen {
         let margins: Dimen = self
             .component_values()
-            .map(|c| c.render.margins())
+            .map(|c| c.draw_ref.margins())
             .map(|m| point!(m.left + m.right, m.top + m.bottom))
             .sum();
 
         self.component_values()
-            .map(|c| c.render.dimen())
+            .map(|c| c.draw_ref.dimen())
             .fold(initial, |a, b| acc(a, b))
             + (self.padding * 2, self.padding * 2)
             + margins
@@ -186,7 +186,7 @@ impl Default for Orientation {
 pub struct Component {
     id: &'static str,
     order: i32,
-    render: Box<dyn Render>,
+    draw_ref: Box<dyn Draw>,
     #[new(default)]
     pos: Point,
 }
@@ -200,8 +200,8 @@ impl Component {
         &self.pos
     }
 
-    pub fn render(&self) -> &dyn Render {
-        &*self.render
+    pub fn draw_ref(&self) -> &dyn Draw {
+        &*self.draw_ref
     }
 }
 
@@ -232,7 +232,7 @@ impl fmt::Debug for Component {
             "Component {{ order: {}, pos: {:?}, dimen: {:?} }}",
             self.order,
             self.pos,
-            self.render.dimen()
+            self.draw_ref.dimen()
         )
     }
 }

@@ -1,20 +1,20 @@
 mod cell;
 
-use self::cell::RenderCellBuilder;
-use super::{DrawContext, Render};
+use self::cell::DrawCellBuilder;
+use super::{Draw, DrawContext};
 use crate::config::CellConfig;
 use crate::math::{Dimen, Point};
 use crate::BoardRef;
 use sdl2::rect::Rect;
 
 #[derive(Clone)]
-pub struct RenderBoard {
+pub struct DrawBoard {
     board: BoardRef,
     dimen: Dimen,
     cell_config: CellConfig,
 }
 
-impl RenderBoard {
+impl DrawBoard {
     pub fn new(board: BoardRef, cell_config: CellConfig) -> Self {
         let cell_dimen = cell_config.dimen.as_i32();
         let border_width = cell_config.border_width as i32;
@@ -37,8 +37,8 @@ impl RenderBoard {
     }
 }
 
-impl Render for RenderBoard {
-    fn render(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
+impl Draw for DrawBoard {
+    fn draw(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
         render_rect!(self.dimen, self.cell_config.color, ctx, pos)?;
         self.draw_cell_borders(ctx, pos)?;
         self.draw_cells(ctx, pos)
@@ -49,7 +49,7 @@ impl Render for RenderBoard {
     }
 }
 
-impl RenderBoard {
+impl DrawBoard {
     fn draw_cell_borders(&self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
         let mut canvas = ctx.canvas();
         canvas.set_draw_color(self.cell_config.border_color);
@@ -97,12 +97,12 @@ impl RenderBoard {
 
     fn draw_cell(&self, ctx: &DrawContext, pos: Point, x: u32, y: u32) -> Result<(), String> {
         let screen_pos = Self::calc_cell_screen_pos(point!(x, y), pos, &self.cell_config);
-        RenderCellBuilder::default()
+        DrawCellBuilder::default()
             .board(&self.board.borrow())
             .board_pos(point!(x, y))
             .config(&self.cell_config)
             .build()?
-            .render(ctx, screen_pos)
+            .draw(ctx, screen_pos)
     }
 
     fn calc_cell_screen_pos(cell_pos: Point<u32>, board_pos: Point, config: &CellConfig) -> Point {

@@ -1,7 +1,6 @@
 pub(super) mod context;
 
 pub use self::context::*;
-use crate::layout::LayoutResult;
 
 use self::ContextBuilder;
 use crate::board::Board;
@@ -12,6 +11,7 @@ use crate::draw::{CanvasRef, Draw, DrawContext, DrawRect};
 use crate::events;
 use crate::fonts::Fonts;
 use crate::layout::LayoutBuilder;
+use crate::layout::LayoutResult;
 use crate::math::{Dimen, Point};
 use sdl2::ttf::Sdl2TtfContext;
 use sdl2::{self, EventPump, VideoSubsystem};

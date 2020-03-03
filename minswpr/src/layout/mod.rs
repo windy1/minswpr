@@ -7,6 +7,8 @@ use std::fmt;
 
 use self::Orientation::*;
 
+pub type LayoutResult = Result<Layout, String>;
+
 #[derive(Builder, AsAny)]
 pub struct Layout {
     #[builder(setter(skip))]

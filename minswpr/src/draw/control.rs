@@ -3,6 +3,7 @@ use crate::config::{ControlConfig, LedDisplayConfig};
 use crate::draw::text::TextResult;
 use crate::draw::text::{self, Text};
 use crate::draw::DrawContext;
+use crate::layout::LayoutResult;
 use crate::layout::{Layout, LayoutBuilder, Orientation};
 use crate::math::{Dimen, Point};
 use crate::utils;
@@ -58,17 +59,14 @@ impl DrawLedDisplay {
     }
 }
 
-pub fn make_layout(config: &ControlConfig, board_width: u32, board: &BoardRef) -> Layout {
-    // TODO: Return result type
-
+pub fn make_layout(config: &ControlConfig, board_width: u32, board: &BoardRef) -> LayoutResult {
     let p = config.padding;
 
     let mut layout = LayoutBuilder::default()
         .color(Some(config.color))
         .padding(p)
         .orientation(Orientation::Horizontal)
-        .build()
-        .unwrap();
+        .build()?;
 
     let btn_dimen = config.reset_button_dimen;
     let w = board_width;
@@ -79,15 +77,12 @@ pub fn make_layout(config: &ControlConfig, board_width: u32, board: &BoardRef) -
     layout.insert_all(vec![
         (
             "flag_counter",
-            Box::new(
-                self::make_led_display(
-                    FlagCounter {
-                        board: Rc::clone(board),
-                    },
-                    &config.flag_counter,
-                )
-                .unwrap(),
-            ),
+            Box::new(self::make_led_display(
+                FlagCounter {
+                    board: Rc::clone(board),
+                },
+                &config.flag_counter,
+            )?),
         ),
         (
             "reset_button",
@@ -99,11 +94,11 @@ pub fn make_layout(config: &ControlConfig, board_width: u32, board: &BoardRef) -
         ),
         (
             "stopwatch",
-            Box::new(self::make_led_display(Stopwatch, &config.stopwatch).unwrap()),
+            Box::new(self::make_led_display(Stopwatch, &config.stopwatch)?),
         ),
     ]);
 
-    layout
+    Ok(layout)
 }
 
 pub fn make_led_display(kind: LedDisplayKind, config: &LedDisplayConfig) -> Result<Layout, String> {

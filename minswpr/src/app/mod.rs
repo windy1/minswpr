@@ -1,7 +1,7 @@
 pub(super) mod context;
 
 pub use self::context::*;
-use crate::layout::Layout;
+use crate::layout::LayoutResult;
 
 use self::ContextBuilder;
 use crate::board::Board;
@@ -111,7 +111,7 @@ impl Minswpr {
         Ok(Rc::new(RefCell::new(Board::new(w, h, bc.mine_frequency)?)))
     }
 
-    fn make_layout(&self, board: &BoardRef) -> Result<Layout, String> {
+    fn make_layout(&self, board: &BoardRef) -> LayoutResult {
         let lc = &self.config.layout;
         let mut layout = LayoutBuilder::default()
             .color(Some(lc.color))
@@ -129,7 +129,7 @@ impl Minswpr {
         layout.insert_all(vec![
             (
                 "control",
-                Box::new(control::make_layout(&cc, board_width, &board)),
+                Box::new(control::make_layout(&cc, board_width, &board)?),
             ),
             (
                 "spacer",

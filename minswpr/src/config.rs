@@ -47,15 +47,18 @@ pub struct ControlConfig {
     #[serde(deserialize_with = "read_color")]
     pub color: Color,
     pub padding: u32,
-    pub flag_counter_dimen: Dimen,
-    #[serde(deserialize_with = "read_color")]
-    pub flag_counter_color: Color,
-    pub stopwatch_dimen: Dimen,
-    #[serde(deserialize_with = "read_color")]
-    pub stopwatch_color: Color,
     pub reset_button_dimen: Dimen,
     #[serde(deserialize_with = "read_color")]
     pub reset_button_color: Color,
+    pub flag_counter: LedDisplayConfig,
+    pub stopwatch: LedDisplayConfig,
+}
+
+#[derive(Deserialize, Clone)]
+pub struct LedDisplayConfig {
+    pub dimen: Dimen,
+    #[serde(deserialize_with = "read_color")]
+    pub color: Color,
 }
 
 #[derive(Deserialize, Clone)]

@@ -3,23 +3,37 @@ mod macros;
 
 pub mod board;
 pub mod control;
+pub mod text;
 
 use crate::fonts::Fonts;
 use crate::math::{Dimen, Point};
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
-use sdl2::render::WindowCanvas;
+use sdl2::render::{TextureCreator, WindowCanvas};
+use sdl2::video::WindowContext;
 use std::any::Any;
 use std::cell::{RefCell, RefMut};
 use std::rc::Rc;
 
+pub trait Draw: AsRef<dyn Any> {
+    fn draw(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String>;
+
+    fn dimen(&self) -> Dimen;
+
+    fn margins(&self) -> Margins {
+        Default::default()
+    }
+}
+
 pub type CanvasRefMut<'a> = RefMut<'a, WindowCanvas>;
 pub type CanvasRef = Rc<RefCell<WindowCanvas>>;
+pub type Textures = TextureCreator<WindowContext>;
 
 #[derive(new)]
 pub struct DrawContext<'a> {
     canvas: CanvasRef,
     fonts: &'a Fonts<'a>,
+    textures: Textures,
 }
 
 impl DrawContext<'_> {
@@ -34,15 +48,9 @@ impl DrawContext<'_> {
     pub fn fonts(&self) -> &Fonts {
         self.fonts
     }
-}
 
-pub trait Draw: AsRef<dyn Any> {
-    fn draw(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String>;
-
-    fn dimen(&self) -> Dimen;
-
-    fn margins(&self) -> Margins {
-        Default::default()
+    pub fn textures(&self) -> &Textures {
+        &self.textures
     }
 }
 

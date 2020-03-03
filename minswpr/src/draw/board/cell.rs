@@ -1,5 +1,6 @@
 use crate::board::{Board, CellFlags};
 use crate::config::CellConfig;
+use crate::draw::text::{self, Text};
 use crate::draw::{Draw, DrawContext};
 use crate::math::{Dimen, Point};
 use sdl2::pixels::Color;
@@ -57,28 +58,15 @@ impl DrawCell<'_> {
     }
 
     fn draw_hint(&self, ctx: &DrawContext, pos: Point, hint: usize) -> Result<(), String> {
-        let mut canvas = ctx.canvas();
-        let textures = canvas.texture_creator();
-
-        let surface = ctx
-            .fonts()
-            .get("board.cell")?
-            .render(&hint.to_string())
-            .blended(color!(green))
-            .map_err(|e| e.to_string())?;
-
-        let texture = textures
-            .create_texture_from_surface(&surface)
-            .map_err(|e| e.to_string())?;
-
-        let tq = texture.query();
+        let text = text::make_text(ctx, Text::new(hint, "board.cell", color!(green)))?;
+        let tq = text.query();
 
         let cell_dimen = &self.config.dimen.as_i32();
         let tex_dimen = point!(tq.width as i32, tq.height as i32);
         let hint_pos = pos + *cell_dimen / (2, 2) - tex_dimen / (2, 2);
 
-        canvas.copy(
-            &texture,
+        ctx.canvas().copy(
+            text.texture(),
             None,
             Some(Rect::new(hint_pos.x, hint_pos.y, tq.width, tq.height)),
         )

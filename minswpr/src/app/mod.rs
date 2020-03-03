@@ -57,7 +57,12 @@ impl Minswpr {
             f
         };
 
-        let draw = DrawContext::new(self.make_canvas(ctx.layout().dimen())?, &fonts);
+        let draw = {
+            let canvas = self.make_canvas(ctx.layout().dimen())?;
+            let textures = canvas.borrow().texture_creator();
+            DrawContext::new(canvas, &fonts, textures)
+        };
+
         draw.with_canvas(|mut c| {
             c.clear();
             c.present();

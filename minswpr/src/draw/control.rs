@@ -1,6 +1,29 @@
-use super::{DrawRect, Margins};
-use crate::config::ControlConfig;
+use super::{Draw, DrawRect, Margins};
+use crate::config::{ControlConfig, LedDisplayConfig};
+use crate::draw::DrawContext;
 use crate::layout::{Layout, LayoutBuilder, Orientation};
+use crate::math::{Dimen, Point};
+
+#[derive(new, AsAny)]
+pub struct DrawLedDisplay {
+    config: LedDisplayConfig,
+}
+
+impl Draw for DrawLedDisplay {
+    fn draw(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
+        render_rect!(self.dimen(), self.config.color, ctx, pos)
+    }
+
+    fn dimen(&self) -> Dimen {
+        self.config.dimen
+    }
+}
+
+impl DrawLedDisplay {
+    fn draw_text(&mut self, _ctx: &DrawContext, _pos: Point) -> Result<(), String> {
+        Ok(())
+    }
+}
 
 pub fn make_layout(config: &ControlConfig, board_width: u32) -> Layout {
     let p = config.padding;
@@ -13,19 +36,15 @@ pub fn make_layout(config: &ControlConfig, board_width: u32) -> Layout {
         .unwrap();
 
     let btn_dimen = config.reset_button_dimen;
-    let btn_width = btn_dimen.width();
-    let flag_counter_dimen = config.flag_counter_dimen;
-    let stopwatch_dimen = config.stopwatch_dimen;
-
     let w = board_width;
-
-    let btn_left = w / 2 - btn_width / 2 - flag_counter_dimen.width() - p;
-    let btn_right = w / 2 - btn_width / 2 - stopwatch_dimen.width() - p;
+    let btn_width = btn_dimen.width();
+    let btn_left = w / 2 - btn_width / 2 - config.flag_counter.dimen.width() - p;
+    let btn_right = w / 2 - btn_width / 2 - config.stopwatch.dimen.width() - p;
 
     layout.insert_all(vec![
         (
             "flag_counter",
-            Box::new(DrawRect::new(flag_counter_dimen, config.flag_counter_color)),
+            Box::new(DrawLedDisplay::new(config.flag_counter.clone())),
         ),
         (
             "reset_button",
@@ -37,7 +56,7 @@ pub fn make_layout(config: &ControlConfig, board_width: u32) -> Layout {
         ),
         (
             "stopwatch",
-            Box::new(DrawRect::new(stopwatch_dimen, config.stopwatch_color)),
+            Box::new(DrawLedDisplay::new(config.stopwatch.clone())),
         ),
     ]);
 

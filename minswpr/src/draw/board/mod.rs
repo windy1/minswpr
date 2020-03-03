@@ -7,7 +7,7 @@ use crate::math::{Dimen, Point};
 use crate::BoardRef;
 use sdl2::rect::Rect;
 
-#[derive(Clone, AsAny)]
+#[derive(AsAny)]
 pub struct DrawBoard {
     board: BoardRef,
     dimen: Dimen,

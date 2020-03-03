@@ -35,8 +35,8 @@ impl DrawContext<'_> {
     }
 }
 
-pub trait Render {
-    fn render(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String>;
+pub trait Draw {
+    fn draw(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String>;
 
     fn dimen(&self) -> Dimen;
 
@@ -46,14 +46,14 @@ pub trait Render {
 }
 
 #[derive(new)]
-pub struct RenderRect {
+pub struct DrawRect {
     dimen: Dimen,
     color: Color,
     #[new(default)]
     margins: Margins,
 }
 
-impl RenderRect {
+impl DrawRect {
     pub fn with_margins(dimen: Dimen, color: Color, margins: Margins) -> Self {
         Self {
             dimen,
@@ -63,8 +63,8 @@ impl RenderRect {
     }
 }
 
-impl Render for RenderRect {
-    fn render(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
+impl Draw for DrawRect {
+    fn draw(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
         let mut canvas = ctx.canvas();
         canvas.set_draw_color(self.color);
         canvas.fill_rect(Rect::new(

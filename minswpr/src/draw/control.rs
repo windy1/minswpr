@@ -1,4 +1,4 @@
-use super::{Margins, RenderRect};
+use super::{DrawRect, Margins};
 use crate::config::ControlConfig;
 use crate::layout::{Layout, LayoutBuilder, Orientation};
 
@@ -25,14 +25,11 @@ pub fn make_layout(config: &ControlConfig, board_width: u32) -> Layout {
     layout.insert_all(vec![
         (
             "flag_counter",
-            Box::new(RenderRect::new(
-                flag_counter_dimen,
-                config.flag_counter_color,
-            )),
+            Box::new(DrawRect::new(flag_counter_dimen, config.flag_counter_color)),
         ),
         (
             "reset_button",
-            Box::new(RenderRect::with_margins(
+            Box::new(DrawRect::with_margins(
                 btn_dimen,
                 config.reset_button_color,
                 *Margins::new().left(btn_left).right(btn_right),
@@ -40,7 +37,7 @@ pub fn make_layout(config: &ControlConfig, board_width: u32) -> Layout {
         ),
         (
             "stopwatch",
-            Box::new(RenderRect::new(stopwatch_dimen, config.stopwatch_color)),
+            Box::new(DrawRect::new(stopwatch_dimen, config.stopwatch_color)),
         ),
     ]);
 

@@ -6,13 +6,13 @@ use crate::layout::Layout;
 use self::ContextBuilder;
 use crate::board::Board;
 use crate::config::{self, Config};
+use crate::draw::board::DrawBoard;
+use crate::draw::control;
+use crate::draw::{CanvasRef, Draw, DrawContext, DrawRect};
 use crate::events;
 use crate::fonts::Fonts;
 use crate::layout::LayoutBuilder;
 use crate::math::{Dimen, Point};
-use crate::render::board::RenderBoard;
-use crate::render::control;
-use crate::render::{CanvasRef, DrawContext, Render, RenderRect};
 use sdl2::ttf::Sdl2TtfContext;
 use sdl2::{self, EventPump, VideoSubsystem};
 use std::cell::RefCell;
@@ -91,7 +91,7 @@ impl Minswpr {
                 c.clear();
             });
 
-            ctx.layout_mut().render(&draw, *LAYOUT_POS)?;
+            ctx.layout_mut().draw(&draw, *LAYOUT_POS)?;
             draw.canvas().present();
 
             thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
@@ -115,7 +115,7 @@ impl Minswpr {
 
         let cc = &self.config.control;
 
-        let board = Box::new(RenderBoard::new(
+        let board = Box::new(DrawBoard::new(
             Rc::clone(&board),
             self.config.board.cells.clone(),
         ));
@@ -125,7 +125,7 @@ impl Minswpr {
             ("control", Box::new(control::make_layout(&cc, board_width))),
             (
                 "spacer",
-                Box::new(RenderRect::new(
+                Box::new(DrawRect::new(
                     point!(board_width, cc.spacer_height),
                     cc.spacer_color,
                 )),

@@ -14,7 +14,7 @@ extern crate lazy_static;
 #[macro_use]
 pub mod math;
 #[macro_use]
-pub mod render;
+pub mod draw;
 
 mod app;
 pub mod board;

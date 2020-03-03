@@ -1,19 +1,19 @@
 use crate::board::{Board, CellFlags};
 use crate::config::CellConfig;
+use crate::draw::{Draw, DrawContext};
 use crate::math::{Dimen, Point};
-use crate::render::{DrawContext, Render};
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 
 #[derive(Builder)]
-pub(super) struct RenderCell<'a> {
+pub(super) struct DrawCell<'a> {
     board: &'a Board,
     board_pos: Point<u32>,
     config: &'a CellConfig,
 }
 
-impl Render for RenderCell<'_> {
-    fn render(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
+impl Draw for DrawCell<'_> {
+    fn draw(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
         let cell = self.board.cell(self.board_pos.x, self.board_pos.y);
         let config = &self.config;
         let mines = &config.mines;
@@ -49,7 +49,7 @@ impl Render for RenderCell<'_> {
     }
 }
 
-impl RenderCell<'_> {
+impl DrawCell<'_> {
     fn draw_centered_rect(
         &self,
         ctx: &DrawContext,

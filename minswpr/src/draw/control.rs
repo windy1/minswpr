@@ -71,8 +71,18 @@ pub fn make_layout(config: &ControlConfig, board_width: u32, board: &BoardRef) -
     let btn_dimen = config.reset_button_dimen;
     let w = board_width;
     let btn_width = btn_dimen.width();
-    let btn_left = w / 2 - btn_width / 2 - config.flag_counter.dimen.width() - p;
-    let btn_right = w / 2 - btn_width / 2 - config.stopwatch.dimen.width() - p;
+    let fc = &config.flag_counter;
+    let sw = &config.stopwatch;
+
+    let btn_left = w / 2 - btn_width / 2 - fc.dimen.width() - p - fc.padding * 2;
+    let btn_right = w / 2 - btn_width / 2 - sw.dimen.width() - p - sw.padding * 2;
+
+    println!("p = {}", p);
+    println!("btn_left = {}", btn_left);
+    println!("btn_right = {}", btn_right);
+    println!("flag_counter = {}", fc.dimen.width());
+    println!("stopwatch = {}", sw.dimen.width());
+    println!("btn_width = {}", btn_width);
 
     layout.insert_all(vec![
         (
@@ -81,7 +91,7 @@ pub fn make_layout(config: &ControlConfig, board_width: u32, board: &BoardRef) -
                 FlagCounter {
                     board: Rc::clone(board),
                 },
-                &config.flag_counter,
+                &fc,
             )?),
         ),
         (
@@ -94,7 +104,7 @@ pub fn make_layout(config: &ControlConfig, board_width: u32, board: &BoardRef) -
         ),
         (
             "stopwatch",
-            Box::new(self::make_led_display(Stopwatch, &config.stopwatch)?),
+            Box::new(self::make_led_display(Stopwatch, &sw)?),
         ),
     ]);
 

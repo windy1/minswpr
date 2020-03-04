@@ -115,6 +115,7 @@ impl Minswpr {
         let mut layout = LayoutBuilder::default()
             .color(Some(lc.color))
             .padding(lc.padding)
+            .guides(lc.guides)
             .build()?;
 
         let cc = &self.config.control;
@@ -124,6 +125,8 @@ impl Minswpr {
             self.config.board.cells.clone(),
         ));
         let board_width = board_draw.dimen().width();
+
+        println!("board_width = {}", board_width);
 
         layout.insert_all(vec![
             (

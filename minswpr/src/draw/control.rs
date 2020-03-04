@@ -115,7 +115,7 @@ pub fn make_layout(
     Ok(layout)
 }
 
-pub fn make_led_display(kind: LedDisplayKind, config: &LedDisplayConfig) -> MsResult<Layout> {
+fn make_led_display(kind: LedDisplayKind, config: &LedDisplayConfig) -> MsResult<Layout> {
     let mut layout = LayoutBuilder::default()
         .color(Some(config.color))
         .padding(config.padding)

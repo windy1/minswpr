@@ -1,12 +1,13 @@
 use super::board::CellFlags;
 use super::math::Point;
 use crate::layout::Layout;
+use crate::MsResult;
 use crate::{Context, GameState};
 use sdl2::keyboard::Keycode;
 use sdl2::mouse::MouseButton;
 
 pub trait Execute {
-    fn execute(&self) -> Result<GameState, String>;
+    fn execute(&self) -> MsResult<GameState>;
 }
 
 pub trait Input {
@@ -90,7 +91,7 @@ impl MouseUp<'_> {
 }
 
 impl Execute for MouseUp<'_> {
-    fn execute(&self) -> Result<GameState, String> {
+    fn execute(&self) -> MsResult<GameState> {
         let ctx = self.context;
         let game_state = ctx.game_state();
         let Point { x, y } = self.mouse_pos;
@@ -115,7 +116,7 @@ pub struct KeyDown<'a> {
 }
 
 impl Execute for KeyDown<'_> {
-    fn execute(&self) -> Result<GameState, String> {
+    fn execute(&self) -> MsResult<GameState> {
         match &self.keycode {
             Keycode::F2 => Ok(GameState::Reset),
             _ => Ok(self.context.game_state()),

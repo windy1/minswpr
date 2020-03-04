@@ -17,7 +17,7 @@ fn test_cell_flags() {
 }
 
 fn make_board() -> Board {
-    Board::new(8, 8, 0.078).unwrap()
+    Board::new(9, 9, 10).unwrap()
 }
 
 #[test]
@@ -54,13 +54,13 @@ fn test_board_neighbors() {
 
 #[test]
 fn test_reveal_from() {
-    let mut b = Board::new(9, 9, 0.0).unwrap();
+    let mut b = Board::new(9, 9, 0).unwrap();
     assert_eq!(81, b.reveal_from(0, 0));
 }
 
 #[test]
 fn test_reveal_area() {
-    let mut b = Board::new(9, 9, 0.0).unwrap();
+    let mut b = Board::new(9, 9, 0).unwrap();
     assert_eq!(0, b.reveal_area(0, 0).len());
 
     b.cell_mut(1, 0).insert(CellFlags::MINE);
@@ -72,7 +72,7 @@ fn test_reveal_area() {
     b.cell_mut(0, 0).insert(CellFlags::REVEALED);
     assert_eq!(2, b.reveal_area(0, 0).len());
 
-    b = Board::new(9, 9, 0.0).unwrap();
+    b = Board::new(9, 9, 0).unwrap();
     b.cell_mut(0, 0).insert(CellFlags::MINE | CellFlags::FLAG);
     b.cell_mut(1, 0).insert(CellFlags::MINE | CellFlags::FLAG);
     b.cell_mut(1, 1).insert(CellFlags::REVEALED);

@@ -82,7 +82,7 @@ impl Minswpr {
                     let bc = &self.config.board;
                     let bd = &bc.dimen;
                     ctx.board()
-                        .replace(Board::new(bd.width(), bd.height(), bc.mine_frequency)?);
+                        .replace(Board::new(bd.width(), bd.height(), bc.num_mines)?);
                     GameState::Ready
                 }
                 _ => ctx.game_state(),
@@ -107,7 +107,7 @@ impl Minswpr {
     fn make_board(&self) -> MsResult<BoardRef> {
         let bc = &self.config.board;
         let Dimen { x: w, y: h } = bc.dimen;
-        Ok(Rc::new(RefCell::new(Board::new(w, h, bc.mine_frequency)?)))
+        Ok(Rc::new(RefCell::new(Board::new(w, h, bc.num_mines)?)))
     }
 
     fn make_layout(&self, board: &BoardRef) -> MsResult<Layout> {

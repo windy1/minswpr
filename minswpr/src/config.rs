@@ -66,7 +66,7 @@ pub struct LedDisplayConfig {
 #[derive(Deserialize, Clone)]
 pub struct BoardConfig {
     pub dimen: Dimen<usize>,
-    pub mine_frequency: f64,
+    pub num_mines: usize,
     pub cells: CellConfig,
 }
 

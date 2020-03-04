@@ -23,20 +23,18 @@ pub struct Board {
 }
 
 impl Board {
-    pub fn new(width: usize, height: usize, mine_freq: f64) -> MsResult<Self> {
-        if mine_freq < 0.0 || mine_freq > 1.0 {
-            return Err("mine_freq must be between 0.0 and 1.0".to_string());
-        }
-
-        let num_mines = (mine_freq * (width * height) as f64).round() as usize;
+    pub fn new(width: usize, height: usize, num_mines: usize) -> MsResult<Self> {
         let num_cells = width * height;
-        let mine_indices = math::gen_rand_unique(num_mines, 0, num_cells);
+
+        if num_mines > width * height {
+            return Err("num_mines must not exceed the area of the board".to_string());
+        }
 
         Ok(Self {
             width,
             height,
             num_mines,
-            cells: Self::make_cells(num_cells, &mine_indices),
+            cells: Self::make_cells(num_cells, &math::gen_rand_unique(num_mines, 0, num_cells)),
         })
     }
 

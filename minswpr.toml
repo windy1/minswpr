@@ -32,7 +32,7 @@ color = "#000000"
 
 [board]
 dimen = { x = 9, y = 9 }
-mine_frequency = 0.123
+num_mines = 10
 
 [board.cells]
 dimen = { x = 15, y = 15 }

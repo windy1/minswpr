@@ -51,11 +51,7 @@ impl Minswpr {
             .layout(self.make_layout(&board)?)
             .build()?;
 
-        let fonts = {
-            let mut f = Fonts::new(&self.ttf);
-            f.load_from_config(&self.config.fonts)?;
-            f
-        };
+        let fonts = Fonts::from_config(&self.config.fonts, &self.ttf)?;
 
         let draw = {
             let canvas = self.make_canvas(ctx.layout().dimen())?;

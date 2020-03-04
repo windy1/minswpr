@@ -12,7 +12,7 @@ use crate::draw::{CanvasRef, Draw, DrawContext, DrawRect};
 use crate::fonts::Fonts;
 use crate::layout::{Layout, LayoutBuilder};
 use crate::math::{Dimen, Point};
-use crate::utils::Stopwatch;
+use crate::stopwatch::Stopwatch;
 use crate::MsResult;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;

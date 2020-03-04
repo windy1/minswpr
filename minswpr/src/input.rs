@@ -1,6 +1,5 @@
 use super::board::CellFlags;
 use super::math::Point;
-use crate::layout::Layout;
 use crate::MsResult;
 use crate::{Context, GameState};
 use sdl2::keyboard::Keycode;
@@ -33,33 +32,41 @@ impl MouseUp<'_> {
         let board_pos = ctx.layout().get("board").unwrap().pos();
 
         match ctx.get_cell_at(x, y, *board_pos) {
-            Some(p) => match &self.mouse_btn {
-                MouseButton::Left => self.left_click_cell(p),
-                MouseButton::Right => self.right_click_cell(p),
-                MouseButton::Middle => self.middle_click_cell(p),
-                _ => game_state,
-            },
+            Some(p) => {
+                let game_state = if let GameState::Ready = game_state {
+                    GameState::Start
+                } else {
+                    game_state
+                };
+
+                match &self.mouse_btn {
+                    MouseButton::Left => self.left_click_cell(p, game_state),
+                    MouseButton::Right => self.right_click_cell(p, game_state),
+                    MouseButton::Middle => self.middle_click_cell(p, game_state),
+                    _ => game_state,
+                }
+            }
             None => game_state,
         }
     }
 
-    fn left_click_cell(&self, Point { x, y }: Point<u32>) -> GameState {
+    fn left_click_cell(&self, Point { x, y }: Point<u32>, game_state: GameState) -> GameState {
         let mut board = self.context.board().borrow_mut();
         let num_revealed = board.reveal_from(x, y);
         if num_revealed > 0 && board.cell(x, y).contains(CellFlags::MINE) {
             GameState::Over
         } else {
-            self.context.game_state()
+            game_state
         }
     }
 
-    fn right_click_cell(&self, Point { x, y }: Point<u32>) -> GameState {
+    fn right_click_cell(&self, Point { x, y }: Point<u32>, game_state: GameState) -> GameState {
         let ctx = self.context;
         ctx.board().borrow_mut().toggle_flag(x, y);
-        ctx.game_state()
+        game_state
     }
 
-    fn middle_click_cell(&self, Point { x, y }: Point<u32>) -> GameState {
+    fn middle_click_cell(&self, Point { x, y }: Point<u32>, game_state: GameState) -> GameState {
         let ctx = self.context;
         let mut board = ctx.board().borrow_mut();
         let mines_revealed = board
@@ -70,19 +77,15 @@ impl MouseUp<'_> {
         if mines_revealed > 0 {
             GameState::Over
         } else {
-            ctx.game_state()
+            game_state
         }
     }
 
     fn click_control(&self, x: i32, y: i32) -> GameState {
         self.context
             .layout()
-            .get("control")
+            .get_layout("control")
             .unwrap()
-            .draw_ref()
-            .as_ref()
-            .downcast_ref::<Layout>()
-            .expect("Draw downcast to Layout failed on `control`")
             .get_at(x, y)
             .filter(|c| c.id() == "reset_button")
             .map(|_| GameState::Reset)

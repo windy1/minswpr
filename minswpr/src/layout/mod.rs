@@ -52,6 +52,14 @@ impl Layout {
             .ok_or_else(|| format!("missing required layout component `{}`", key))
     }
 
+    pub fn get_layout(&self, key: &'static str) -> MsResult<&Layout> {
+        self.get(key)?
+            .draw_ref()
+            .as_ref()
+            .downcast_ref::<Layout>()
+            .ok_or_else(|| format!("Draw downcast to Layout failed on `{}`", key))
+    }
+
     pub fn get_at(&self, x: i32, y: i32) -> Option<&Component> {
         for component in self.components.values() {
             let Point { x: min_x, y: min_y } = component.pos;

@@ -6,12 +6,9 @@ use crate::draw::DrawContext;
 use crate::layout::{Layout, LayoutBuilder, Orientation};
 use crate::math::{Dimen, Point};
 use crate::utils;
-use crate::BoardRef;
-use crate::MsResult;
+use crate::{BoardRef, MsResult, StopwatchRef};
 use sdl2::rect::Rect;
 use std::rc::Rc;
-
-use self::LedDisplayKind::*;
 
 #[derive(new, AsAny)]
 pub struct DrawLedDisplay {
@@ -21,7 +18,7 @@ pub struct DrawLedDisplay {
 
 pub enum LedDisplayKind {
     FlagCounter { board: BoardRef },
-    Stopwatch,
+    Stopwatch { stopwatch: StopwatchRef },
 }
 
 impl Draw for DrawLedDisplay {
@@ -49,17 +46,26 @@ impl DrawLedDisplay {
 
     fn make_text<'a>(&self, ctx: &'a DrawContext<'a>) -> TextResult<'a> {
         text::make_text(ctx, match &self.kind {
-            FlagCounter { board } => {
+            LedDisplayKind::FlagCounter { board } => {
                 let flags_remaining =
                     utils::borrow_safe(&board, |b| b.num_mines() as i32 - b.count_flags() as i32);
                 Text::new(flags_remaining, "control.flag_counter", color!(red))
             }
-            Stopwatch => Text::new(0, "control.stopwatch", color!(red)),
+            LedDisplayKind::Stopwatch { stopwatch } => Text::new(
+                stopwatch.borrow().elapsed().as_secs() as i32,
+                "control.stopwatch",
+                color!(red),
+            ),
         })
     }
 }
 
-pub fn make_layout(config: &ControlConfig, board_width: u32, board: &BoardRef) -> MsResult<Layout> {
+pub fn make_layout(
+    config: &ControlConfig,
+    board_width: u32,
+    board: &BoardRef,
+    stopwatch: &StopwatchRef,
+) -> MsResult<Layout> {
     let p = config.padding;
 
     let mut layout = LayoutBuilder::default()
@@ -81,7 +87,7 @@ pub fn make_layout(config: &ControlConfig, board_width: u32, board: &BoardRef) -
         (
             "flag_counter",
             Box::new(self::make_led_display(
-                FlagCounter {
+                LedDisplayKind::FlagCounter {
                     board: Rc::clone(board),
                 },
                 &fc,
@@ -97,7 +103,12 @@ pub fn make_layout(config: &ControlConfig, board_width: u32, board: &BoardRef) -
         ),
         (
             "stopwatch",
-            Box::new(self::make_led_display(Stopwatch, &sw)?),
+            Box::new(self::make_led_display(
+                LedDisplayKind::Stopwatch {
+                    stopwatch: Rc::clone(stopwatch),
+                },
+                &sw,
+            )?),
         ),
     ]);
 

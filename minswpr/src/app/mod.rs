@@ -12,6 +12,7 @@ use crate::draw::{CanvasRef, Draw, DrawContext, DrawRect};
 use crate::fonts::Fonts;
 use crate::layout::{Layout, LayoutBuilder};
 use crate::math::{Dimen, Point};
+use crate::utils::Stopwatch;
 use crate::MsResult;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -25,6 +26,7 @@ use std::thread;
 use std::time::Duration;
 
 pub type BoardRef = Rc<RefCell<Board>>;
+pub type StopwatchRef = Rc<RefCell<Stopwatch>>;
 
 pub struct Minswpr {
     config: Config,
@@ -46,12 +48,13 @@ impl Minswpr {
 
     pub fn start(&mut self) -> MsResult {
         let board = self.make_board()?;
+        let stopwatch = Rc::new(RefCell::new(Stopwatch::new()));
 
         let mut ctx = ContextBuilder::default()
             .config(self.config.clone())
             .game_state(GameState::Ready)
             .board(Rc::clone(&board))
-            .layout(self.make_layout(&board)?)
+            .layout(self.make_layout(&board, &stopwatch)?)
             .build()?;
 
         let fonts = Fonts::from_config(&self.config.fonts, &self.ttf)?;
@@ -71,6 +74,8 @@ impl Minswpr {
             static ref LAYOUT_POS: Point = point!(0, 0);
         }
 
+        let mut last_game_state = GameState::Unknown; // debug
+
         'main: loop {
             for event in self.event_pump.poll_iter() {
                 ctx.set_game_state(self::handle_event(&ctx, event)?);
@@ -83,7 +88,16 @@ impl Minswpr {
                     let bd = &bc.dimen;
                     ctx.board()
                         .replace(Board::new(bd.width(), bd.height(), bc.num_mines)?);
+                    stopwatch.borrow_mut().reset();
                     GameState::Ready
+                }
+                GameState::Start => {
+                    stopwatch.borrow_mut().start();
+                    GameState::Started
+                }
+                GameState::Over => {
+                    stopwatch.borrow_mut().stop();
+                    GameState::Over
                 }
                 _ => ctx.game_state(),
             };
@@ -98,6 +112,14 @@ impl Minswpr {
             ctx.layout_mut().draw(&draw, *LAYOUT_POS)?;
             draw.canvas().present();
 
+            // debug
+            let game_state = ctx.game_state();
+            if game_state != last_game_state {
+                println!("game_state = {:?}", game_state);
+                last_game_state = game_state;
+            }
+            // debug
+
             thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
         }
 
@@ -110,7 +132,7 @@ impl Minswpr {
         Ok(Rc::new(RefCell::new(Board::new(w, h, bc.num_mines)?)))
     }
 
-    fn make_layout(&self, board: &BoardRef) -> MsResult<Layout> {
+    fn make_layout(&self, board: &BoardRef, stopwatch: &StopwatchRef) -> MsResult<Layout> {
         let lc = &self.config.layout;
         let mut layout = LayoutBuilder::default()
             .color(Some(lc.color))
@@ -129,7 +151,7 @@ impl Minswpr {
         layout.insert_all(vec![
             (
                 "control",
-                Box::new(control::make_layout(&cc, board_width, &board)?),
+                Box::new(control::make_layout(&cc, board_width, &board, &stopwatch)?),
             ),
             (
                 "spacer",
@@ -171,10 +193,12 @@ where
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum GameState {
     Unknown,
     Ready,
+    Start,
+    Started,
     Over,
     Reset,
     Quit,

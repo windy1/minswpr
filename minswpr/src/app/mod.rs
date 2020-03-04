@@ -2,17 +2,20 @@ pub(super) mod context;
 
 pub use self::context::*;
 
-use self::ContextBuilder;
+use self::{Context, ContextBuilder};
+use super::input::{Execute, KeyDown, MouseUp};
 use crate::board::Board;
 use crate::config::{self, Config};
 use crate::draw::board::DrawBoard;
 use crate::draw::control;
 use crate::draw::{CanvasRef, Draw, DrawContext, DrawRect};
-use crate::events;
 use crate::fonts::Fonts;
 use crate::layout::{Layout, LayoutBuilder};
 use crate::math::{Dimen, Point};
 use crate::MsResult;
+use sdl2::event::Event;
+use sdl2::keyboard::Keycode;
+use sdl2::mouse::MouseButton;
 use sdl2::ttf::Sdl2TtfContext;
 use sdl2::{self, EventPump, VideoSubsystem};
 use std::cell::RefCell;
@@ -70,7 +73,7 @@ impl Minswpr {
 
         'main: loop {
             for event in self.event_pump.poll_iter() {
-                ctx.set_game_state(events::handle_event(&ctx, event)?);
+                ctx.set_game_state(self::handle_event(&ctx, event)?);
             }
 
             let game_state = match ctx.game_state() {
@@ -180,4 +183,31 @@ impl Default for GameState {
     fn default() -> Self {
         Self::Unknown
     }
+}
+
+pub fn handle_event(context: &Context, event: Event) -> MsResult<GameState> {
+    match event {
+        Event::Quit { .. } => Ok(GameState::Quit),
+        Event::MouseButtonUp {
+            mouse_btn, x, y, ..
+        } => self::handle_mouse_up(context, mouse_btn, x, y),
+        Event::KeyDown { keycode, .. } => match keycode {
+            Some(k) => self::handle_key_down(context, k),
+            None => Ok(context.game_state()),
+        },
+        _ => Ok(context.game_state()),
+    }
+}
+
+fn handle_mouse_up(
+    context: &Context,
+    mouse_btn: MouseButton,
+    x: i32,
+    y: i32,
+) -> MsResult<GameState> {
+    MouseUp::new(mouse_btn, point!(x, y), context).execute()
+}
+
+fn handle_key_down(context: &Context, keycode: Keycode) -> MsResult<GameState> {
+    KeyDown::new(keycode, context).execute()
 }

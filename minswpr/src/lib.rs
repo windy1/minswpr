@@ -19,7 +19,6 @@ pub mod draw;
 mod app;
 pub mod board;
 pub mod config;
-pub mod events;
 pub mod fonts;
 pub mod input;
 pub mod layout;

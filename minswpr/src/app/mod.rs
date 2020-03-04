@@ -126,8 +126,6 @@ impl Minswpr {
         ));
         let board_width = board_draw.dimen().width();
 
-        println!("board_width = {}", board_width);
-
         layout.insert_all(vec![
             (
                 "control",

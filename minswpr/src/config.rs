@@ -150,7 +150,6 @@ where
         {
             let value = normalize_hex_str(value).map_err(de::Error::custom)?;
             let (r, g, b) = math::hex_to_rgb(value).map_err(de::Error::custom)?;
-            println!("(r, g, b) = {:?}", (r, g, b));
             Ok(Color::RGB(r, g, b))
         }
     }

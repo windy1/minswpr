@@ -77,13 +77,6 @@ pub fn make_layout(config: &ControlConfig, board_width: u32, board: &BoardRef) -
     let btn_left = w / 2 - btn_width / 2 - fc.dimen.width() - p - fc.padding * 2;
     let btn_right = w / 2 - btn_width / 2 - sw.dimen.width() - p - sw.padding * 2;
 
-    println!("p = {}", p);
-    println!("btn_left = {}", btn_left);
-    println!("btn_right = {}", btn_right);
-    println!("flag_counter = {}", fc.dimen.width());
-    println!("stopwatch = {}", sw.dimen.width());
-    println!("btn_width = {}", btn_width);
-
     layout.insert_all(vec![
         (
             "flag_counter",

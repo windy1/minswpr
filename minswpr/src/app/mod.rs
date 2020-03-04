@@ -210,7 +210,7 @@ impl Default for GameState {
     }
 }
 
-pub fn handle_event(context: &Context, event: Event) -> MsResult<GameState> {
+fn handle_event(context: &Context, event: Event) -> MsResult<GameState> {
     match event {
         Event::Quit { .. } => Ok(GameState::Quit),
         Event::MouseButtonUp {

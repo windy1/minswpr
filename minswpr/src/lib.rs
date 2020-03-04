@@ -27,6 +27,8 @@ pub mod layout;
 pub use app::context::*;
 pub use app::*;
 
+pub type MsResult<R = (), E = String> = Result<R, E>;
+
 pub mod utils {
     use std::cell::{Ref, RefCell};
     use std::rc::Rc;

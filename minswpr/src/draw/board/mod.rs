@@ -5,6 +5,7 @@ use super::{Draw, DrawContext};
 use crate::config::CellConfig;
 use crate::math::{Dimen, Point};
 use crate::BoardRef;
+use crate::MsResult;
 use sdl2::rect::Rect;
 
 #[derive(AsAny)]
@@ -38,7 +39,7 @@ impl DrawBoard {
 }
 
 impl Draw for DrawBoard {
-    fn draw(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
+    fn draw(&mut self, ctx: &DrawContext, pos: Point) -> MsResult {
         render_rect!(self.dimen, self.cell_config.color, ctx, pos)?;
         self.draw_cell_borders(ctx, pos)?;
         self.draw_cells(ctx, pos)
@@ -50,7 +51,7 @@ impl Draw for DrawBoard {
 }
 
 impl DrawBoard {
-    fn draw_cell_borders(&self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
+    fn draw_cell_borders(&self, ctx: &DrawContext, pos: Point) -> MsResult {
         let mut canvas = ctx.canvas();
         canvas.set_draw_color(self.cell_config.border_color);
 
@@ -85,7 +86,7 @@ impl DrawBoard {
         Ok(())
     }
 
-    fn draw_cells(&self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
+    fn draw_cells(&self, ctx: &DrawContext, pos: Point) -> MsResult {
         let b = self.board.borrow();
         for x in 0..b.width() as u32 {
             for y in 0..b.height() as u32 {
@@ -95,7 +96,7 @@ impl DrawBoard {
         Ok(())
     }
 
-    fn draw_cell(&self, ctx: &DrawContext, pos: Point, x: u32, y: u32) -> Result<(), String> {
+    fn draw_cell(&self, ctx: &DrawContext, pos: Point, x: u32, y: u32) -> MsResult {
         let screen_pos = Self::calc_cell_screen_pos(point!(x, y), pos, &self.cell_config);
         DrawCellBuilder::default()
             .board(&self.board.borrow())

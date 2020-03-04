@@ -10,9 +10,9 @@ use crate::draw::control;
 use crate::draw::{CanvasRef, Draw, DrawContext, DrawRect};
 use crate::events;
 use crate::fonts::Fonts;
-use crate::layout::LayoutBuilder;
-use crate::layout::LayoutResult;
+use crate::layout::{Layout, LayoutBuilder};
 use crate::math::{Dimen, Point};
+use crate::MsResult;
 use sdl2::ttf::Sdl2TtfContext;
 use sdl2::{self, EventPump, VideoSubsystem};
 use std::cell::RefCell;
@@ -31,7 +31,7 @@ pub struct Minswpr {
 }
 
 impl Minswpr {
-    pub fn new(config: Config) -> Result<Self, String> {
+    pub fn new(config: Config) -> MsResult<Self> {
         let sdl = sdl2::init()?;
         Ok(Self {
             config,
@@ -41,7 +41,7 @@ impl Minswpr {
         })
     }
 
-    pub fn start(&mut self) -> Result<(), String> {
+    pub fn start(&mut self) -> MsResult {
         let board = self.make_board()?;
 
         let mut ctx = ContextBuilder::default()
@@ -101,13 +101,13 @@ impl Minswpr {
         Ok(())
     }
 
-    fn make_board(&self) -> Result<BoardRef, String> {
+    fn make_board(&self) -> MsResult<BoardRef> {
         let bc = &self.config.board;
         let Dimen { x: w, y: h } = bc.dimen;
         Ok(Rc::new(RefCell::new(Board::new(w, h, bc.mine_frequency)?)))
     }
 
-    fn make_layout(&self, board: &BoardRef) -> LayoutResult {
+    fn make_layout(&self, board: &BoardRef) -> MsResult<Layout> {
         let lc = &self.config.layout;
         let mut layout = LayoutBuilder::default()
             .color(Some(lc.color))
@@ -140,7 +140,7 @@ impl Minswpr {
         Ok(layout)
     }
 
-    fn make_canvas(&self, dimen: Dimen) -> Result<CanvasRef, String> {
+    fn make_canvas(&self, dimen: Dimen) -> MsResult<CanvasRef> {
         Ok(Rc::new(RefCell::new(
             self.video
                 .window(&self.config.window.title, dimen.width(), dimen.height())

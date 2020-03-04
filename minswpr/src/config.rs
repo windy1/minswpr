@@ -1,4 +1,5 @@
 use crate::math::{self, Dimen};
+use crate::MsResult;
 use sdl2::pixels::Color;
 use serde::de::{self, Visitor};
 use serde::{Deserialize, Deserializer};
@@ -105,7 +106,7 @@ pub struct FontConfig {
     pub pt: u16,
 }
 
-pub fn read_config<P>(fname: P) -> Result<Config, String>
+pub fn read_config<P>(fname: P) -> MsResult<Config>
 where
     P: AsRef<Path>,
 {
@@ -113,7 +114,7 @@ where
     Ok(toml::from_str(&s).map_err(|e| e.to_string())?)
 }
 
-pub fn resolve() -> Result<PathBuf, String> {
+pub fn resolve() -> MsResult<PathBuf> {
     let for_os = |os: &str| -> PathBuf {
         let p = PathBuf::from(&format!("minswpr.{}.toml", os));
         if p.exists() {

@@ -7,6 +7,7 @@ pub mod text;
 
 use crate::fonts::Fonts;
 use crate::math::{Dimen, Point};
+use crate::MsResult;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::{TextureCreator, WindowCanvas};
@@ -15,8 +16,12 @@ use std::any::Any;
 use std::cell::{RefCell, RefMut};
 use std::rc::Rc;
 
+pub type CanvasRefMut<'a> = RefMut<'a, WindowCanvas>;
+pub type CanvasRef = Rc<RefCell<WindowCanvas>>;
+pub type Textures = TextureCreator<WindowContext>;
+
 pub trait Draw: AsRef<dyn Any> {
-    fn draw(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String>;
+    fn draw(&mut self, ctx: &DrawContext, pos: Point) -> MsResult;
 
     fn dimen(&self) -> Dimen;
 
@@ -24,10 +29,6 @@ pub trait Draw: AsRef<dyn Any> {
         Default::default()
     }
 }
-
-pub type CanvasRefMut<'a> = RefMut<'a, WindowCanvas>;
-pub type CanvasRef = Rc<RefCell<WindowCanvas>>;
-pub type Textures = TextureCreator<WindowContext>;
 
 #[derive(new)]
 pub struct DrawContext<'a> {
@@ -73,7 +74,7 @@ impl DrawRect {
 }
 
 impl Draw for DrawRect {
-    fn draw(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
+    fn draw(&mut self, ctx: &DrawContext, pos: Point) -> MsResult {
         let mut canvas = ctx.canvas();
         canvas.set_draw_color(self.color);
         canvas.fill_rect(Rect::new(

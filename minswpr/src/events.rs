@@ -1,11 +1,12 @@
 use super::input::{Execute, KeyDown, MouseUp};
 use super::math::Point;
 use super::{Context, GameState};
+use crate::MsResult;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::mouse::MouseButton;
 
-pub fn handle_event(context: &Context, event: Event) -> Result<GameState, String> {
+pub fn handle_event(context: &Context, event: Event) -> MsResult<GameState> {
     match event {
         Event::Quit { .. } => Ok(GameState::Quit),
         Event::MouseButtonUp {
@@ -24,10 +25,10 @@ fn handle_mouse_up(
     mouse_btn: MouseButton,
     x: i32,
     y: i32,
-) -> Result<GameState, String> {
+) -> MsResult<GameState> {
     MouseUp::new(mouse_btn, point!(x, y), context).execute()
 }
 
-fn handle_key_down(context: &Context, keycode: Keycode) -> Result<GameState, String> {
+fn handle_key_down(context: &Context, keycode: Keycode) -> MsResult<GameState> {
     KeyDown::new(keycode, context).execute()
 }

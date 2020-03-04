@@ -3,6 +3,7 @@ use crate::config::CellConfig;
 use crate::draw::text::{self, Text};
 use crate::draw::{Draw, DrawContext};
 use crate::math::{Dimen, Point};
+use crate::MsResult;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 
@@ -14,7 +15,7 @@ pub(super) struct DrawCell<'a> {
 }
 
 impl DrawCell<'_> {
-    pub fn draw(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
+    pub fn draw(&mut self, ctx: &DrawContext, pos: Point) -> MsResult {
         let cell = self.board.cell(self.board_pos.x, self.board_pos.y);
         let config = &self.config;
         let mines = &config.mines;
@@ -51,13 +52,13 @@ impl DrawCell<'_> {
         pos: Point,
         dimen: Dimen,
         color: Color,
-    ) -> Result<(), String> {
+    ) -> MsResult {
         let cell_dimen = self.config.dimen.as_i32();
         let pos = pos + cell_dimen / (2, 2) - dimen.as_i32() / (2, 2);
         render_rect!(dimen, color, ctx, pos)
     }
 
-    fn draw_hint(&self, ctx: &DrawContext, pos: Point, hint: usize) -> Result<(), String> {
+    fn draw_hint(&self, ctx: &DrawContext, pos: Point, hint: usize) -> MsResult {
         let text = text::make_text(ctx, Text::new(hint, "board.cell", color!(green)))?;
         let tq = text.query();
 

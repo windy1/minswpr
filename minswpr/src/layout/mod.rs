@@ -1,13 +1,12 @@
 use crate::draw::{Draw, DrawContext};
 use crate::math::{Dimen, Point};
+use crate::MsResult;
 use sdl2::pixels::Color;
 use std::cmp::Ordering;
 use std::collections::{hash_map, HashMap};
 use std::fmt;
 
 use self::Orientation::*;
-
-pub type LayoutResult = Result<Layout, String>;
 
 #[derive(Builder, AsAny)]
 pub struct Layout {
@@ -47,7 +46,7 @@ impl Layout {
         }
     }
 
-    pub fn get(&self, key: &'static str) -> Result<&Component, String> {
+    pub fn get(&self, key: &'static str) -> MsResult<&Component> {
         self.components
             .get(key)
             .ok_or_else(|| format!("missing required layout component `{}`", key))
@@ -70,7 +69,7 @@ impl Layout {
 }
 
 impl Draw for Layout {
-    fn draw(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
+    fn draw(&mut self, ctx: &DrawContext, pos: Point) -> MsResult {
         if let Some(c) = self.color {
             render_rect!(self.dimen(), c, ctx, pos)?;
         }
@@ -123,7 +122,7 @@ impl Draw for Layout {
 type ComponentValues<'a> = hash_map::Values<'a, &'static str, Component>;
 
 impl Layout {
-    fn draw_guides(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
+    fn draw_guides(&mut self, ctx: &DrawContext, pos: Point) -> MsResult {
         let Dimen { x: w, y: h } = self.dimen();
         render_rect!(
             point!(1, h),

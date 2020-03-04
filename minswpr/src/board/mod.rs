@@ -2,6 +2,7 @@
 mod tests;
 
 use crate::math::{self, Point};
+use crate::MsResult;
 use itertools::Itertools;
 
 bitflags! {
@@ -22,9 +23,9 @@ pub struct Board {
 }
 
 impl Board {
-    pub fn new(width: usize, height: usize, mine_freq: f64) -> Result<Self, &'static str> {
+    pub fn new(width: usize, height: usize, mine_freq: f64) -> MsResult<Self> {
         if mine_freq < 0.0 || mine_freq > 1.0 {
-            return Err("mine_freq must be between 0.0 and 1.0");
+            return Err("mine_freq must be between 0.0 and 1.0".to_string());
         }
 
         let num_mines = (mine_freq * (width * height) as f64).round() as usize;

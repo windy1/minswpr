@@ -1,4 +1,5 @@
 use super::DrawContext;
+use crate::MsResult;
 use sdl2::pixels::Color;
 use sdl2::render::Texture;
 use sdl2::render::TextureQuery;
@@ -26,7 +27,7 @@ impl RenderedText<'_> {
     }
 }
 
-pub type TextResult<'a> = Result<RenderedText<'a>, String>;
+pub type TextResult<'a> = MsResult<RenderedText<'a>>;
 
 pub fn make_text<'a, T>(ctx: &'a DrawContext<'a>, text: Text<T>) -> TextResult<'a>
 where

@@ -3,11 +3,11 @@ use crate::config::{ControlConfig, LedDisplayConfig};
 use crate::draw::text::TextResult;
 use crate::draw::text::{self, Text};
 use crate::draw::DrawContext;
-use crate::layout::LayoutResult;
 use crate::layout::{Layout, LayoutBuilder, Orientation};
 use crate::math::{Dimen, Point};
 use crate::utils;
 use crate::BoardRef;
+use crate::MsResult;
 use sdl2::rect::Rect;
 use std::rc::Rc;
 
@@ -25,7 +25,7 @@ pub enum LedDisplayKind {
 }
 
 impl Draw for DrawLedDisplay {
-    fn draw(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
+    fn draw(&mut self, ctx: &DrawContext, pos: Point) -> MsResult {
         self.draw_text(ctx, pos)
     }
 
@@ -35,7 +35,7 @@ impl Draw for DrawLedDisplay {
 }
 
 impl DrawLedDisplay {
-    fn draw_text(&mut self, ctx: &DrawContext, pos: Point) -> Result<(), String> {
+    fn draw_text(&mut self, ctx: &DrawContext, pos: Point) -> MsResult {
         let text = self.make_text(ctx)?;
         let tq = text.query();
         let pos = pos + point!(self.dimen().width(), 0).as_i32() - point!(tq.width, 0).as_i32();
@@ -59,7 +59,7 @@ impl DrawLedDisplay {
     }
 }
 
-pub fn make_layout(config: &ControlConfig, board_width: u32, board: &BoardRef) -> LayoutResult {
+pub fn make_layout(config: &ControlConfig, board_width: u32, board: &BoardRef) -> MsResult<Layout> {
     let p = config.padding;
 
     let mut layout = LayoutBuilder::default()
@@ -101,7 +101,7 @@ pub fn make_layout(config: &ControlConfig, board_width: u32, board: &BoardRef) -
     Ok(layout)
 }
 
-pub fn make_led_display(kind: LedDisplayKind, config: &LedDisplayConfig) -> Result<Layout, String> {
+pub fn make_led_display(kind: LedDisplayKind, config: &LedDisplayConfig) -> MsResult<Layout> {
     let mut layout = LayoutBuilder::default()
         .color(Some(config.color))
         .padding(config.padding)

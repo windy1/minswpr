@@ -192,6 +192,7 @@ impl Minswpr {
                     .mouse_up(Box::new(input::on_click_board))
                     .mouse_move(Box::new(input::on_mouse_move_board))
                     .mouse_down(Box::new(input::on_mouse_down_board))
+                    .mouse_leave(Box::new(input::on_mouse_leave_board))
                     .build()?,
             ),
         ]);
@@ -281,11 +282,10 @@ fn handle_mouse_down(ctx: &Context, mouse_btn: MouseButton, x: i32, y: i32) -> G
 }
 
 fn handle_mouse_motion(ctx: &Context, mouse_state: MouseState, x: i32, y: i32) -> GameState {
-    ctx.layout().defer_mouse_event(
-        ctx,
-        MouseMoveEvent::new(mouse_state, point!(x, y)),
-        |elem| elem.mouse_move(),
-    )
+    let move_event = MouseMoveEvent::new(mouse_state, point!(x, y));
+    let layout = ctx.layout();
+    layout.on_mouse_move(ctx, &move_event);
+    layout.defer_mouse_event(ctx, move_event, &input::mouse_move)
 }
 
 fn handle_key_down(ctx: &Context, keycode: Keycode) -> GameState {

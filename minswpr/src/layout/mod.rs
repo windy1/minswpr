@@ -2,10 +2,13 @@ use crate::app::context::Context;
 use crate::app::GameState;
 use crate::draw::{Draw, DrawContext};
 use crate::input::MouseDownEvent;
+use crate::input::MouseEnterEvent;
+use crate::input::MouseLeaveEvent;
 use crate::input::{MouseEvent, MouseMoveEvent, MouseUpEvent};
 use crate::math::{Dimen, Point};
 use crate::MsResult;
 use sdl2::pixels::Color;
+use std::cell::Cell;
 use std::cmp::Ordering;
 use std::collections::{hash_map, HashMap};
 use std::fmt;
@@ -17,6 +20,8 @@ use self::Orientation::*;
 pub struct Layout {
     #[builder(setter(skip))]
     nodes: HashMap<&'static str, Node>,
+    #[builder(setter(skip))]
+    hover_id: Cell<&'static str>,
     #[builder(default, setter(strip_option))]
     color: Option<Color>,
     #[builder(default)]
@@ -112,6 +117,49 @@ impl Layout {
             },
             None => game_state,
         }
+    }
+
+    pub fn on_mouse_move(&self, ctx: &Context, e: &MouseMoveEvent) -> GameState {
+        let pos = e.mouse_pos();
+        let hover_id = self.hover_id.get();
+        let g = match self.get_at(pos.x, pos.y) {
+            Some(n) => {
+                if hover_id == n.id() {
+                    return ctx.game_state();
+                }
+
+                let game_state = match self.get(hover_id) {
+                    Ok(old) => match old.elem().mouse_leave() {
+                        Some(leave) => leave(ctx, MouseLeaveEvent::new(pos)),
+                        None => ctx.game_state(),
+                    },
+                    Err(_) => ctx.game_state(),
+                };
+
+                let game_state = match n.elem().mouse_enter() {
+                    Some(enter) => enter(ctx, MouseEnterEvent::new(pos)),
+                    None => game_state,
+                };
+
+                self.hover_id.set(n.id());
+
+                game_state
+            }
+            None => match hover_id {
+                "" => match self.get(hover_id) {
+                    Ok(old) => match old.elem().mouse_leave() {
+                        Some(leave) => leave(ctx, MouseLeaveEvent::new(pos)),
+                        None => ctx.game_state(),
+                    },
+                    Err(_) => ctx.game_state(),
+                },
+                _ => ctx.game_state(),
+            },
+        };
+
+        println!("hover_id = {}", self.hover_id.get());
+
+        g
     }
 }
 
@@ -237,6 +285,8 @@ pub type OnMouse<E> = dyn Fn(&Context, E) -> GameState;
 pub type OnMouseUp = OnMouse<MouseUpEvent>;
 pub type OnMouseMove = OnMouse<MouseMoveEvent>;
 pub type OnMouseDown = OnMouse<MouseDownEvent>;
+pub type OnMouseEnter = OnMouse<MouseEnterEvent>;
+pub type OnMouseLeave = OnMouse<MouseLeaveEvent>;
 
 /// An element on a `Layout`, contained within a `Node`
 #[derive(new, Builder)]
@@ -252,6 +302,12 @@ pub struct Element {
     #[builder(default, setter(strip_option))]
     #[new(default)]
     mouse_down: Option<Box<OnMouseDown>>,
+    #[builder(default, setter(strip_option))]
+    #[new(default)]
+    mouse_enter: Option<Box<OnMouseEnter>>,
+    #[builder(default, setter(strip_option))]
+    #[new(default)]
+    mouse_leave: Option<Box<OnMouseLeave>>,
 }
 
 impl Element {
@@ -273,6 +329,14 @@ impl Element {
 
     pub fn mouse_down(&self) -> Option<&OnMouseDown> {
         self.mouse_down.as_deref()
+    }
+
+    pub fn mouse_enter(&self) -> Option<&OnMouseEnter> {
+        self.mouse_enter.as_deref()
+    }
+
+    pub fn mouse_leave(&self) -> Option<&OnMouseLeave> {
+        self.mouse_leave.as_deref()
     }
 }
 

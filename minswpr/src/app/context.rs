@@ -10,9 +10,9 @@ use std::cmp;
 pub struct Context {
     config: Config,
     game_state: GameState,
+    layout: Layout,
     board: BoardRef,
     stopwatch: StopwatchRef,
-    layout: Layout,
 }
 
 impl Context {

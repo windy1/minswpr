@@ -41,7 +41,7 @@ impl DrawCell<'_> {
             }
         } else {
             if cell.contains(CellFlags::PRESSED) {
-                draw_rect!(self.config.dimen, color!(magenta), ctx, pos)?;
+                draw_rect!(self.config.dimen, self.config.pressed_color, ctx, pos)?;
             }
 
             if cell.contains(CellFlags::FLAG) {

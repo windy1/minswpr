@@ -65,10 +65,6 @@ impl Board {
         &self.cells
     }
 
-    pub fn cells_mut(&mut self) -> &mut Vec<CellFlags> {
-        &mut self.cells
-    }
-
     /// Returns the cell at the specified `x` and `y` position. Panics if the
     /// cell is not present
     pub fn cell(&self, x: u32, y: u32) -> &CellFlags {
@@ -91,6 +87,12 @@ impl Board {
     /// `y` position. Returns `None` otherwise.
     pub fn get_cell_mut(&mut self, x: u32, y: u32) -> Option<&mut CellFlags> {
         self.cells.get_mut(Self::index(x, y, self.width))
+    }
+
+    pub fn clear_all(&mut self, cell_flags: CellFlags) {
+        for cell in &mut self.cells {
+            cell.remove(cell_flags);
+        }
     }
 
     /// Toggles whether the cell at the specified `x` and `y` position is a

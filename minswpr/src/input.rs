@@ -65,6 +65,28 @@ impl MouseEvent for MouseMoveEvent {
     }
 }
 
+#[derive(new)]
+pub struct MouseEnterEvent {
+    mouse_pos: Point,
+}
+
+impl MouseEvent for MouseEnterEvent {
+    fn mouse_pos(&self) -> Point {
+        self.mouse_pos
+    }
+}
+
+#[derive(new)]
+pub struct MouseLeaveEvent {
+    mouse_pos: Point,
+}
+
+impl MouseEvent for MouseLeaveEvent {
+    fn mouse_pos(&self) -> Point {
+        self.mouse_pos
+    }
+}
+
 /// Event handler for receiving `DrawBoard` clicks
 ///
 /// This function has no effect if the current `GameState` is `Over`. Otherwise,
@@ -157,15 +179,8 @@ pub fn on_mouse_move_board(ctx: &Context, e: MouseMoveEvent) -> GameState {
     match ctx.get_cell_at(x, y) {
         Some(p) => {
             let mut board = ctx.board().borrow_mut();
-
-            board
-                .cells_mut()
-                .iter_mut()
-                .filter(|c| c.contains(CellFlags::PRESSED))
-                .for_each(|c| c.remove(CellFlags::PRESSED));
-
+            board.clear_all(CellFlags::PRESSED);
             board.cell_mut(p.x, p.y).insert(CellFlags::PRESSED);
-
             ctx.game_state()
         }
         None => ctx.game_state(),
@@ -189,6 +204,11 @@ pub fn on_mouse_down_board(ctx: &Context, e: MouseDownEvent) -> GameState {
         }
         None => ctx.game_state(),
     }
+}
+
+pub fn on_mouse_leave_board(ctx: &Context, _: MouseLeaveEvent) -> GameState {
+    ctx.board().borrow_mut().clear_all(CellFlags::PRESSED);
+    ctx.game_state()
 }
 
 /// Returns an `OnMouse<E: MouseEvent>` handler that will defer `MouseUpEvent`s

@@ -28,7 +28,7 @@ impl DrawCell<'_> {
             } else {
                 config.revealed_color
             };
-            render_rect!(self.config.dimen, fill_color, ctx, pos)?;
+            draw_rect!(self.config.dimen, fill_color, ctx, pos)?;
 
             let adjacent_mines = self
                 .board
@@ -55,7 +55,7 @@ impl DrawCell<'_> {
     ) -> MsResult {
         let cell_dimen = self.config.dimen.as_i32();
         let pos = pos + cell_dimen / (2, 2) - dimen.as_i32() / (2, 2);
-        render_rect!(dimen, color, ctx, pos)
+        draw_rect!(dimen, color, ctx, pos)
     }
 
     fn draw_hint(&self, ctx: &DrawContext, pos: Point, hint: usize) -> MsResult {

@@ -39,7 +39,7 @@ impl DrawBoard {
 
 impl Draw for DrawBoard {
     fn draw(&mut self, ctx: &DrawContext, pos: Point) -> MsResult {
-        render_rect!(self.dimen, self.cell_config.color, ctx, pos)?;
+        draw_rect!(self.dimen, self.cell_config.color, ctx, pos)?;
         self.draw_cell_borders(ctx, pos)?;
         self.draw_cells(ctx, pos)
     }

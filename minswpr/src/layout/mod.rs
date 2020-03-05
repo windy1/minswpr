@@ -79,7 +79,7 @@ impl Layout {
 impl Draw for Layout {
     fn draw(&mut self, ctx: &DrawContext, pos: Point) -> MsResult {
         if let Some(c) = self.color {
-            render_rect!(self.dimen(), c, ctx, pos)?;
+            draw_rect!(self.dimen(), c, ctx, pos)?;
         }
 
         let orien = self.orientation;
@@ -132,13 +132,13 @@ type ComponentValues<'a> = hash_map::Values<'a, &'static str, Component>;
 impl Layout {
     fn draw_guides(&mut self, ctx: &DrawContext, pos: Point) -> MsResult {
         let Dimen { x: w, y: h } = self.dimen();
-        render_rect!(
+        draw_rect!(
             point!(1, h),
             color!(magenta),
             ctx,
             pos + point!(w / 2, 0).as_i32()
         )?;
-        render_rect!(
+        draw_rect!(
             point!(w, 1),
             color!(magenta),
             ctx,

@@ -36,7 +36,7 @@ macro_rules! color {
 }
 
 #[allow(unused)]
-macro_rules! render_rect {
+macro_rules! draw_rect {
     ($dimen:expr, $color:expr, $ctx:expr, $pos:expr) => {
         crate::draw::DrawRect::new($dimen, $color).draw($ctx, $pos)
     };

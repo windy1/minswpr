@@ -53,13 +53,6 @@ impl DrawContext<'_> {
     ///
     /// # Arguments
     /// * `f` - The function that will use the borrowed canvas
-    ///
-    /// # Example
-    /// ```rust
-    /// fn foo(draw: &DrawContext) {
-    ///     draw.with_canvas(|c| c.clear());
-    /// }
-    /// ```
     pub fn with_canvas(&self, f: impl FnOnce(CanvasRefMut)) {
         f(self.canvas.borrow_mut())
     }

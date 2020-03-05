@@ -55,6 +55,7 @@ impl MouseUp<'_> {
         let mut board = self.context.board().borrow_mut();
         let num_revealed = board.reveal_from(x, y);
         if num_revealed > 0 && board.cell(x, y).contains(CellFlags::MINE) {
+            // hit a mine :(
             GameState::Over
         } else {
             game_state

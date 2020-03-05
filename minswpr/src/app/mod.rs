@@ -21,6 +21,7 @@ use sdl2::ttf::Sdl2TtfContext;
 use sdl2::{self, EventPump, VideoSubsystem};
 use std::cell::RefCell;
 use std::path::Path;
+use std::process;
 use std::rc::Rc;
 use std::thread;
 use std::time::Duration;
@@ -36,6 +37,8 @@ pub struct Minswpr {
 }
 
 impl Minswpr {
+    /// Initializes SDL2 and creates a new `Minswpr` instance from the specified
+    /// Config.
     pub fn new(config: Config) -> MsResult<Self> {
         let sdl = sdl2::init()?;
         Ok(Self {
@@ -46,6 +49,8 @@ impl Minswpr {
         })
     }
 
+    /// Starts the game. Returns an `Err` if an error occurs during
+    /// initialization or the main game loop.
     pub fn start(&mut self) -> MsResult {
         let board = self.make_board()?;
         let stopwatch = Rc::new(RefCell::new(Stopwatch::new()));
@@ -54,6 +59,7 @@ impl Minswpr {
             .config(self.config.clone())
             .game_state(GameState::Ready)
             .board(Rc::clone(&board))
+            .stopwatch(Rc::clone(&stopwatch))
             .layout(self.make_layout(&board, &stopwatch)?)
             .build()?;
 
@@ -76,34 +82,16 @@ impl Minswpr {
 
         let mut last_game_state = GameState::Unknown; // debug
 
-        'main: loop {
+        loop {
+            // handle input events
             for event in self.event_pump.poll_iter() {
                 ctx.set_game_state(self::handle_event(&ctx, event)?);
             }
 
-            let game_state = match ctx.game_state() {
-                GameState::Quit => break 'main,
-                GameState::Reset => {
-                    let bc = &self.config.board;
-                    let bd = &bc.dimen;
-                    ctx.board()
-                        .replace(Board::new(bd.width(), bd.height(), bc.num_mines)?);
-                    stopwatch.borrow_mut().reset();
-                    GameState::Ready
-                }
-                GameState::Start => {
-                    stopwatch.borrow_mut().start();
-                    GameState::Started
-                }
-                GameState::Over => {
-                    stopwatch.borrow_mut().stop();
-                    GameState::Over
-                }
-                _ => ctx.game_state(),
-            };
+            // do some post-processing on the game state produced by the input events
+            self.handle_game_state(&mut ctx)?;
 
-            ctx.set_game_state(game_state);
-
+            // initialize the canvas
             draw.with_canvas(|mut c| {
                 c.set_draw_color(self.config.window.bg_color);
                 c.clear();
@@ -122,6 +110,32 @@ impl Minswpr {
 
             thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
         }
+    }
+
+    fn handle_game_state(&self, ctx: &mut Context) -> MsResult {
+        ctx.set_game_state(match ctx.game_state() {
+            GameState::Quit => {
+                process::exit(0);
+            }
+            GameState::Reset => {
+                // reset the board and the stopwatch
+                let bc = &self.config.board;
+                let bd = &bc.dimen;
+                ctx.board()
+                    .replace(Board::new(bd.width(), bd.height(), bc.num_mines)?);
+                ctx.stopwatch().borrow_mut().reset();
+                GameState::Ready
+            }
+            GameState::Start => {
+                ctx.stopwatch().borrow_mut().start();
+                GameState::Started
+            }
+            GameState::Over => {
+                ctx.stopwatch().borrow_mut().stop();
+                GameState::Over
+            }
+            _ => ctx.game_state(),
+        });
 
         Ok(())
     }

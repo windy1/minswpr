@@ -310,7 +310,7 @@ pub struct Element {
 
 impl Element {
     /// Returns a reference to the `Draw` instance contained within this
-    /// compoent
+    /// element
     pub fn draw_ref(&self) -> &dyn Draw {
         &*self.draw_ref
     }
@@ -321,18 +321,26 @@ impl Element {
         self.mouse_up.as_deref()
     }
 
+    /// Returns `Some` reference to the `OnMouseMove` handler if present,
+    /// returns `None` otherwise
     pub fn mouse_move(&self) -> Option<&OnMouseMove> {
         self.mouse_move.as_deref()
     }
 
+    /// Returns `Some` reference to the `OnMouseDown` handler if present,
+    /// returns `None` otherwise
     pub fn mouse_down(&self) -> Option<&OnMouseDown> {
         self.mouse_down.as_deref()
     }
 
+    /// Returns `Some` reference to the `OnMouseEnter` handler if present,
+    /// returns `None` otherwise
     pub fn mouse_enter(&self) -> Option<&OnMouseEnter> {
         self.mouse_enter.as_deref()
     }
 
+    /// Returns `Some` reference to the `OnMouseLeave` handler if present,
+    /// returns `None` otherwise
     pub fn mouse_leave(&self) -> Option<&OnMouseLeave> {
         self.mouse_leave.as_deref()
     }

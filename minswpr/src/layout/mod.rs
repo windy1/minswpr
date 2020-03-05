@@ -205,8 +205,8 @@ impl Component {
         self.id
     }
 
-    pub fn pos(&self) -> &Point {
-        &self.pos
+    pub fn pos(&self) -> Point {
+        self.pos
     }
 
     pub fn draw_ref(&self) -> &dyn Draw {

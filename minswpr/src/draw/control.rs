@@ -3,7 +3,7 @@ use crate::config::{ControlConfig, LedDisplayConfig};
 use crate::draw::text::TextResult;
 use crate::draw::text::{self, Text};
 use crate::draw::DrawContext;
-use crate::layout::{Element, Layout, LayoutBuilder, Orientation};
+use crate::layout::{Element, ElementBuilder, Layout, LayoutBuilder, Orientation};
 use crate::math::{Dimen, Point};
 use crate::utils;
 use crate::{BoardRef, GameState, MsResult, StopwatchRef};
@@ -89,24 +89,6 @@ pub fn make_layout(
     let btn_left = w / 2 - btn_width / 2 - fc.dimen.width() - p - fc.padding * 2;
     let btn_right = w / 2 - btn_width / 2 - sw.dimen.width() - p - sw.padding * 2;
 
-    let mut reset_button = Element::new(Box::new(DrawRect::with_margins(
-        btn_dimen,
-        config.reset_button_color,
-        *Margins::new().left(btn_left).right(btn_right),
-    )));
-
-    reset_button.on_mouse_up(|ctx, e| {
-        println!("reset_button clicked");
-        let Point { x, y } = e.mouse_pos();
-        ctx.layout()
-            .get_layout("control")
-            .unwrap()
-            .get_at(x, y)
-            .filter(|c| c.id() == "reset_button")
-            .map(|_| GameState::Reset)
-            .unwrap_or_else(|| ctx.game_state())
-    });
-
     layout.insert_all(vec![
         (
             "flag_counter",
@@ -117,7 +99,27 @@ pub fn make_layout(
                 &fc,
             )?)),
         ),
-        ("reset_button", reset_button),
+        (
+            "reset_button",
+            ElementBuilder::default()
+                .draw_ref(Box::new(DrawRect::with_margins(
+                    btn_dimen,
+                    config.reset_button_color,
+                    *Margins::new().left(btn_left).right(btn_right),
+                )))
+                .mouse_up(Some(Box::new(|ctx, e| {
+                    println!("reset_button clicked");
+                    let Point { x, y } = e.mouse_pos();
+                    ctx.layout()
+                        .get_layout("control")
+                        .unwrap()
+                        .get_at(x, y)
+                        .filter(|c| c.id() == "reset_button")
+                        .map(|_| GameState::Reset)
+                        .unwrap_or_else(|| ctx.game_state())
+                })))
+                .build()?,
+        ),
         (
             "stopwatch",
             Element::new(Box::new(self::make_led_display(

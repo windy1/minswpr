@@ -232,9 +232,11 @@ impl Default for Orientation {
 
 pub type OnMouseUp = dyn Fn(&Context, MouseUpEvent) -> GameState;
 
-#[derive(new)]
+#[derive(new, Builder)]
+#[builder(pattern = "owned")]
 pub struct Element {
     draw_ref: Box<dyn Draw>,
+    #[builder(default)]
     #[new(default)]
     mouse_up: Option<Box<OnMouseUp>>,
 }
@@ -246,9 +248,9 @@ impl Element {
         &*self.draw_ref
     }
 
-    pub fn on_mouse_up(&mut self, f: impl Fn(&Context, MouseUpEvent) -> GameState + 'static) {
-        self.mouse_up = Some(Box::new(f))
-    }
+    // pub fn on_mouse_up(&mut self, f: impl Fn(&Context, MouseUpEvent) -> GameState
+    // + 'static) {     self.mouse_up = Some(Box::new(f))
+    // }
 
     pub fn mouse_up(&self) -> Option<&OnMouseUp> {
         self.mouse_up.as_deref()

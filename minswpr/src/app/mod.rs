@@ -10,7 +10,7 @@ use crate::draw::board::DrawBoard;
 use crate::draw::control;
 use crate::draw::{CanvasRef, Draw, DrawContext, DrawRect};
 use crate::fonts::Fonts;
-use crate::layout::{Element, Layout, LayoutBuilder};
+use crate::layout::{Element, ElementBuilder, Layout, LayoutBuilder};
 use crate::math::{Dimen, Point};
 use crate::stopwatch::Stopwatch;
 use crate::MsResult;
@@ -55,7 +55,7 @@ impl Minswpr {
     /// Starts the game. Returns an `Err` if an error occurs during
     /// initialization or the main game loop.
     pub fn start(&mut self) -> MsResult {
-        let board = self.make_board()?;
+        let board = Rc::new(RefCell::new(self.make_board()?));
         let stopwatch = Rc::new(RefCell::new(Stopwatch::new()));
 
         let mut ctx = ContextBuilder::default()
@@ -143,10 +143,10 @@ impl Minswpr {
         Ok(())
     }
 
-    fn make_board(&self) -> MsResult<BoardRef> {
+    fn make_board(&self) -> MsResult<Board> {
         let bc = &self.config.board;
         let Dimen { x: w, y: h } = bc.dimen;
-        Ok(Rc::new(RefCell::new(Board::new(w, h, bc.num_mines)?)))
+        Board::new(w, h, bc.num_mines)
     }
 
     fn make_layout(&self, board: &BoardRef, stopwatch: &StopwatchRef) -> MsResult<Layout> {
@@ -159,64 +159,30 @@ impl Minswpr {
 
         let cc = &self.config.control;
 
-        let mut board_elem = Element::new(Box::new(DrawBoard::new(
-            Rc::clone(&board),
-            self.config.board.cells.clone(),
-        )));
-
-        board_elem.on_mouse_up(|ctx, e| {
-            let Point { x, y } = e.mouse_pos();
-            let game_state = ctx.game_state();
-
-            println!("board clicked!");
-
-            // if the current game is over, freeze the board
-            if let GameState::Over = game_state {
-                return game_state;
-            }
-
-            match ctx.get_cell_at(x, y) {
-                Some(p) => {
-                    // start the game when the first cell of a fresh board is clicked
-                    let game_state = if let GameState::Ready = game_state {
-                        GameState::Start
-                    } else {
-                        game_state
-                    };
-
-                    match &e.mouse_btn() {
-                        MouseButton::Left => input::left_click_cell(ctx, p, game_state),
-                        MouseButton::Right => input::right_click_cell(ctx, p, game_state),
-                        MouseButton::Middle => input::middle_click_cell(ctx, p, game_state),
-                        _ => game_state,
-                    }
-                }
-                None => game_state,
-            }
-        });
-
         let board_draw = Box::new(DrawBoard::new(
             Rc::clone(&board),
             self.config.board.cells.clone(),
         ));
         let board_width = board_draw.dimen().width();
 
-        let mut control_elem = Element::new(Box::new(control::make_layout(
-            &cc,
-            board_width,
-            &board,
-            &stopwatch,
-        )?));
-
-        control_elem.on_mouse_up(|ctx, e| {
-            ctx.layout()
-                .get_layout("control")
-                .unwrap()
-                .defer_mouse_up(ctx, e)
-        });
-
         layout.insert_all(vec![
-            ("control", control_elem),
+            (
+                "control",
+                ElementBuilder::default()
+                    .draw_ref(Box::new(control::make_layout(
+                        &cc,
+                        board_width,
+                        &board,
+                        &stopwatch,
+                    )?))
+                    .mouse_up(Some(Box::new(|ctx, e| {
+                        ctx.layout()
+                            .get_layout("control")
+                            .unwrap()
+                            .defer_mouse_up(ctx, e)
+                    })))
+                    .build()?,
+            ),
             (
                 "spacer",
                 Element::new(Box::new(DrawRect::new(
@@ -224,7 +190,13 @@ impl Minswpr {
                     cc.spacer_color,
                 ))),
             ),
-            ("board", board_elem),
+            (
+                "board",
+                ElementBuilder::default()
+                    .draw_ref(board_draw)
+                    .mouse_up(Some(Box::new(input::click_board)))
+                    .build()?,
+            ),
         ]);
 
         Ok(layout)

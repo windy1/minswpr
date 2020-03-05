@@ -19,6 +19,35 @@ impl MouseUpEvent {
     }
 }
 
+pub fn click_board(ctx: &Context, e: MouseUpEvent) -> GameState {
+    let Point { x, y } = e.mouse_pos();
+    let game_state = ctx.game_state();
+
+    // if the current game is over, freeze the board
+    if let GameState::Over = game_state {
+        return game_state;
+    }
+
+    match ctx.get_cell_at(x, y) {
+        Some(p) => {
+            // start the game when the first cell of a fresh board is clicked
+            let game_state = if let GameState::Ready = game_state {
+                GameState::Start
+            } else {
+                game_state
+            };
+
+            match &e.mouse_btn() {
+                MouseButton::Left => self::left_click_cell(ctx, p, game_state),
+                MouseButton::Right => self::right_click_cell(ctx, p, game_state),
+                MouseButton::Middle => self::middle_click_cell(ctx, p, game_state),
+                _ => game_state,
+            }
+        }
+        None => game_state,
+    }
+}
+
 pub fn left_click_cell(
     ctx: &Context,
     Point { x, y }: Point<u32>,

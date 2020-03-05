@@ -37,6 +37,8 @@ impl<'a> Fonts<'a> {
         Ok(())
     }
 
+    /// Returns `Ok(&Font)` of the font with the specified `key` if present.
+    /// Returns `Err(String)` otherwise
     pub fn get(&self, key: &str) -> MsResult<&Font> {
         self.font_map
             .get(key)

@@ -26,9 +26,12 @@ use std::rc::Rc;
 use std::thread;
 use std::time::Duration;
 
+/// Helper type for a `Board` reference
 pub type BoardRef = Rc<RefCell<Board>>;
+/// Helper type for a `Stopwatch` reference
 pub type StopwatchRef = Rc<RefCell<Stopwatch>>;
 
+/// The application root
 pub struct Minswpr {
     config: Config,
     ttf: Sdl2TtfContext,
@@ -207,6 +210,7 @@ where
     }
 }
 
+/// Represents different states the application can be in
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum GameState {
     Unknown,

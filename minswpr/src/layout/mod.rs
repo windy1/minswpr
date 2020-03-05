@@ -8,6 +8,7 @@ use std::fmt;
 
 use self::Orientation::*;
 
+/// Organizes various components on the canvas
 #[derive(Builder, AsAny)]
 pub struct Layout {
     #[builder(setter(skip))]
@@ -23,35 +24,51 @@ pub struct Layout {
 }
 
 impl Layout {
+    /// Returns the background color of this layout
     pub fn color(&self) -> Option<Color> {
         self.color
     }
 
+    /// Returns the padding (pixels) of this layout
     pub fn padding(&self) -> u32 {
         self.padding
     }
 
+    /// Returns spacial orientation of this layout. That is, the direction in
+    /// which components should be laid-out on the screen
     pub fn orientation(&self) -> Orientation {
         self.orientation
     }
 
+    /// Inserts a new component into the layout
+    ///
+    /// # Arguments
+    /// * `key` - Unique identified for component
+    /// * `order` - The ordinal positioning of the component in this layout
+    /// * `component` - Instance of `Draw` component
     pub fn insert(&mut self, key: &'static str, order: i32, component: Box<dyn Draw>) {
         self.components
             .insert(key, Component::new(key, order, component));
     }
 
+    /// Inserts the components in the specified `components` `Vec<_>`
     pub fn insert_all(&mut self, mut components: Vec<(&'static str, Box<dyn Draw>)>) {
         for (i, c) in components.drain(..).enumerate() {
             self.insert(c.0, i as i32, c.1);
         }
     }
 
+    /// Returns `Ok(&Component)` of the component with the specified unique ID,
+    /// or `Err(String)` if the component is not present.
     pub fn get(&self, key: &'static str) -> MsResult<&Component> {
         self.components
             .get(key)
             .ok_or_else(|| format!("missing required layout component `{}`", key))
     }
 
+    /// Returns `Ok(&Layout)` of the component with the specified unique ID, or
+    /// `Err(String)` if the component is not present or if the component found
+    /// is not an instance of Layout.
     pub fn get_layout(&self, key: &'static str) -> MsResult<&Layout> {
         self.get(key)?
             .draw_ref()
@@ -60,6 +77,8 @@ impl Layout {
             .ok_or_else(|| format!("Draw downcast to Layout failed on `{}`", key))
     }
 
+    /// Returns `Some(&Component)` of the component at the specified `x` and `y`
+    /// position on the screen. Otherwise, returns None
     pub fn get_at(&self, x: i32, y: i32) -> Option<&Component> {
         for component in self.components.values() {
             let Point { x: min_x, y: min_y } = component.pos;
@@ -131,6 +150,7 @@ type ComponentValues<'a> = hash_map::Values<'a, &'static str, Component>;
 
 impl Layout {
     fn draw_guides(&mut self, ctx: &DrawContext, pos: Point) -> MsResult {
+        // for debugging
         let Dimen { x: w, y: h } = self.dimen();
         draw_rect!(
             point!(1, h),
@@ -179,6 +199,7 @@ impl Layout {
     }
 }
 
+/// A 2-dimensional orientation in space
 #[derive(Debug, Clone, Copy)]
 pub enum Orientation {
     Vertical,
@@ -191,6 +212,7 @@ impl Default for Orientation {
     }
 }
 
+/// A single component within the layout
 #[derive(new)]
 pub struct Component {
     id: &'static str,
@@ -201,14 +223,18 @@ pub struct Component {
 }
 
 impl Component {
+    /// Returns this components unique identifier
     pub fn id(&self) -> &'static str {
         self.id
     }
 
+    /// Returns the current position of this component
     pub fn pos(&self) -> Point {
         self.pos
     }
 
+    /// Returns a reference to the `Draw` instance contained within this
+    /// compoent
     pub fn draw_ref(&self) -> &dyn Draw {
         &*self.draw_ref
     }

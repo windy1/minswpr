@@ -4,7 +4,7 @@ pub use self::context::*;
 
 use self::{Context, ContextBuilder};
 use super::input::{self, MouseDownEvent, MouseMoveEvent, MouseUpEvent};
-use crate::board::Board;
+use crate::board::{Board, CellFlags};
 use crate::config::{self, Config};
 use crate::draw::board::DrawBoard;
 use crate::draw::control;
@@ -14,7 +14,7 @@ use crate::layout::{Element, ElementBuilder, Layout, LayoutBuilder};
 use crate::math::{Dimen, Point};
 use crate::stopwatch::Stopwatch;
 use crate::MsResult;
-use sdl2::event::Event;
+use sdl2::event::{Event, WindowEvent};
 use sdl2::keyboard::Keycode;
 use sdl2::mouse::{MouseButton, MouseState};
 use sdl2::ttf::Sdl2TtfContext;
@@ -260,6 +260,13 @@ fn handle_event(ctx: &Context, event: Event) -> GameState {
         Event::KeyDown { keycode, .. } => match keycode {
             Some(k) => self::handle_key_down(ctx, k),
             None => ctx.game_state(),
+        },
+        Event::Window { win_event, .. } => match win_event {
+            WindowEvent::Leave => {
+                ctx.board().borrow_mut().clear_all(CellFlags::PRESSED);
+                ctx.game_state()
+            }
+            _ => ctx.game_state(),
         },
         _ => ctx.game_state(),
     }

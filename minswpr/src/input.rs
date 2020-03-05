@@ -171,6 +171,10 @@ fn on_middle_click_cell(
 }
 
 pub fn on_mouse_move_board(ctx: &Context, e: MouseMoveEvent) -> GameState {
+    if let GameState::Over = ctx.game_state() {
+        return ctx.game_state();
+    }
+
     if !e.mouse_state.is_mouse_button_pressed(MouseButton::Left) {
         return ctx.game_state();
     }
@@ -188,6 +192,10 @@ pub fn on_mouse_move_board(ctx: &Context, e: MouseMoveEvent) -> GameState {
 }
 
 pub fn on_mouse_down_board(ctx: &Context, e: MouseDownEvent) -> GameState {
+    if let GameState::Over = ctx.game_state() {
+        return ctx.game_state();
+    }
+
     match e.mouse_btn() {
         MouseButton::Left => {}
         _ => return ctx.game_state(),

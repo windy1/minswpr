@@ -262,7 +262,6 @@ fn handle_event(context: &Context, event: Event) -> MsResult<GameState> {
 }
 
 fn handle_mouse_up(ctx: &Context, mouse_btn: MouseButton, x: i32, y: i32) -> GameState {
-    // MouseUp::new(mouse_btn, point!(x, y), context).execute()
     ctx.layout()
         .defer_mouse_up(ctx, MouseUpEvent::new(mouse_btn, point!(x, y)))
 }

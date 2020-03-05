@@ -97,6 +97,7 @@ impl Layout {
         None
     }
 
+    /// Defers the specified `MouseUpEvent` to this `Layout`'s children
     pub fn defer_mouse_up(&self, ctx: &Context, e: MouseUpEvent) -> GameState {
         let game_state = ctx.game_state();
         let Point { x, y } = e.mouse_pos();
@@ -230,8 +231,10 @@ impl Default for Orientation {
     }
 }
 
+/// Function type of a handler for a `MouseUpEvent`
 pub type OnMouseUp = dyn Fn(&Context, MouseUpEvent) -> GameState;
 
+/// An element on a `Layout`, contained within a `Node`
 #[derive(new, Builder)]
 #[builder(pattern = "owned")]
 pub struct Element {
@@ -248,10 +251,8 @@ impl Element {
         &*self.draw_ref
     }
 
-    // pub fn on_mouse_up(&mut self, f: impl Fn(&Context, MouseUpEvent) -> GameState
-    // + 'static) {     self.mouse_up = Some(Box::new(f))
-    // }
-
+    /// Returns `Some` reference to the `OnMouseUp` handler if present, returns
+    /// `None` otherwise
     pub fn mouse_up(&self) -> Option<&OnMouseUp> {
         self.mouse_up.as_deref()
     }

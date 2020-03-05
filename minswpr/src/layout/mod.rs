@@ -1,4 +1,7 @@
+use crate::app::context::Context;
+use crate::app::GameState;
 use crate::draw::{Draw, DrawContext};
+use crate::input::MouseUpEvent;
 use crate::math::{Dimen, Point};
 use crate::MsResult;
 use sdl2::pixels::Color;
@@ -46,13 +49,12 @@ impl Layout {
     /// * `key` - Unique identified for element
     /// * `order` - The ordinal positioning of the element in this layout
     /// * `elem` - Instance of `Draw` element
-    pub fn insert(&mut self, key: &'static str, order: i32, elem: Box<dyn Draw>) {
-        self.nodes
-            .insert(key, Node::new(key, order, Element::new(elem)));
+    pub fn insert(&mut self, key: &'static str, order: i32, elem: Element) {
+        self.nodes.insert(key, Node::new(key, order, elem));
     }
 
     /// Inserts the elements in the specified `elems` `Vec<_>`
-    pub fn insert_all(&mut self, mut elems: Vec<(&'static str, Box<dyn Draw>)>) {
+    pub fn insert_all(&mut self, mut elems: Vec<(&'static str, Element)>) {
         for (i, c) in elems.drain(..).enumerate() {
             self.insert(c.0, i as i32, c.1);
         }
@@ -93,6 +95,21 @@ impl Layout {
         }
 
         None
+    }
+
+    pub fn defer_mouse_up(&self, ctx: &Context, e: MouseUpEvent) -> GameState {
+        let game_state = ctx.game_state();
+        let Point { x, y } = e.mouse_pos();
+
+        println!("mouse_up = {:?}", point!(x, y));
+
+        match self.get_at(x, y) {
+            Some(n) => match n.elem().mouse_up() {
+                Some(handler) => handler(ctx, e),
+                None => game_state,
+            },
+            None => game_state,
+        }
     }
 }
 
@@ -213,9 +230,13 @@ impl Default for Orientation {
     }
 }
 
+pub type OnMouseUp = dyn Fn(&Context, MouseUpEvent) -> GameState;
+
 #[derive(new)]
 pub struct Element {
     draw_ref: Box<dyn Draw>,
+    #[new(default)]
+    mouse_up: Option<Box<OnMouseUp>>,
 }
 
 impl Element {
@@ -223,6 +244,14 @@ impl Element {
     /// compoent
     pub fn draw_ref(&self) -> &dyn Draw {
         &*self.draw_ref
+    }
+
+    pub fn on_mouse_up(&mut self, f: impl Fn(&Context, MouseUpEvent) -> GameState + 'static) {
+        self.mouse_up = Some(Box::new(f))
+    }
+
+    pub fn mouse_up(&self) -> Option<&OnMouseUp> {
+        self.mouse_up.as_deref()
     }
 }
 

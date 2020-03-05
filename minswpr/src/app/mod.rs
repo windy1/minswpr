@@ -3,14 +3,14 @@ pub(super) mod context;
 pub use self::context::*;
 
 use self::{Context, ContextBuilder};
-use super::input::{Execute, KeyDown, MouseUp};
+use super::input::{self, MouseUpEvent};
 use crate::board::Board;
 use crate::config::{self, Config};
 use crate::draw::board::DrawBoard;
 use crate::draw::control;
 use crate::draw::{CanvasRef, Draw, DrawContext, DrawRect};
 use crate::fonts::Fonts;
-use crate::layout::{Layout, LayoutBuilder};
+use crate::layout::{Element, Layout, LayoutBuilder};
 use crate::math::{Dimen, Point};
 use crate::stopwatch::Stopwatch;
 use crate::MsResult;
@@ -159,25 +159,72 @@ impl Minswpr {
 
         let cc = &self.config.control;
 
+        let mut board_elem = Element::new(Box::new(DrawBoard::new(
+            Rc::clone(&board),
+            self.config.board.cells.clone(),
+        )));
+
+        board_elem.on_mouse_up(|ctx, e| {
+            let Point { x, y } = e.mouse_pos();
+            let game_state = ctx.game_state();
+
+            println!("board clicked!");
+
+            // if the current game is over, freeze the board
+            if let GameState::Over = game_state {
+                return game_state;
+            }
+
+            match ctx.get_cell_at(x, y) {
+                Some(p) => {
+                    // start the game when the first cell of a fresh board is clicked
+                    let game_state = if let GameState::Ready = game_state {
+                        GameState::Start
+                    } else {
+                        game_state
+                    };
+
+                    match &e.mouse_btn() {
+                        MouseButton::Left => input::left_click_cell(ctx, p, game_state),
+                        MouseButton::Right => input::right_click_cell(ctx, p, game_state),
+                        MouseButton::Middle => input::middle_click_cell(ctx, p, game_state),
+                        _ => game_state,
+                    }
+                }
+                None => game_state,
+            }
+        });
+
         let board_draw = Box::new(DrawBoard::new(
             Rc::clone(&board),
             self.config.board.cells.clone(),
         ));
         let board_width = board_draw.dimen().width();
 
+        let mut control_elem = Element::new(Box::new(control::make_layout(
+            &cc,
+            board_width,
+            &board,
+            &stopwatch,
+        )?));
+
+        control_elem.on_mouse_up(|ctx, e| {
+            ctx.layout()
+                .get_layout("control")
+                .unwrap()
+                .defer_mouse_up(ctx, e)
+        });
+
         layout.insert_all(vec![
-            (
-                "control",
-                Box::new(control::make_layout(&cc, board_width, &board, &stopwatch)?),
-            ),
+            ("control", control_elem),
             (
                 "spacer",
-                Box::new(DrawRect::new(
+                Element::new(Box::new(DrawRect::new(
                     point!(board_width, cc.spacer_height),
                     cc.spacer_color,
-                )),
+                ))),
             ),
-            ("board", board_draw),
+            ("board", board_elem),
         ]);
 
         Ok(layout)
@@ -233,7 +280,7 @@ fn handle_event(context: &Context, event: Event) -> MsResult<GameState> {
         Event::Quit { .. } => Ok(GameState::Quit),
         Event::MouseButtonUp {
             mouse_btn, x, y, ..
-        } => self::handle_mouse_up(context, mouse_btn, x, y),
+        } => Ok(self::handle_mouse_up(context, mouse_btn, x, y)),
         Event::KeyDown { keycode, .. } => match keycode {
             Some(k) => self::handle_key_down(context, k),
             None => Ok(context.game_state()),
@@ -242,15 +289,15 @@ fn handle_event(context: &Context, event: Event) -> MsResult<GameState> {
     }
 }
 
-fn handle_mouse_up(
-    context: &Context,
-    mouse_btn: MouseButton,
-    x: i32,
-    y: i32,
-) -> MsResult<GameState> {
-    MouseUp::new(mouse_btn, point!(x, y), context).execute()
+fn handle_mouse_up(ctx: &Context, mouse_btn: MouseButton, x: i32, y: i32) -> GameState {
+    // MouseUp::new(mouse_btn, point!(x, y), context).execute()
+    ctx.layout()
+        .defer_mouse_up(ctx, MouseUpEvent::new(mouse_btn, point!(x, y)))
 }
 
-fn handle_key_down(context: &Context, keycode: Keycode) -> MsResult<GameState> {
-    KeyDown::new(keycode, context).execute()
+fn handle_key_down(ctx: &Context, keycode: Keycode) -> MsResult<GameState> {
+    match keycode {
+        Keycode::F2 => Ok(GameState::Reset),
+        _ => Ok(ctx.game_state()),
+    }
 }

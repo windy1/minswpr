@@ -128,46 +128,46 @@ impl Layout {
     }
 
     pub fn on_mouse_move(&self, ctx: &Context, e: &MouseMoveEvent) -> GameState {
+        // TODO: returned GameState currently has no effect
         let pos = e.mouse_pos();
         let hover_id = self.hover_id.get();
-        let g = match self.get_at(pos.x, pos.y) {
+        match self.get_at(pos.x, pos.y) {
             Some(n) => {
                 if hover_id == n.id() {
-                    return ctx.game_state();
+                    ctx.game_state()
+                } else {
+                    self.on_hover_change(ctx, pos, n)
                 }
-
-                let game_state = match self.get(hover_id) {
-                    Ok(old) => match old.elem().mouse_leave() {
-                        Some(leave) => leave(ctx, MouseLeaveEvent::new(pos)),
-                        None => ctx.game_state(),
-                    },
-                    Err(_) => ctx.game_state(),
+            }
+            None => {
+                let game_state = match hover_id {
+                    "" => ctx.game_state(),
+                    _ => self.fire_mouse_leave_event(ctx, pos),
                 };
-
-                let game_state = match n.elem().mouse_enter() {
-                    Some(enter) => enter(ctx, MouseEnterEvent::new(pos)),
-                    None => game_state,
-                };
-
-                self.hover_id.set(n.id());
-
+                self.hover_id.set("");
                 game_state
             }
-            None => match hover_id {
-                "" => match self.get(hover_id) {
-                    Ok(old) => match old.elem().mouse_leave() {
-                        Some(leave) => leave(ctx, MouseLeaveEvent::new(pos)),
-                        None => ctx.game_state(),
-                    },
-                    Err(_) => ctx.game_state(),
-                },
-                _ => ctx.game_state(),
-            },
+        }
+    }
+
+    fn on_hover_change(&self, ctx: &Context, pos: Point, node: &Node) -> GameState {
+        let game_state = self.fire_mouse_leave_event(ctx, pos);
+        let game_state = match node.elem().mouse_enter() {
+            Some(enter) => enter(ctx, MouseEnterEvent::new(pos)),
+            None => game_state,
         };
+        self.hover_id.set(node.id());
+        game_state
+    }
 
-        println!("hover_id = {}", self.hover_id.get());
-
-        g
+    fn fire_mouse_leave_event(&self, ctx: &Context, pos: Point) -> GameState {
+        match self.get(self.hover_id.get()) {
+            Ok(old) => match old.elem().mouse_leave() {
+                Some(leave) => leave(ctx, MouseLeaveEvent::new(pos)),
+                None => ctx.game_state(),
+            },
+            Err(_) => ctx.game_state(),
+        }
     }
 }
 
@@ -289,7 +289,6 @@ impl Default for Orientation {
 }
 
 pub type OnMouse<E> = dyn Fn(&Context, E) -> GameState;
-/// Function type of a handler for a `MouseUpEvent`
 pub type OnMouseUp = OnMouse<MouseUpEvent>;
 pub type OnMouseMove = OnMouse<MouseMoveEvent>;
 pub type OnMouseDown = OnMouse<MouseDownEvent>;

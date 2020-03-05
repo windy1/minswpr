@@ -3,6 +3,7 @@ use super::math::Point;
 use crate::{Context, GameState};
 use sdl2::mouse::MouseButton;
 
+/// Event created when a `MouseButton`, is released on the screen
 #[derive(new)]
 pub struct MouseUpEvent {
     mouse_btn: MouseButton,

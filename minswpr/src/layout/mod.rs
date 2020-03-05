@@ -1,7 +1,7 @@
 use crate::app::context::Context;
 use crate::app::GameState;
 use crate::draw::{Draw, DrawContext};
-use crate::input::MouseUpEvent;
+use crate::input::{MouseEvent, MouseMoveEvent, MouseUpEvent};
 use crate::math::{Dimen, Point};
 use crate::MsResult;
 use sdl2::pixels::Color;
@@ -97,15 +97,15 @@ impl Layout {
         None
     }
 
-    /// Defers the specified `MouseUpEvent` to this `Layout`'s children
-    pub fn defer_mouse_up(&self, ctx: &Context, e: MouseUpEvent) -> GameState {
+    pub fn defer_mouse_event<E, F>(&self, ctx: &Context, e: E, handler_getter: F) -> GameState
+    where
+        E: MouseEvent,
+        F: FnOnce(&Element) -> Option<&OnMouse<E>>,
+    {
         let game_state = ctx.game_state();
         let Point { x, y } = e.mouse_pos();
-
-        println!("mouse_up = {:?}", point!(x, y));
-
         match self.get_at(x, y) {
-            Some(n) => match n.elem().mouse_up() {
+            Some(n) => match handler_getter(n.elem()) {
                 Some(handler) => handler(ctx, e),
                 None => game_state,
             },
@@ -231,8 +231,10 @@ impl Default for Orientation {
     }
 }
 
+pub type OnMouse<E: MouseEvent> = dyn Fn(&Context, E) -> GameState;
 /// Function type of a handler for a `MouseUpEvent`
-pub type OnMouseUp = dyn Fn(&Context, MouseUpEvent) -> GameState;
+pub type OnMouseUp = OnMouse<MouseUpEvent>;
+pub type OnMouseMove = OnMouse<MouseMoveEvent>;
 
 /// An element on a `Layout`, contained within a `Node`
 #[derive(new, Builder)]
@@ -242,6 +244,9 @@ pub struct Element {
     #[builder(default, setter(strip_option))]
     #[new(default)]
     mouse_up: Option<Box<OnMouseUp>>,
+    #[builder(default, setter(strip_option))]
+    #[new(default)]
+    mouse_move: Option<Box<OnMouseMove>>,
 }
 
 impl Element {
@@ -255,6 +260,10 @@ impl Element {
     /// `None` otherwise
     pub fn mouse_up(&self) -> Option<&OnMouseUp> {
         self.mouse_up.as_deref()
+    }
+
+    pub fn mouse_move(&self) -> Option<&OnMouseMove> {
+        self.mouse_move.as_deref()
     }
 }
 

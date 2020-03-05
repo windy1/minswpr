@@ -1,8 +1,14 @@
 use super::board::CellFlags;
 use super::math::Point;
-use crate::layout::OnMouseUp;
+use crate::layout::Element;
+use crate::layout::OnMouse;
 use crate::{Context, GameState};
-use sdl2::mouse::MouseButton;
+use sdl2::mouse::{MouseButton, MouseState};
+
+pub trait MouseEvent {
+    /// Returns the `Point` position of the mouse
+    fn mouse_pos(&self) -> Point;
+}
 
 /// Event created when a `MouseButton`, is released on the screen
 #[derive(new)]
@@ -16,9 +22,28 @@ impl MouseUpEvent {
     pub fn mouse_btn(&self) -> MouseButton {
         self.mouse_btn
     }
+}
 
-    /// Returns the `Point` position of the mouse when released
-    pub fn mouse_pos(&self) -> Point {
+impl MouseEvent for MouseUpEvent {
+    fn mouse_pos(&self) -> Point {
+        self.mouse_pos
+    }
+}
+
+#[derive(new)]
+pub struct MouseMoveEvent {
+    mouse_state: MouseState,
+    mouse_pos: Point,
+}
+
+impl MouseMoveEvent {
+    pub fn mouse_state(&self) -> MouseState {
+        self.mouse_state
+    }
+}
+
+impl MouseEvent for MouseMoveEvent {
+    fn mouse_pos(&self) -> Point {
         self.mouse_pos
     }
 }
@@ -35,7 +60,7 @@ impl MouseUpEvent {
 /// # Arguments
 /// * `ctx` - The game `Context`
 /// * `e` - The `MouseUpEvent` to handle
-pub fn click_board(ctx: &Context, e: MouseUpEvent) -> GameState {
+pub fn on_click_board(ctx: &Context, e: MouseUpEvent) -> GameState {
     let Point { x, y } = e.mouse_pos();
     let game_state = ctx.game_state();
 
@@ -54,9 +79,9 @@ pub fn click_board(ctx: &Context, e: MouseUpEvent) -> GameState {
             };
 
             match &e.mouse_btn() {
-                MouseButton::Left => self::left_click_cell(ctx, p, game_state),
-                MouseButton::Right => self::right_click_cell(ctx, p, game_state),
-                MouseButton::Middle => self::middle_click_cell(ctx, p, game_state),
+                MouseButton::Left => self::on_left_click_cell(ctx, p, game_state),
+                MouseButton::Right => self::on_right_click_cell(ctx, p, game_state),
+                MouseButton::Middle => self::on_middle_click_cell(ctx, p, game_state),
                 _ => game_state,
             }
         }
@@ -64,7 +89,11 @@ pub fn click_board(ctx: &Context, e: MouseUpEvent) -> GameState {
     }
 }
 
-fn left_click_cell(ctx: &Context, Point { x, y }: Point<u32>, game_state: GameState) -> GameState {
+fn on_left_click_cell(
+    ctx: &Context,
+    Point { x, y }: Point<u32>,
+    game_state: GameState,
+) -> GameState {
     let mut board = ctx.board().borrow_mut();
     let num_revealed = board.reveal_from(x, y);
     if num_revealed > 0 && board.cell(x, y).contains(CellFlags::MINE) {
@@ -75,12 +104,16 @@ fn left_click_cell(ctx: &Context, Point { x, y }: Point<u32>, game_state: GameSt
     }
 }
 
-fn right_click_cell(ctx: &Context, Point { x, y }: Point<u32>, game_state: GameState) -> GameState {
+fn on_right_click_cell(
+    ctx: &Context,
+    Point { x, y }: Point<u32>,
+    game_state: GameState,
+) -> GameState {
     ctx.board().borrow_mut().toggle_flag(x, y);
     game_state
 }
 
-fn middle_click_cell(
+fn on_middle_click_cell(
     ctx: &Context,
     Point { x, y }: Point<u32>,
     game_state: GameState,
@@ -98,14 +131,26 @@ fn middle_click_cell(
     }
 }
 
-/// Returns an `OnMouseUp` handler that will defer `MouseUpEvent`s to the
-/// specified `Layout`'s child elements. Panics if the `Node` with `layout_id`
-/// is not a `Layout`
-pub fn defer(layout_id: &'static str) -> Box<OnMouseUp> {
+/// Returns an `OnMouse<E: MouseEvnet>` handler that will defer `MouseUpEvent`s
+/// to the specified `Layout`'s child elements. Panics if the `Node` with
+/// `layout_id` is not a `Layout`
+pub fn defer_mouse<E, F>(layout_id: &'static str, f: &'static F) -> Box<OnMouse<E>>
+where
+    E: MouseEvent,
+    F: Fn(&Element) -> Option<&OnMouse<E>>,
+{
     Box::new(move |ctx, e| {
         ctx.layout()
             .get_layout(layout_id)
             .unwrap()
-            .defer_mouse_up(ctx, e)
+            .defer_mouse_event(ctx, e, f)
     })
+}
+
+pub fn mouse_up(elem: &Element) -> Option<&OnMouse<MouseUpEvent>> {
+    elem.mouse_up()
+}
+
+pub fn mouse_move(elem: &Element) -> Option<&OnMouse<MouseMoveEvent>> {
+    elem.mouse_move()
 }

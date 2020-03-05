@@ -8,11 +8,11 @@ use std::fmt;
 
 use self::Orientation::*;
 
-/// Organizes various components on the canvas
+/// Organizes various elements on the canvas
 #[derive(Builder, AsAny)]
 pub struct Layout {
     #[builder(setter(skip))]
-    components: HashMap<&'static str, Component>,
+    nodes: HashMap<&'static str, Node>,
     #[builder(default)]
     color: Option<Color>,
     #[builder(default)]
@@ -34,40 +34,40 @@ impl Layout {
         self.padding
     }
 
-    /// Returns spacial orientation of this layout. That is, the direction in
-    /// which components should be laid-out on the screen
+    /// Returns spacial orielementof this layout. That is, the direction in
+    /// which elements should be laid-out on the screen
     pub fn orientation(&self) -> Orientation {
         self.orientation
     }
 
-    /// Inserts a new component into the layout
+    /// Inserts a new element into the layout
     ///
     /// # Arguments
-    /// * `key` - Unique identified for component
-    /// * `order` - The ordinal positioning of the component in this layout
-    /// * `component` - Instance of `Draw` component
-    pub fn insert(&mut self, key: &'static str, order: i32, component: Box<dyn Draw>) {
-        self.components
-            .insert(key, Component::new(key, order, Element::new(component)));
+    /// * `key` - Unique identified for element
+    /// * `order` - The ordinal positioning of the element in this layout
+    /// * `elem` - Instance of `Draw` element
+    pub fn insert(&mut self, key: &'static str, order: i32, elem: Box<dyn Draw>) {
+        self.nodes
+            .insert(key, Node::new(key, order, Element::new(elem)));
     }
 
-    /// Inserts the components in the specified `components` `Vec<_>`
-    pub fn insert_all(&mut self, mut components: Vec<(&'static str, Box<dyn Draw>)>) {
-        for (i, c) in components.drain(..).enumerate() {
+    /// Inserts the elements in the specified `elems` `Vec<_>`
+    pub fn insert_all(&mut self, mut elems: Vec<(&'static str, Box<dyn Draw>)>) {
+        for (i, c) in elems.drain(..).enumerate() {
             self.insert(c.0, i as i32, c.1);
         }
     }
 
-    /// Returns `Ok(&Component)` of the component with the specified unique ID,
-    /// or `Err(String)` if the component is not present.
-    pub fn get(&self, key: &'static str) -> MsResult<&Component> {
-        self.components
+    /// Returns `Ok(&Element)` of the element with the specified unique ID,
+    /// or `Err(String)` if the element is not present.
+    pub fn get(&self, key: &'static str) -> MsResult<&Node> {
+        self.nodes
             .get(key)
-            .ok_or_else(|| format!("missing required layout component `{}`", key))
+            .ok_or_else(|| format!("missing required layout element `{}`", key))
     }
 
-    /// Returns `Ok(&Layout)` of the component with the specified unique ID, or
-    /// `Err(String)` if the component is not present or if the component found
+    /// Returns `Ok(&Layout)` of the element with the specified unique ID, or
+    /// `Err(String)` if the element is not present or if the element found
     /// is not an instance of Layout.
     pub fn get_layout(&self, key: &'static str) -> MsResult<&Layout> {
         self.get(key)?
@@ -78,17 +78,17 @@ impl Layout {
             .ok_or_else(|| format!("Draw downcast to Layout failed on `{}`", key))
     }
 
-    /// Returns `Some(&Component)` of the component at the specified `x` and `y`
+    /// Returns `Some(&Element)` of the element at the specified `x` and `y`
     /// position on the screen. Otherwise, returns None
-    pub fn get_at(&self, x: i32, y: i32) -> Option<&Component> {
-        for component in self.components.values() {
-            let Point { x: min_x, y: min_y } = component.pos;
-            let cd = component.elem().draw_ref.dimen();
+    pub fn get_at(&self, x: i32, y: i32) -> Option<&Node> {
+        for node in self.nodes.values() {
+            let Point { x: min_x, y: min_y } = node.pos;
+            let cd = node.elem().draw_ref.dimen();
             let max_x = min_x + cd.width() as i32;
             let max_y = min_y + cd.height() as i32;
 
             if x >= min_x && x <= max_x && y >= min_y && y <= max_y {
-                return Some(component);
+                return Some(node);
             }
         }
 
@@ -105,16 +105,16 @@ impl Draw for Layout {
         let orien = self.orientation;
         let padding = self.padding;
         let mut cur = pos + point!(padding, padding).as_i32();
-        let mut components = self.components.values_mut().collect::<Vec<_>>();
+        let mut nodes = self.nodes.values_mut().collect::<Vec<_>>();
 
-        components.sort();
+        nodes.sort();
 
-        for component in components {
-            let r = &mut component.elem.draw_ref;
+        for node in nodes {
+            let r = &mut node.elem.draw_ref;
             let m = r.margins();
 
-            component.pos = cur + point!(m.left, m.top).as_i32();
-            r.draw(ctx, component.pos)?;
+            node.pos = cur + point!(m.left, m.top).as_i32();
+            r.draw(ctx, node.pos)?;
 
             let d = r.dimen();
 
@@ -134,11 +134,11 @@ impl Draw for Layout {
     fn dimen(&self) -> Dimen {
         let (d, acc): (Dimen, Box<dyn Fn(Dimen, Dimen) -> Dimen>) = match self.orientation {
             Vertical => (
-                point!(self.component_max_width(), 0),
+                point!(self.node_max_width(), 0),
                 Box::new(|a, b| a + (0, b.height())),
             ),
             Horizontal => (
-                point!(0, self.component_max_height()),
+                point!(0, self.node_max_height()),
                 Box::new(|a, b| a + (b.width(), 0)),
             ),
         };
@@ -147,7 +147,7 @@ impl Draw for Layout {
     }
 }
 
-type ComponentValues<'a> = hash_map::Values<'a, &'static str, Component>;
+type NodeValues<'a> = hash_map::Values<'a, &'static str, Node>;
 
 impl Layout {
     fn draw_guides(&mut self, ctx: &DrawContext, pos: Point) -> MsResult {
@@ -167,19 +167,19 @@ impl Layout {
         )
     }
 
-    fn component_values(&self) -> ComponentValues {
-        self.components.values()
+    fn node_values(&self) -> NodeValues {
+        self.nodes.values()
     }
 
-    fn component_max_height(&self) -> u32 {
-        self.component_values()
+    fn node_max_height(&self) -> u32 {
+        self.node_values()
             .map(|c| c.elem().draw_ref.dimen().height())
             .max()
             .unwrap_or_else(|| 0)
     }
 
-    fn component_max_width(&self) -> u32 {
-        self.component_values()
+    fn node_max_width(&self) -> u32 {
+        self.node_values()
             .map(|c| c.elem().draw_ref.dimen().width())
             .max()
             .unwrap_or_else(|| 0)
@@ -187,12 +187,12 @@ impl Layout {
 
     fn calc_dimen(&self, initial: Dimen, acc: impl Fn(Dimen, Dimen) -> Dimen) -> Dimen {
         let margins: Dimen = self
-            .component_values()
+            .node_values()
             .map(|c| c.elem().draw_ref.margins())
             .map(|m| point!(m.left + m.right, m.top + m.bottom))
             .sum();
 
-        self.component_values()
+        self.node_values()
             .map(|c| c.elem().draw_ref.dimen())
             .fold(initial, |a, b| acc(a, b))
             + (self.padding * 2, self.padding * 2)
@@ -226,9 +226,9 @@ impl Element {
     }
 }
 
-/// A single component within the layout
+/// A single node within the layout
 #[derive(new)]
-pub struct Component {
+pub struct Node {
     id: &'static str,
     order: i32,
     elem: Element,
@@ -236,13 +236,13 @@ pub struct Component {
     pos: Point,
 }
 
-impl Component {
-    /// Returns this components unique identifier
+impl Node {
+    /// Returns this nodes unique identifier
     pub fn id(&self) -> &'static str {
         self.id
     }
 
-    /// Returns the current position of this component
+    /// Returns the current position of this node
     pub fn pos(&self) -> Point {
         self.pos
     }
@@ -253,31 +253,31 @@ impl Component {
     }
 }
 
-impl PartialOrd for Component {
+impl PartialOrd for Node {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl Ord for Component {
+impl Ord for Node {
     fn cmp(&self, other: &Self) -> Ordering {
         self.order.cmp(&other.order)
     }
 }
 
-impl PartialEq for Component {
+impl PartialEq for Node {
     fn eq(&self, other: &Self) -> bool {
         self.order == other.order
     }
 }
 
-impl Eq for Component {}
+impl Eq for Node {}
 
-impl fmt::Debug for Component {
+impl fmt::Debug for Node {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "Component {{ order: {}, pos: {:?}, dimen: {:?} }}",
+            "Node {{ order: {}, pos: {:?}, dimen: {:?} }}",
             self.order,
             self.pos,
             self.elem().draw_ref.dimen()

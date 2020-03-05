@@ -84,7 +84,7 @@ impl DrawRect {
     /// `dimen` - The dimensions of the rectangle
     /// `color` - The rectangle Color
     /// `margins` - The `Margins` of the rectangle for spacing relative to other
-    ///             components
+    ///             elements
     pub fn with_margins(dimen: Dimen, color: Color, margins: Margins) -> Self {
         Self {
             dimen,
@@ -115,8 +115,8 @@ impl Draw for DrawRect {
     }
 }
 
-/// Contains margin data for `Draw` components in a `Layout`. The `Margins` of a
-/// `Draw` determines how the component is spaced relative to other components
+/// Contains margin data for `Draw` elements in a `Layout`. The `Margins` of a
+/// `Draw` determines how the element is spaced relative to other elements
 /// in the layout.
 #[derive(new, Default, Clone, Copy, Debug)]
 pub struct Margins {

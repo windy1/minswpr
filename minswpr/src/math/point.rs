@@ -6,14 +6,19 @@ use std::iter::{Iterator, Sum};
 use std::num::TryFromIntError;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
+/// Creates a new `Point` with `x` and `y`
 macro_rules! point {
     ($x:expr, $y:expr) => {
         Point::new($x, $y)
     };
 }
 
-pub type RawPoint<T = i32> = (T, T);
+/// A helper type alias for `Point<u32>`, used for measuring dimensions
+pub type Dimen<T = u32> = Point<T>;
 
+type RawPoint<T = i32> = (T, T);
+
+/// A 2-dimensional point
 #[derive(new, Debug, Eq, PartialEq, Copy, Clone, Hash, Deserialize, Default)]
 pub struct Point<T = i32>
 where
@@ -24,14 +29,42 @@ where
 }
 
 impl Point<u32> {
+    /// Returns this point as a `Point<i32>`
     pub fn as_i32(self) -> Point {
         self.into()
     }
 }
 
 impl Point {
+    /// Attempts to convert this `Point<i32>` to a `Point<u32>`. Returns an
+    /// `Err(TryFromIntError)` if unsuccessful
     pub fn try_as_u32(self) -> Result<Point<u32>, TryFromIntError> {
         self.try_into()
+    }
+}
+
+impl<T> Dimen<T>
+where
+    T: Copy,
+{
+    /// Alias for this `Point`'s `x` value
+    pub fn width(&self) -> T {
+        self.x
+    }
+
+    /// Alias for this `Point`'s `y` value
+    pub fn height(&self) -> T {
+        self.y
+    }
+
+    /// Sets this `Point`'s `x` value
+    pub fn set_width(&mut self, width: T) {
+        self.x = width
+    }
+
+    /// Sets this `Point`'s `y` value
+    pub fn set_height(&mut self, height: T) {
+        self.y = height
     }
 }
 
@@ -257,29 +290,6 @@ where
 {
     fn div_assign(&mut self, rhs: RawPoint<T>) {
         self.div_assign(Self::new(rhs.0, rhs.1))
-    }
-}
-
-pub type Dimen<T = u32> = Point<T>;
-
-impl<T> Dimen<T>
-where
-    T: Copy,
-{
-    pub fn width(&self) -> T {
-        self.x
-    }
-
-    pub fn height(&self) -> T {
-        self.y
-    }
-
-    pub fn set_width(&mut self, width: T) {
-        self.x = width
-    }
-
-    pub fn set_height(&mut self, height: T) {
-        self.y = height
     }
 }
 

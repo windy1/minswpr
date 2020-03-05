@@ -8,6 +8,8 @@ use std::collections::HashSet;
 use std::hash::Hash;
 use std::num::ParseIntError;
 
+/// Returns a uniform random distribution of unique values of `n` elements in
+/// the range `(lo, hi)`
 pub fn gen_rand_unique<T, B>(n: usize, lo: B, hi: B) -> Vec<T>
 where
     T: SampleUniform + Eq + Hash,
@@ -22,6 +24,7 @@ where
     res.drain().collect()
 }
 
+/// Returns an RGB tuple from the specified `hex` string
 pub fn hex_to_rgb(hex: &str) -> Result<(u8, u8, u8), ParseIntError> {
     let hex = u32::from_str_radix(hex, 16)?;
     Ok((

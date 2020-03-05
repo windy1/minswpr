@@ -11,8 +11,11 @@ extern crate derive_new;
 #[macro_use]
 extern crate lazy_static;
 
+/// Contains misc. math functions and structures
 #[macro_use]
 pub mod math;
+
+/// Contains the basic components necessary to draw to the canvas
 #[macro_use]
 pub mod draw;
 

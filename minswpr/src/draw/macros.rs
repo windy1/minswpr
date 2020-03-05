@@ -1,3 +1,12 @@
+/// Helper macro for quickly creating common `Color` values
+///
+/// # Example
+/// ```rust
+/// use sdl2::pixels::Color;
+///
+/// assert_eq!(color!(red), Color::RGB(255, 0, 0));
+/// assert_eq!(color!(blue), Color::RGB(0, 0, 255));
+/// ```
 #[allow(unused)]
 macro_rules! color {
     (white) => {

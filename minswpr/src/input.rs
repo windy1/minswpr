@@ -1,6 +1,5 @@
 use super::board::CellFlags;
 use super::math::Point;
-use crate::layout;
 use crate::MsResult;
 use crate::{Context, GameState};
 use sdl2::keyboard::Keycode;

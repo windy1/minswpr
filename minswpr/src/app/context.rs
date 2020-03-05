@@ -21,11 +21,7 @@ impl Context {
         self.game_state
     }
 
-    /// Sets the current `GameState`
-    ///
-    /// # Arguments
-    ///
-    /// * `game_state` - The new `GameState`
+    /// Sets the current `GameState` to `game_state`
     pub fn set_game_state(&mut self, game_state: GameState) {
         self.game_state = game_state
     }
@@ -56,7 +52,7 @@ impl Context {
     }
 
     /// Return `Some(Point<u32>)` with the board position of the cell that
-    /// occupies the point on the screen specified
+    /// occupies the point on the screen specified. Returns `None` otherwise.
     ///
     /// # Arguments
     ///

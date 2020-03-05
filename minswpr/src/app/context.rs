@@ -62,7 +62,7 @@ impl Context {
     ///
     /// * `x` - x position on the screen
     /// * `y` - y position on the screen
-    pub fn get_cell_at(&self, x: i32, y: i32, board_pos: Point) -> Option<Point<u32>> {
+    pub fn get_cell_at(&self, x: i32, y: i32) -> Option<Point<u32>> {
         let cell_config = &self.config.board.cells;
         let cell_dimen = &cell_config.dimen.as_i32();
         let border_width = cell_config.border_width as i32;

@@ -22,7 +22,7 @@ pub struct MouseUp<'a> {
 }
 
 impl MouseUp<'_> {
-    fn click_cell(&self, board: &layout::Component, x: i32, y: i32) -> GameState {
+    fn click_cell(&self, x: i32, y: i32) -> GameState {
         let ctx = self.context;
         let game_state = ctx.game_state();
 
@@ -31,7 +31,7 @@ impl MouseUp<'_> {
             return game_state;
         }
 
-        match ctx.get_cell_at(x, y, board.pos()) {
+        match ctx.get_cell_at(x, y) {
             Some(p) => {
                 // start the game when the first cell of a fresh board is clicked
                 let game_state = if let GameState::Ready = game_state {
@@ -105,7 +105,7 @@ impl Execute for MouseUp<'_> {
 
         match ctx.layout().get_at(x, y) {
             Some(c) => match c.id() {
-                "board" => Ok(self.click_cell(c, x, y)),
+                "board" => Ok(self.click_cell(x, y)),
                 "control" => Ok(self.click_control(x, y)),
                 _ => Ok(game_state),
             },

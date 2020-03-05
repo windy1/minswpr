@@ -48,7 +48,7 @@ impl Layout {
     /// * `component` - Instance of `Draw` component
     pub fn insert(&mut self, key: &'static str, order: i32, component: Box<dyn Draw>) {
         self.components
-            .insert(key, Component::new(key, order, component));
+            .insert(key, Component::new(key, order, Element::new(component)));
     }
 
     /// Inserts the components in the specified `components` `Vec<_>`
@@ -71,6 +71,7 @@ impl Layout {
     /// is not an instance of Layout.
     pub fn get_layout(&self, key: &'static str) -> MsResult<&Layout> {
         self.get(key)?
+            .elem()
             .draw_ref()
             .as_ref()
             .downcast_ref::<Layout>()
@@ -82,7 +83,7 @@ impl Layout {
     pub fn get_at(&self, x: i32, y: i32) -> Option<&Component> {
         for component in self.components.values() {
             let Point { x: min_x, y: min_y } = component.pos;
-            let cd = component.draw_ref.dimen();
+            let cd = component.elem().draw_ref.dimen();
             let max_x = min_x + cd.width() as i32;
             let max_y = min_y + cd.height() as i32;
 
@@ -109,7 +110,7 @@ impl Draw for Layout {
         components.sort();
 
         for component in components {
-            let r = &mut component.draw_ref;
+            let r = &mut component.elem.draw_ref;
             let m = r.margins();
 
             component.pos = cur + point!(m.left, m.top).as_i32();
@@ -172,14 +173,14 @@ impl Layout {
 
     fn component_max_height(&self) -> u32 {
         self.component_values()
-            .map(|c| c.draw_ref.dimen().height())
+            .map(|c| c.elem().draw_ref.dimen().height())
             .max()
             .unwrap_or_else(|| 0)
     }
 
     fn component_max_width(&self) -> u32 {
         self.component_values()
-            .map(|c| c.draw_ref.dimen().width())
+            .map(|c| c.elem().draw_ref.dimen().width())
             .max()
             .unwrap_or_else(|| 0)
     }
@@ -187,12 +188,12 @@ impl Layout {
     fn calc_dimen(&self, initial: Dimen, acc: impl Fn(Dimen, Dimen) -> Dimen) -> Dimen {
         let margins: Dimen = self
             .component_values()
-            .map(|c| c.draw_ref.margins())
+            .map(|c| c.elem().draw_ref.margins())
             .map(|m| point!(m.left + m.right, m.top + m.bottom))
             .sum();
 
         self.component_values()
-            .map(|c| c.draw_ref.dimen())
+            .map(|c| c.elem().draw_ref.dimen())
             .fold(initial, |a, b| acc(a, b))
             + (self.padding * 2, self.padding * 2)
             + margins
@@ -212,12 +213,25 @@ impl Default for Orientation {
     }
 }
 
+#[derive(new)]
+pub struct Element {
+    draw_ref: Box<dyn Draw>,
+}
+
+impl Element {
+    /// Returns a reference to the `Draw` instance contained within this
+    /// compoent
+    pub fn draw_ref(&self) -> &dyn Draw {
+        &*self.draw_ref
+    }
+}
+
 /// A single component within the layout
 #[derive(new)]
 pub struct Component {
     id: &'static str,
     order: i32,
-    draw_ref: Box<dyn Draw>,
+    elem: Element,
     #[new(default)]
     pos: Point,
 }
@@ -233,10 +247,9 @@ impl Component {
         self.pos
     }
 
-    /// Returns a reference to the `Draw` instance contained within this
-    /// compoent
-    pub fn draw_ref(&self) -> &dyn Draw {
-        &*self.draw_ref
+    /// Returns the contains `Element` in this node
+    pub fn elem(&self) -> &Element {
+        &self.elem
     }
 }
 
@@ -267,7 +280,7 @@ impl fmt::Debug for Component {
             "Component {{ order: {}, pos: {:?}, dimen: {:?} }}",
             self.order,
             self.pos,
-            self.draw_ref.dimen()
+            self.elem().draw_ref.dimen()
         )
     }
 }

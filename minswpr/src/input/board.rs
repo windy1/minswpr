@@ -1,96 +1,9 @@
-use super::board::CellFlags;
-use super::math::Point;
-use crate::layout::{Element, OnMouse, OnMouseDown, OnMouseMove, OnMouseUp};
+use crate::board::CellFlags;
+use crate::math::Point;
 use crate::{Context, GameState};
-use sdl2::mouse::{MouseButton, MouseState};
+use sdl2::mouse::MouseButton;
 
-/// A generic event that contains a mouse `Point` position
-pub trait MouseEvent {
-    /// Returns the `Point` position of the mouse
-    fn mouse_pos(&self) -> Point;
-}
-
-/// Event created when a `MouseButton`, is released on the screen
-#[derive(new)]
-pub struct MouseUpEvent {
-    mouse_btn: MouseButton,
-    mouse_pos: Point,
-}
-
-impl MouseUpEvent {
-    /// Returns the `MouseButton` that was released
-    pub fn mouse_btn(&self) -> MouseButton {
-        self.mouse_btn
-    }
-}
-
-impl MouseEvent for MouseUpEvent {
-    fn mouse_pos(&self) -> Point {
-        self.mouse_pos
-    }
-}
-
-/// Event created when a `MouseButton` is pressed down
-#[derive(new)]
-pub struct MouseDownEvent {
-    mouse_btn: MouseButton,
-    mouse_pos: Point,
-}
-
-impl MouseDownEvent {
-    pub fn mouse_btn(&self) -> MouseButton {
-        self.mouse_btn
-    }
-}
-
-impl MouseEvent for MouseDownEvent {
-    fn mouse_pos(&self) -> Point {
-        self.mouse_pos
-    }
-}
-
-/// Event thrown when the mouse cursor moves
-#[derive(new)]
-pub struct MouseMoveEvent {
-    mouse_state: MouseState,
-    mouse_pos: Point,
-}
-
-impl MouseMoveEvent {
-    pub fn mouse_state(&self) -> MouseState {
-        self.mouse_state
-    }
-}
-
-impl MouseEvent for MouseMoveEvent {
-    fn mouse_pos(&self) -> Point {
-        self.mouse_pos
-    }
-}
-
-/// Event thrown when the mouse enters a `layout::Element`
-#[derive(new)]
-pub struct MouseEnterEvent {
-    mouse_pos: Point,
-}
-
-impl MouseEvent for MouseEnterEvent {
-    fn mouse_pos(&self) -> Point {
-        self.mouse_pos
-    }
-}
-
-/// Event thrown when the mouse leaves a `layout::Element`
-#[derive(new)]
-pub struct MouseLeaveEvent {
-    mouse_pos: Point,
-}
-
-impl MouseEvent for MouseLeaveEvent {
-    fn mouse_pos(&self) -> Point {
-        self.mouse_pos
-    }
-}
+use super::events::*;
 
 /// Event handler for receiving `DrawBoard` clicks
 ///
@@ -180,7 +93,7 @@ pub fn on_mouse_move_board(ctx: &Context, e: MouseMoveEvent) -> GameState {
         return ctx.game_state();
     }
 
-    if !e.mouse_state.is_mouse_button_pressed(MouseButton::Left) {
+    if !e.mouse_state().is_mouse_button_pressed(MouseButton::Left) {
         // TODO: different mouse button have different effects here
         return ctx.game_state();
     }
@@ -224,34 +137,4 @@ pub fn on_mouse_down_board(ctx: &Context, e: MouseDownEvent) -> GameState {
 pub fn on_mouse_leave_board(ctx: &Context, _: MouseLeaveEvent) -> GameState {
     ctx.board().borrow_mut().clear_all(CellFlags::PRESSED);
     ctx.game_state()
-}
-
-/// Returns an `OnMouse<E: MouseEvent>` handler that will defer `MouseUpEvent`s
-/// to the specified `Layout`'s child elements. Panics if the `Node` with
-/// `layout_id` is not a `Layout`
-pub fn defer_mouse<E, F>(layout_id: &'static str, f: &'static F) -> Box<OnMouse<E>>
-where
-    E: MouseEvent,
-    F: Fn(&Element) -> Option<&OnMouse<E>>,
-{
-    Box::new(move |ctx, e| {
-        ctx.layout()
-            .get_layout(layout_id)
-            .unwrap()
-            .defer_mouse_event(ctx, e, f)
-    })
-}
-
-/// Returns a static `OnMouseUp` getter for convienience
-pub fn mouse_up(elem: &Element) -> Option<&OnMouseUp> {
-    elem.mouse_up()
-}
-
-pub fn mouse_down(elem: &Element) -> Option<&OnMouseDown> {
-    elem.mouse_down()
-}
-
-/// Returns a static `OnMouseMove` getter for convienience
-pub fn mouse_move(elem: &Element) -> Option<&OnMouseMove> {
-    elem.mouse_move()
 }

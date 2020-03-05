@@ -3,7 +3,8 @@ pub(super) mod context;
 pub use self::context::*;
 
 use self::{Context, ContextBuilder};
-use super::input::{self, MouseDownEvent, MouseMoveEvent, MouseUpEvent};
+use super::input;
+use super::input::events::{MouseDownEvent, MouseMoveEvent, MouseUpEvent};
 use crate::board::{Board, CellFlags};
 use crate::config::{self, Config};
 use crate::draw::board::DrawBoard;
@@ -189,10 +190,10 @@ impl Minswpr {
                 "board",
                 ElementBuilder::default()
                     .draw_ref(board_draw)
-                    .mouse_up(Box::new(input::on_click_board))
-                    .mouse_move(Box::new(input::on_mouse_move_board))
-                    .mouse_down(Box::new(input::on_mouse_down_board))
-                    .mouse_leave(Box::new(input::on_mouse_leave_board))
+                    .mouse_up(Box::new(input::board::on_click_board))
+                    .mouse_move(Box::new(input::board::on_mouse_move_board))
+                    .mouse_down(Box::new(input::board::on_mouse_down_board))
+                    .mouse_leave(Box::new(input::board::on_mouse_leave_board))
                     .build()?,
             ),
         ]);

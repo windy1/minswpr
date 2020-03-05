@@ -1,10 +1,6 @@
 use crate::app::context::Context;
 use crate::app::GameState;
 use crate::draw::{Draw, DrawContext};
-use crate::input::MouseDownEvent;
-use crate::input::MouseEnterEvent;
-use crate::input::MouseLeaveEvent;
-use crate::input::{MouseEvent, MouseMoveEvent, MouseUpEvent};
 use crate::math::{Dimen, Point};
 use crate::MsResult;
 use sdl2::pixels::Color;
@@ -12,6 +8,8 @@ use std::cell::Cell;
 use std::cmp::Ordering;
 use std::collections::{hash_map, HashMap};
 use std::fmt;
+
+use crate::input::events::*;
 
 use self::Orientation::*;
 
@@ -287,13 +285,6 @@ impl Default for Orientation {
         Self::Vertical
     }
 }
-
-pub type OnMouse<E> = dyn Fn(&Context, E) -> GameState;
-pub type OnMouseUp = OnMouse<MouseUpEvent>;
-pub type OnMouseMove = OnMouse<MouseMoveEvent>;
-pub type OnMouseDown = OnMouse<MouseDownEvent>;
-pub type OnMouseEnter = OnMouse<MouseEnterEvent>;
-pub type OnMouseLeave = OnMouse<MouseLeaveEvent>;
 
 /// An element on a `Layout`, contained within a `Node`
 #[derive(new, Builder)]

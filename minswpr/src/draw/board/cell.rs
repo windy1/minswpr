@@ -39,8 +39,14 @@ impl DrawCell<'_> {
             } else if adjacent_mines > 0 {
                 self.draw_hint(ctx, pos, adjacent_mines)?;
             }
-        } else if cell.contains(CellFlags::FLAG) {
-            self.draw_centered_rect(&ctx, pos, flags.dimen, flags.color)?;
+        } else {
+            if cell.contains(CellFlags::PRESSED) {
+                draw_rect!(self.config.dimen, color!(magenta), ctx, pos)?;
+            }
+
+            if cell.contains(CellFlags::FLAG) {
+                self.draw_centered_rect(&ctx, pos, flags.dimen, flags.color)?;
+            }
         }
 
         Ok(())

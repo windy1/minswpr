@@ -84,6 +84,8 @@ pub struct CellConfig {
     pub dimen: Dimen,
     #[serde(deserialize_with = "read_color")]
     pub color: Color,
+    #[serde(deserialize_with = "read_color")]
+    pub pressed_color: Color,
     pub border_width: u32,
     #[serde(deserialize_with = "read_color")]
     pub border_color: Color,

@@ -1,6 +1,7 @@
 use crate::app::context::Context;
 use crate::app::GameState;
 use crate::draw::{Draw, DrawContext};
+use crate::input::MouseDownEvent;
 use crate::input::{MouseEvent, MouseMoveEvent, MouseUpEvent};
 use crate::math::{Dimen, Point};
 use crate::MsResult;
@@ -231,10 +232,11 @@ impl Default for Orientation {
     }
 }
 
-pub type OnMouse<E: MouseEvent> = dyn Fn(&Context, E) -> GameState;
+pub type OnMouse<E> = dyn Fn(&Context, E) -> GameState;
 /// Function type of a handler for a `MouseUpEvent`
 pub type OnMouseUp = OnMouse<MouseUpEvent>;
 pub type OnMouseMove = OnMouse<MouseMoveEvent>;
+pub type OnMouseDown = OnMouse<MouseDownEvent>;
 
 /// An element on a `Layout`, contained within a `Node`
 #[derive(new, Builder)]
@@ -247,6 +249,9 @@ pub struct Element {
     #[builder(default, setter(strip_option))]
     #[new(default)]
     mouse_move: Option<Box<OnMouseMove>>,
+    #[builder(default, setter(strip_option))]
+    #[new(default)]
+    mouse_down: Option<Box<OnMouseDown>>,
 }
 
 impl Element {
@@ -264,6 +269,10 @@ impl Element {
 
     pub fn mouse_move(&self) -> Option<&OnMouseMove> {
         self.mouse_move.as_deref()
+    }
+
+    pub fn mouse_down(&self) -> Option<&OnMouseDown> {
+        self.mouse_down.as_deref()
     }
 }
 

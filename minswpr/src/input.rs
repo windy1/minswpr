@@ -1,7 +1,6 @@
 use super::board::CellFlags;
 use super::math::Point;
-use crate::layout::Element;
-use crate::layout::OnMouse;
+use crate::layout::{Element, OnMouse, OnMouseDown, OnMouseMove, OnMouseUp};
 use crate::{Context, GameState};
 use sdl2::mouse::{MouseButton, MouseState};
 
@@ -25,6 +24,24 @@ impl MouseUpEvent {
 }
 
 impl MouseEvent for MouseUpEvent {
+    fn mouse_pos(&self) -> Point {
+        self.mouse_pos
+    }
+}
+
+#[derive(new)]
+pub struct MouseDownEvent {
+    mouse_btn: MouseButton,
+    mouse_pos: Point,
+}
+
+impl MouseDownEvent {
+    pub fn mouse_btn(&self) -> MouseButton {
+        self.mouse_btn
+    }
+}
+
+impl MouseEvent for MouseDownEvent {
     fn mouse_pos(&self) -> Point {
         self.mouse_pos
     }
@@ -131,7 +148,50 @@ fn on_middle_click_cell(
     }
 }
 
-/// Returns an `OnMouse<E: MouseEvnet>` handler that will defer `MouseUpEvent`s
+pub fn on_mouse_move_board(ctx: &Context, e: MouseMoveEvent) -> GameState {
+    if !e.mouse_state.is_mouse_button_pressed(MouseButton::Left) {
+        return ctx.game_state();
+    }
+
+    let Point { x, y } = e.mouse_pos();
+    match ctx.get_cell_at(x, y) {
+        Some(p) => {
+            let mut board = ctx.board().borrow_mut();
+
+            board
+                .cells_mut()
+                .iter_mut()
+                .filter(|c| c.contains(CellFlags::PRESSED))
+                .for_each(|c| c.remove(CellFlags::PRESSED));
+
+            board.cell_mut(p.x, p.y).insert(CellFlags::PRESSED);
+
+            ctx.game_state()
+        }
+        None => ctx.game_state(),
+    }
+}
+
+pub fn on_mouse_down_board(ctx: &Context, e: MouseDownEvent) -> GameState {
+    match e.mouse_btn() {
+        MouseButton::Left => {}
+        _ => return ctx.game_state(),
+    }
+
+    let Point { x, y } = e.mouse_pos();
+    match ctx.get_cell_at(x, y) {
+        Some(p) => {
+            ctx.board()
+                .borrow_mut()
+                .cell_mut(p.x, p.y)
+                .insert(CellFlags::PRESSED);
+            ctx.game_state()
+        }
+        None => ctx.game_state(),
+    }
+}
+
+/// Returns an `OnMouse<E: MouseEvent>` handler that will defer `MouseUpEvent`s
 /// to the specified `Layout`'s child elements. Panics if the `Node` with
 /// `layout_id` is not a `Layout`
 pub fn defer_mouse<E, F>(layout_id: &'static str, f: &'static F) -> Box<OnMouse<E>>
@@ -147,10 +207,16 @@ where
     })
 }
 
-pub fn mouse_up(elem: &Element) -> Option<&OnMouse<MouseUpEvent>> {
+/// Returns a static `OnMouseUp` getter for convienience
+pub fn mouse_up(elem: &Element) -> Option<&OnMouseUp> {
     elem.mouse_up()
 }
 
-pub fn mouse_move(elem: &Element) -> Option<&OnMouse<MouseMoveEvent>> {
+pub fn mouse_down(elem: &Element) -> Option<&OnMouseDown> {
+    elem.mouse_down()
+}
+
+/// Returns a static `OnMouseMove` getter for convienience
+pub fn mouse_move(elem: &Element) -> Option<&OnMouseMove> {
     elem.mouse_move()
 }

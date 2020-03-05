@@ -3,7 +3,7 @@ pub(super) mod context;
 pub use self::context::*;
 
 use self::{Context, ContextBuilder};
-use super::input::{self, MouseMoveEvent, MouseUpEvent};
+use super::input::{self, MouseDownEvent, MouseMoveEvent, MouseUpEvent};
 use crate::board::Board;
 use crate::config::{self, Config};
 use crate::draw::board::DrawBoard;
@@ -190,6 +190,8 @@ impl Minswpr {
                 ElementBuilder::default()
                     .draw_ref(board_draw)
                     .mouse_up(Box::new(input::on_click_board))
+                    .mouse_move(Box::new(input::on_mouse_move_board))
+                    .mouse_down(Box::new(input::on_mouse_down_board))
                     .build()?,
             ),
         ]);
@@ -248,6 +250,9 @@ fn handle_event(ctx: &Context, event: Event) -> GameState {
         Event::MouseButtonUp {
             mouse_btn, x, y, ..
         } => self::handle_mouse_up(ctx, mouse_btn, x, y),
+        Event::MouseButtonDown {
+            mouse_btn, x, y, ..
+        } => self::handle_mouse_down(ctx, mouse_btn, x, y),
         Event::MouseMotion {
             mousestate, x, y, ..
         } => self::handle_mouse_motion(ctx, mousestate, x, y),
@@ -260,10 +265,19 @@ fn handle_event(ctx: &Context, event: Event) -> GameState {
 }
 
 fn handle_mouse_up(ctx: &Context, mouse_btn: MouseButton, x: i32, y: i32) -> GameState {
-    ctx.layout()
-        .defer_mouse_event(ctx, MouseUpEvent::new(mouse_btn, point!(x, y)), |elem| {
-            elem.mouse_up()
-        })
+    ctx.layout().defer_mouse_event(
+        ctx,
+        MouseUpEvent::new(mouse_btn, point!(x, y)),
+        &input::mouse_up,
+    )
+}
+
+fn handle_mouse_down(ctx: &Context, mouse_btn: MouseButton, x: i32, y: i32) -> GameState {
+    ctx.layout().defer_mouse_event(
+        ctx,
+        MouseDownEvent::new(mouse_btn, point!(x, y)),
+        &input::mouse_down,
+    )
 }
 
 fn handle_mouse_motion(ctx: &Context, mouse_state: MouseState, x: i32, y: i32) -> GameState {

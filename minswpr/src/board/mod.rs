@@ -11,6 +11,7 @@ bitflags! {
         const REVEALED = 0b0000_0001;
         const MINE = 0b0000_0010;
         const FLAG = 0b0000_0100;
+        const PRESSED = 0b0000_1000;
     }
 }
 
@@ -62,6 +63,10 @@ impl Board {
     /// Returns a reference to the internal `Vec<CellFlags>`
     pub fn cells(&self) -> &Vec<CellFlags> {
         &self.cells
+    }
+
+    pub fn cells_mut(&mut self) -> &mut Vec<CellFlags> {
+        &mut self.cells
     }
 
     /// Returns the cell at the specified `x` and `y` position. Panics if the

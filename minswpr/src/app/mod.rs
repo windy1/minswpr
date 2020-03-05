@@ -152,7 +152,7 @@ impl Minswpr {
     fn make_layout(&self, board: &BoardRef, stopwatch: &StopwatchRef) -> MsResult<Layout> {
         let lc = &self.config.layout;
         let mut layout = LayoutBuilder::default()
-            .color(Some(lc.color))
+            .color(lc.color)
             .padding(lc.padding)
             .guides(lc.guides)
             .build()?;
@@ -175,12 +175,12 @@ impl Minswpr {
                         &board,
                         &stopwatch,
                     )?))
-                    .mouse_up(Some(Box::new(|ctx, e| {
+                    .mouse_up(Box::new(|ctx, e| {
                         ctx.layout()
                             .get_layout("control")
                             .unwrap()
                             .defer_mouse_up(ctx, e)
-                    })))
+                    }))
                     .build()?,
             ),
             (
@@ -194,7 +194,7 @@ impl Minswpr {
                 "board",
                 ElementBuilder::default()
                     .draw_ref(board_draw)
-                    .mouse_up(Some(Box::new(input::click_board)))
+                    .mouse_up(Box::new(input::click_board))
                     .build()?,
             ),
         ]);

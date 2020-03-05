@@ -16,7 +16,7 @@ use self::Orientation::*;
 pub struct Layout {
     #[builder(setter(skip))]
     nodes: HashMap<&'static str, Node>,
-    #[builder(default)]
+    #[builder(default, setter(strip_option))]
     color: Option<Color>,
     #[builder(default)]
     padding: u32,
@@ -236,7 +236,7 @@ pub type OnMouseUp = dyn Fn(&Context, MouseUpEvent) -> GameState;
 #[builder(pattern = "owned")]
 pub struct Element {
     draw_ref: Box<dyn Draw>,
-    #[builder(default)]
+    #[builder(default, setter(strip_option))]
     #[new(default)]
     mouse_up: Option<Box<OnMouseUp>>,
 }

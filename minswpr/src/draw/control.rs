@@ -75,7 +75,7 @@ pub fn make_layout(
     let p = config.padding;
 
     let mut layout = LayoutBuilder::default()
-        .color(Some(config.color))
+        .color(config.color)
         .padding(p)
         .orientation(Orientation::Horizontal)
         .build()?;
@@ -107,7 +107,7 @@ pub fn make_layout(
                     config.reset_button_color,
                     *Margins::new().left(btn_left).right(btn_right),
                 )))
-                .mouse_up(Some(Box::new(|ctx, e| {
+                .mouse_up(Box::new(|ctx, e| {
                     println!("reset_button clicked");
                     let Point { x, y } = e.mouse_pos();
                     ctx.layout()
@@ -117,7 +117,7 @@ pub fn make_layout(
                         .filter(|c| c.id() == "reset_button")
                         .map(|_| GameState::Reset)
                         .unwrap_or_else(|| ctx.game_state())
-                })))
+                }))
                 .build()?,
         ),
         (
@@ -136,7 +136,7 @@ pub fn make_layout(
 
 fn make_led_display(kind: LedDisplayKind, config: &LedDisplayConfig) -> MsResult<Layout> {
     let mut layout = LayoutBuilder::default()
-        .color(Some(config.color))
+        .color(config.color)
         .padding(config.padding)
         .build()?;
 

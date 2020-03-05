@@ -8,6 +8,7 @@ use crate::math::{Dimen, Point};
 use crate::utils;
 use crate::{BoardRef, MsResult, StopwatchRef};
 use sdl2::rect::Rect;
+use std::cmp;
 use std::rc::Rc;
 
 #[derive(new, AsAny)]
@@ -45,14 +46,19 @@ impl DrawLedDisplay {
     }
 
     fn make_text<'a>(&self, ctx: &'a DrawContext<'a>) -> TextResult<'a> {
+        let normal_val = |i| cmp::max(-99, cmp::min(999, i));
         text::make_text(ctx, match &self.kind {
             LedDisplayKind::FlagCounter { board } => {
                 let flags_remaining =
                     utils::borrow_safe(&board, |b| b.num_mines() as i32 - b.count_flags() as i32);
-                Text::new(flags_remaining, "control.flag_counter", color!(red))
+                Text::new(
+                    normal_val(flags_remaining),
+                    "control.flag_counter",
+                    color!(red),
+                )
             }
             LedDisplayKind::Stopwatch { stopwatch } => Text::new(
-                stopwatch.borrow().elapsed().as_secs() as i32,
+                normal_val(stopwatch.borrow().elapsed().as_secs() as i32),
                 "control.stopwatch",
                 color!(red),
             ),

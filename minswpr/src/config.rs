@@ -12,8 +12,10 @@ lazy_static! {
     static ref DEFAULT_CONFIG: &'static Path = Path::new("minswpr.toml");
 }
 
+/// Helper type for the configured fonts to load into `Fonts`
 pub type FontsConfig = HashMap<String, FontConfig>;
 
+/// Base config for application
 #[derive(Deserialize, Clone)]
 pub struct Config {
     pub window: WindowConfig,
@@ -23,6 +25,7 @@ pub struct Config {
     pub layout: LayoutConfig,
 }
 
+/// Window specific values
 #[derive(Deserialize, Clone)]
 pub struct WindowConfig {
     pub title: String,
@@ -31,6 +34,7 @@ pub struct WindowConfig {
     pub bg_color: Color,
 }
 
+/// `Layout` specific values
 #[derive(Deserialize, Clone)]
 pub struct LayoutConfig {
     pub padding: u32,
@@ -39,6 +43,8 @@ pub struct LayoutConfig {
     pub guides: bool,
 }
 
+/// Values specific to the central control panel located on the top of the board
+/// (by default)
 #[derive(Deserialize, Clone)]
 pub struct ControlConfig {
     pub height: u32,
@@ -55,6 +61,7 @@ pub struct ControlConfig {
     pub stopwatch: LedDisplayConfig,
 }
 
+/// Config for LED display like the flag counter or stopwatch
 #[derive(Deserialize, Clone)]
 pub struct LedDisplayConfig {
     pub dimen: Dimen,
@@ -63,6 +70,7 @@ pub struct LedDisplayConfig {
     pub padding: u32,
 }
 
+/// `Board` specific values
 #[derive(Deserialize, Clone)]
 pub struct BoardConfig {
     pub dimen: Dimen<usize>,
@@ -70,6 +78,7 @@ pub struct BoardConfig {
     pub cells: CellConfig,
 }
 
+/// Values specific to the drawn cells on the board
 #[derive(Deserialize, Clone)]
 pub struct CellConfig {
     pub dimen: Dimen,
@@ -84,6 +93,7 @@ pub struct CellConfig {
     pub flags: FlagsConfig,
 }
 
+/// Values specific to the look of mines
 #[derive(Deserialize, Clone)]
 pub struct MinesConfig {
     #[serde(deserialize_with = "read_color")]
@@ -93,6 +103,7 @@ pub struct MinesConfig {
     pub revealed_color: Color,
 }
 
+/// Values specific to the look of flags
 #[derive(Deserialize, Clone)]
 pub struct FlagsConfig {
     #[serde(deserialize_with = "read_color")]
@@ -100,12 +111,15 @@ pub struct FlagsConfig {
     pub dimen: Dimen,
 }
 
+/// Values specific for fonts
 #[derive(Deserialize, Clone)]
 pub struct FontConfig {
     pub path: PathBuf,
     pub pt: u16,
 }
 
+/// Reads a config file from the specified `Path` and returns `Ok(Config)` if
+/// successful, `Err(String)` otherwise.
 pub fn read_config<P>(fname: P) -> MsResult<Config>
 where
     P: AsRef<Path>,
@@ -114,6 +128,8 @@ where
     Ok(toml::from_str(&s).map_err(|e| e.to_string())?)
 }
 
+/// Tries to resolve the config path. If there is a config named
+/// `minswpr.{OS}.toml` that will be used over the default `minswpr.toml` file.
 pub fn resolve() -> MsResult<PathBuf> {
     let for_os = |os: &str| -> PathBuf {
         let p = PathBuf::from(&format!("minswpr.{}.toml", os));

@@ -35,6 +35,7 @@ macro_rules! color {
     };
 }
 
+/// Helper macro for quickly drawing a rectangle to the canvas
 #[allow(unused)]
 macro_rules! draw_rect {
     ($dimen:expr, $color:expr, $ctx:expr, $pos:expr) => {

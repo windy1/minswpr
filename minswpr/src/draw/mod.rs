@@ -1,8 +1,12 @@
 #[macro_use]
 mod macros;
 
+/// Implements `Draw` for the main `Board`
 pub mod board;
+/// Implements the components required to draw the control panel located above
+/// the board
 pub mod control;
+/// Implements text rendering
 pub mod text;
 
 use crate::fonts::Fonts;
@@ -20,6 +24,7 @@ pub type CanvasRefMut<'a> = RefMut<'a, WindowCanvas>;
 pub type CanvasRef = Rc<RefCell<WindowCanvas>>;
 pub type Textures = TextureCreator<WindowContext>;
 
+/// Something that can be drawn to a `sdl2::render::WindowCanvas`
 pub trait Draw: AsRef<dyn Any> {
     /// Draws this to the canvas using the specified `DrawContext` at the
     /// specied `Point` on the screen

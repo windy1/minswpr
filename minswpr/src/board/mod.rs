@@ -89,6 +89,7 @@ impl Board {
         self.cells.get_mut(Self::index(x, y, self.width))
     }
 
+    /// Removes the specified `CellFlags` value from all cells on the board
     pub fn clear_all(&mut self, cell_flags: CellFlags) {
         for cell in &mut self.cells {
             cell.remove(cell_flags);

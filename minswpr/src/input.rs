@@ -4,6 +4,7 @@ use crate::layout::{Element, OnMouse, OnMouseDown, OnMouseMove, OnMouseUp};
 use crate::{Context, GameState};
 use sdl2::mouse::{MouseButton, MouseState};
 
+/// A generic event that contains a mouse `Point` position
 pub trait MouseEvent {
     /// Returns the `Point` position of the mouse
     fn mouse_pos(&self) -> Point;
@@ -29,6 +30,7 @@ impl MouseEvent for MouseUpEvent {
     }
 }
 
+/// Event created when a `MouseButton` is pressed down
 #[derive(new)]
 pub struct MouseDownEvent {
     mouse_btn: MouseButton,
@@ -47,6 +49,7 @@ impl MouseEvent for MouseDownEvent {
     }
 }
 
+/// Event thrown when the mouse cursor moves
 #[derive(new)]
 pub struct MouseMoveEvent {
     mouse_state: MouseState,
@@ -65,6 +68,7 @@ impl MouseEvent for MouseMoveEvent {
     }
 }
 
+/// Event thrown when the mouse enters a `layout::Element`
 #[derive(new)]
 pub struct MouseEnterEvent {
     mouse_pos: Point,
@@ -76,6 +80,7 @@ impl MouseEvent for MouseEnterEvent {
     }
 }
 
+/// Event thrown when the mouse leaves a `layout::Element`
 #[derive(new)]
 pub struct MouseLeaveEvent {
     mouse_pos: Point,
@@ -176,6 +181,7 @@ pub fn on_mouse_move_board(ctx: &Context, e: MouseMoveEvent) -> GameState {
     }
 
     if !e.mouse_state.is_mouse_button_pressed(MouseButton::Left) {
+        // TODO: different mouse button have different effects here
         return ctx.game_state();
     }
 
@@ -196,6 +202,7 @@ pub fn on_mouse_down_board(ctx: &Context, e: MouseDownEvent) -> GameState {
         return ctx.game_state();
     }
 
+    // TODO: different buttons have different effects here
     match e.mouse_btn() {
         MouseButton::Left => {}
         _ => return ctx.game_state(),

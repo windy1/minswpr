@@ -103,6 +103,14 @@ impl Layout {
         None
     }
 
+    /// Resolves the proper recipient of the specified `MouseEvent` by
+    /// retrieving the `Element` at the event's `mouse_pos`. Returns a new
+    /// `GameState` as a result.
+    ///
+    /// # Arguments
+    /// * `ctx` - The main `Context`
+    /// * `handler_getter` - A function that takes an `&Element` as an argument
+    ///   and returns the proper `OnMouse` handler for the event type
     pub fn defer_mouse_event<E, F>(&self, ctx: &Context, e: E, handler_getter: F) -> GameState
     where
         E: MouseEvent,

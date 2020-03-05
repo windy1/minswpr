@@ -175,12 +175,7 @@ impl Minswpr {
                         &board,
                         &stopwatch,
                     )?))
-                    .mouse_up(Box::new(|ctx, e| {
-                        ctx.layout()
-                            .get_layout("control")
-                            .unwrap()
-                            .defer_mouse_up(ctx, e)
-                    }))
+                    .mouse_up(input::defer("control"))
                     .build()?,
             ),
             (

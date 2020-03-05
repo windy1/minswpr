@@ -1,5 +1,6 @@
 use super::board::CellFlags;
 use super::math::Point;
+use crate::layout::OnMouseUp;
 use crate::{Context, GameState};
 use sdl2::mouse::MouseButton;
 
@@ -11,15 +12,29 @@ pub struct MouseUpEvent {
 }
 
 impl MouseUpEvent {
+    /// Returns the `MouseButton` that was released
     pub fn mouse_btn(&self) -> MouseButton {
         self.mouse_btn
     }
 
+    /// Returns the `Point` position of the mouse when released
     pub fn mouse_pos(&self) -> Point {
         self.mouse_pos
     }
 }
 
+/// Event handler for receiving `DrawBoard` clicks
+///
+/// This function has no effect if the current `GameState` is `Over`. Otherwise,
+/// it retrieves the cell at the clicked position and forwards it to another
+/// handler depending on which mouse button was released
+///
+/// If this is the first cell that was clicked on the board, the `GameState` is
+/// moved from `Ready` to `Start`
+///
+/// # Arguments
+/// * `ctx` - The game `Context`
+/// * `e` - The `MouseUpEvent` to handle
 pub fn click_board(ctx: &Context, e: MouseUpEvent) -> GameState {
     let Point { x, y } = e.mouse_pos();
     let game_state = ctx.game_state();
@@ -49,11 +64,7 @@ pub fn click_board(ctx: &Context, e: MouseUpEvent) -> GameState {
     }
 }
 
-pub fn left_click_cell(
-    ctx: &Context,
-    Point { x, y }: Point<u32>,
-    game_state: GameState,
-) -> GameState {
+fn left_click_cell(ctx: &Context, Point { x, y }: Point<u32>, game_state: GameState) -> GameState {
     let mut board = ctx.board().borrow_mut();
     let num_revealed = board.reveal_from(x, y);
     if num_revealed > 0 && board.cell(x, y).contains(CellFlags::MINE) {
@@ -64,16 +75,12 @@ pub fn left_click_cell(
     }
 }
 
-pub fn right_click_cell(
-    ctx: &Context,
-    Point { x, y }: Point<u32>,
-    game_state: GameState,
-) -> GameState {
+fn right_click_cell(ctx: &Context, Point { x, y }: Point<u32>, game_state: GameState) -> GameState {
     ctx.board().borrow_mut().toggle_flag(x, y);
     game_state
 }
 
-pub fn middle_click_cell(
+fn middle_click_cell(
     ctx: &Context,
     Point { x, y }: Point<u32>,
     game_state: GameState,
@@ -89,4 +96,16 @@ pub fn middle_click_cell(
     } else {
         game_state
     }
+}
+
+/// Returns an `OnMouseUp` handler that will defer `MouseUpEvent`s to the
+/// specified `Layout`'s child elements. Panics if the `Node` with `layout_id`
+/// is not a `Layout`
+pub fn defer(layout_id: &'static str) -> Box<OnMouseUp> {
+    Box::new(move |ctx, e| {
+        ctx.layout()
+            .get_layout(layout_id)
+            .unwrap()
+            .defer_mouse_up(ctx, e)
+    })
 }

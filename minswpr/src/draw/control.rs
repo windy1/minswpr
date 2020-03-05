@@ -107,17 +107,7 @@ pub fn make_layout(
                     config.reset_button_color,
                     *Margins::new().left(btn_left).right(btn_right),
                 )))
-                .mouse_up(Box::new(|ctx, e| {
-                    println!("reset_button clicked");
-                    let Point { x, y } = e.mouse_pos();
-                    ctx.layout()
-                        .get_layout("control")
-                        .unwrap()
-                        .get_at(x, y)
-                        .filter(|c| c.id() == "reset_button")
-                        .map(|_| GameState::Reset)
-                        .unwrap_or_else(|| ctx.game_state())
-                }))
+                .mouse_up(Box::new(|_, _| GameState::Reset))
                 .build()?,
         ),
         (

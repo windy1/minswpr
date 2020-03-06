@@ -1,6 +1,7 @@
 use crate::math::Point;
 use crate::{Context, GameState};
 use sdl2::mouse::{MouseButton, MouseState};
+use std::any::Any;
 
 pub type OnMouse<E> = dyn Fn(&Context, E) -> GameState;
 pub type OnMouseUp = OnMouse<MouseUpEvent>;
@@ -10,13 +11,13 @@ pub type OnMouseEnter = OnMouse<MouseEnterEvent>;
 pub type OnMouseLeave = OnMouse<MouseLeaveEvent>;
 
 /// A generic event that contains a mouse `Point` position
-pub trait MouseEvent {
+pub trait MouseEvent: AsRef<dyn Any> {
     /// Returns the `Point` position of the mouse
     fn mouse_pos(&self) -> Point;
 }
 
 /// Event created when a `MouseButton`, is released on the screen
-#[derive(new)]
+#[derive(new, AsAny)]
 pub struct MouseUpEvent {
     mouse_btn: MouseButton,
     mouse_pos: Point,
@@ -36,7 +37,7 @@ impl MouseEvent for MouseUpEvent {
 }
 
 /// Event created when a `MouseButton` is pressed down
-#[derive(new)]
+#[derive(new, AsAny)]
 pub struct MouseDownEvent {
     mouse_btn: MouseButton,
     mouse_pos: Point,
@@ -55,7 +56,7 @@ impl MouseEvent for MouseDownEvent {
 }
 
 /// Event thrown when the mouse cursor moves
-#[derive(new)]
+#[derive(new, AsAny)]
 pub struct MouseMoveEvent {
     mouse_state: MouseState,
     mouse_pos: Point,
@@ -74,7 +75,7 @@ impl MouseEvent for MouseMoveEvent {
 }
 
 /// Event thrown when the mouse enters a `layout::Element`
-#[derive(new)]
+#[derive(new, AsAny)]
 pub struct MouseEnterEvent {
     mouse_state: MouseState,
     mouse_pos: Point,
@@ -99,7 +100,7 @@ impl From<&MouseMoveEvent> for MouseEnterEvent {
 }
 
 /// Event thrown when the mouse leaves a `layout::Element`
-#[derive(new)]
+#[derive(new, AsAny)]
 pub struct MouseLeaveEvent {
     mouse_state: MouseState,
     mouse_pos: Point,

@@ -6,6 +6,7 @@ use crate::draw::{Draw, DrawContext};
 use crate::math::{Dimen, Point};
 use crate::MsResult;
 use sdl2::pixels::Color;
+use std::any;
 use std::cell::Cell;
 use std::cmp::Ordering;
 use std::collections::{hash_map, HashMap};
@@ -116,7 +117,13 @@ impl Layout {
         E: MouseEvent,
         F: FnOnce(&Element) -> Option<&OnMouse<E>>,
     {
-        let game_state = ctx.game_state();
+        // bit of a hack but need to handle MouseMoveEvent for hover tracking
+        let game_state = if any::type_name::<E>() == any::type_name::<MouseMoveEvent>() {
+            self.on_mouse_move(ctx, e.as_ref().downcast_ref::<MouseMoveEvent>().unwrap())
+        } else {
+            ctx.game_state()
+        };
+
         let Point { x, y } = e.mouse_pos();
         match self.get_at(x, y) {
             Some(n) => match handler_getter(n.elem()) {
@@ -128,7 +135,6 @@ impl Layout {
     }
 
     pub fn on_mouse_move(&self, ctx: &Context, e: &MouseMoveEvent) -> GameState {
-        // TODO: returned GameState currently has no effect
         let pos = e.mouse_pos();
         let hover_id = self.hover_id.get();
         match self.get_at(pos.x, pos.y) {

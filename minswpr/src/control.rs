@@ -47,6 +47,8 @@ impl Stopwatch {
 pub struct ResetButton {
     #[new(default)]
     is_pressed: bool,
+    #[new(default)]
+    is_released: bool,
 }
 
 impl ResetButton {
@@ -56,5 +58,13 @@ impl ResetButton {
 
     pub fn set_pressed(&mut self, is_pressed: bool) {
         self.is_pressed = is_pressed
+    }
+
+    pub fn is_released(&self) -> bool {
+        self.is_released
+    }
+
+    pub fn set_released(&mut self, is_released: bool) {
+        self.is_released = is_released
     }
 }

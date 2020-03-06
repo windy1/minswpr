@@ -192,6 +192,7 @@ impl Minswpr {
                     ))
                     .mouse_up(input::defer_mouse("control", &input::mouse_up))
                     .mouse_down(input::defer_mouse("control", &input::mouse_down))
+                    .mouse_move(input::defer_mouse("control", &input::mouse_move))
                     .build()?,
             ),
             (
@@ -289,6 +290,8 @@ fn handle_event(ctx: &Context, event: Event) -> GameState {
 }
 
 fn handle_mouse_up(ctx: &Context, mouse_btn: MouseButton, x: i32, y: i32) -> GameState {
+    ctx.reset_button().borrow_mut().set_released(true);
+
     ctx.layout().defer_mouse_event(
         ctx,
         MouseUpEvent::new(mouse_btn, point!(x, y)),
@@ -305,10 +308,11 @@ fn handle_mouse_down(ctx: &Context, mouse_btn: MouseButton, x: i32, y: i32) -> G
 }
 
 fn handle_mouse_motion(ctx: &Context, mouse_state: MouseState, x: i32, y: i32) -> GameState {
-    let move_event = MouseMoveEvent::new(mouse_state, point!(x, y));
-    let layout = ctx.layout();
-    layout.on_mouse_move(ctx, &move_event);
-    layout.defer_mouse_event(ctx, move_event, &input::mouse_move)
+    ctx.layout().defer_mouse_event(
+        ctx,
+        MouseMoveEvent::new(mouse_state, point!(x, y)),
+        &input::mouse_move,
+    )
 }
 
 fn handle_key_down(ctx: &Context, keycode: Keycode) -> GameState {

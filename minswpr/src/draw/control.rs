@@ -66,8 +66,11 @@ impl Draw for DrawLedDisplay {
 }
 
 impl DrawLedDisplay {
+    const MAX_VALUE: i32 = 999;
+    const MIN_VALUE: i32 = -99;
+
     fn make_text<'a>(&self, ctx: &'a DrawContext<'a>) -> TextResult<'a> {
-        let normal_val = |i| cmp::max(-99, cmp::min(999, i));
+        let normal_val = |i| cmp::max(Self::MIN_VALUE, cmp::min(Self::MAX_VALUE, i));
         text::make_text(ctx, match &self.kind {
             LedDisplayKind::FlagCounter(board) => {
                 let flags_remaining = utils::borrow_safe(&board.as_ref(), |b| {

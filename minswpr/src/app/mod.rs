@@ -3,17 +3,18 @@ pub(super) mod context;
 pub use self::context::*;
 
 use self::{Context, ContextBuilder};
-use super::input;
-use super::input::events::{MouseDownEvent, MouseMoveEvent, MouseUpEvent};
 use crate::board::{Board, CellFlags};
 use crate::config::{self, Config};
 use crate::control::{Button, Stopwatch};
 use crate::draw::board::DrawBoard;
 use crate::draw::{CanvasRef, Draw, DrawContext, DrawRect};
 use crate::fonts::Fonts;
+use crate::input;
+use crate::input::events::{MouseDownEvent, MouseMoveEvent, MouseUpEvent};
 use crate::layout::control::ControlLayoutBuilder;
 use crate::layout::{Element, ElementBuilder, Layout, LayoutBuilder};
 use crate::math::{Dimen, Point};
+use crate::models::Model;
 use crate::MsResult;
 use sdl2::event::{Event, WindowEvent};
 use sdl2::keyboard::Keycode;
@@ -62,8 +63,8 @@ impl Minswpr {
         let mut ctx = ContextBuilder::default()
             .config(self.config.clone())
             .game_state(GameState::Ready)
-            .board(Rc::new(RefCell::new(self.make_board()?)))
-            .stopwatch(Rc::new(RefCell::new(Stopwatch::new())))
+            .board(Model::new(self.make_board()?))
+            .stopwatch(Model::new(Stopwatch::new()))
             .build()?;
 
         ctx.insert_button("reset", Button::new());
@@ -130,6 +131,7 @@ impl Minswpr {
                 let bc = &self.config.board;
                 let bd = &bc.dimen;
                 ctx.board()
+                    .as_ref()
                     .replace(Board::new(bd.width(), bd.height(), bc.num_mines)?);
                 ctx.stopwatch().borrow_mut().reset();
                 GameState::Ready
@@ -165,7 +167,7 @@ impl Minswpr {
         let cc = &self.config.control;
 
         let board_draw = Box::new(DrawBoard::new(
-            Rc::clone(ctx.board()),
+            ctx.board().clone(),
             self.config.board.cells.clone(),
         ));
         let board_width = board_draw.dimen().width();
@@ -178,9 +180,9 @@ impl Minswpr {
                         (ControlLayoutBuilder::default()
                             .config(&cc)
                             .board_width(board_width)
-                            .board(ctx.board())
-                            .stopwatch(ctx.stopwatch())
-                            .reset_button(ctx.button("reset"))
+                            .board(ctx.board().as_ref())
+                            .stopwatch(ctx.stopwatch().as_ref())
+                            .reset_button(ctx.button("reset").as_ref())
                             .build()?
                             .try_into()?): Layout,
                     ))

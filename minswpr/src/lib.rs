@@ -32,6 +32,8 @@ pub mod fonts;
 pub mod input;
 /// Handles the layout of the GUI
 pub mod layout;
+/// Model types for state reference
+pub mod models;
 
 pub use app::context::*;
 pub use app::*;

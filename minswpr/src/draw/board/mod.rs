@@ -2,27 +2,29 @@ mod cell;
 
 use self::cell::DrawCellBuilder;
 use super::{Draw, DrawContext};
+use crate::board::Board;
 use crate::config::CellConfig;
 use crate::math::{Dimen, Point};
+use crate::models::Model;
 use crate::utils;
-use crate::BoardRef;
 use crate::MsResult;
 use sdl2::rect::Rect;
 
 #[derive(AsAny)]
 pub struct DrawBoard {
-    board: BoardRef,
+    board: Model<Board>,
     dimen: Dimen,
     cell_config: CellConfig,
 }
 
 impl DrawBoard {
-    pub fn new(board: BoardRef, cell_config: CellConfig) -> Self {
+    pub fn new(board: Model<Board>, cell_config: CellConfig) -> Self {
         let cell_dimen = cell_config.dimen.as_i32();
         let border_width = cell_config.border_width as i32;
 
-        let board_cell_dimen =
-            utils::borrow_safe(&board, |b| point!(b.width() as i32, b.height() as i32));
+        let board_cell_dimen = utils::borrow_safe(&board.as_ref(), |b| {
+            point!(b.width() as i32, b.height() as i32)
+        });
 
         let board_px_dimen = cell_dimen * board_cell_dimen
             + point!(border_width, border_width) * (board_cell_dimen + (1, 1));

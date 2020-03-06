@@ -3,7 +3,7 @@ use crate::draw::control::{DrawLedDisplay, DrawResetButtonBuilder, LedDisplayKin
 use crate::draw::Margins;
 use crate::input;
 use crate::layout::{Element, ElementBuilder, Layout, LayoutBuilder, Orientation};
-use crate::{BoardRef, MsResult, ResetButtonRef, StopwatchRef};
+use crate::{BoardRef, ButtonRef, MsResult, ResetButtonRef, StopwatchRef};
 use std::convert::TryInto;
 use std::rc::Rc;
 
@@ -13,7 +13,7 @@ pub struct ControlLayout<'a> {
     board_width: u32,
     board: &'a BoardRef,
     stopwatch: &'a StopwatchRef,
-    reset_button: &'a ResetButtonRef,
+    reset_button: &'a ButtonRef,
 }
 
 impl TryInto<Layout> for ControlLayout<'_> {

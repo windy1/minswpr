@@ -1,8 +1,14 @@
-use super::{BoardRef, GameState, ResetButtonRef, StopwatchRef};
+use super::{BoardRef, ButtonRef, GameState, ResetButtonRef, StopwatchRef};
 use crate::config::Config;
+use crate::control::Button;
 use crate::layout::Layout;
 use crate::math::Point;
+use std::cell::RefCell;
 use std::cmp;
+use std::collections::HashMap;
+use std::rc::Rc;
+
+type ButtonMap = HashMap<&'static str, ButtonRef>;
 
 /// The main game context
 #[derive(Builder)]
@@ -14,10 +20,16 @@ pub struct Context {
     layout: Layout,
     board: BoardRef,
     stopwatch: StopwatchRef,
-    reset_button: ResetButtonRef,
+    #[builder(default)]
+    buttons: ButtonMap,
 }
 
 impl Context {
+    /// Returns the application `Config`
+    pub fn config(&self) -> &Config {
+        &self.config
+    }
+
     /// Returns the current `GameState`
     pub fn game_state(&self) -> GameState {
         self.game_state
@@ -53,14 +65,12 @@ impl Context {
         &self.stopwatch
     }
 
-    /// Returns a `RefCell` of the `ResetButton`
-    pub fn reset_button(&self) -> &ResetButtonRef {
-        &self.reset_button
+    pub fn buttons(&self) -> &ButtonMap {
+        &self.buttons
     }
 
-    /// Returns the application `Config`
-    pub fn config(&self) -> &Config {
-        &self.config
+    pub fn buttons_mut(&mut self) -> &mut ButtonMap {
+        &mut self.buttons
     }
 
     /// Return `Some(Point<u32>)` with the board position of the cell that

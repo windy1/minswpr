@@ -7,7 +7,7 @@ use super::input;
 use super::input::events::{MouseDownEvent, MouseMoveEvent, MouseUpEvent};
 use crate::board::{Board, CellFlags};
 use crate::config::{self, Config};
-use crate::control::{ResetButton, Stopwatch};
+use crate::control::{Button, ResetButton, Stopwatch};
 use crate::draw::board::DrawBoard;
 use crate::draw::{CanvasRef, Draw, DrawContext, DrawRect};
 use crate::fonts::Fonts;
@@ -34,6 +34,7 @@ pub type BoardRef = Rc<RefCell<Board>>;
 pub type StopwatchRef = Rc<RefCell<Stopwatch>>;
 // Helper type for a `ResetButton` reference
 pub type ResetButtonRef = Rc<RefCell<ResetButton>>;
+pub type ButtonRef = Rc<RefCell<Button>>;
 
 /// The application root
 pub struct Minswpr {
@@ -64,9 +65,10 @@ impl Minswpr {
             .game_state(GameState::Ready)
             .board(Rc::new(RefCell::new(self.make_board()?)))
             .stopwatch(Rc::new(RefCell::new(Stopwatch::new())))
-            .reset_button(Rc::new(RefCell::new(ResetButton::new())))
             .build()?;
 
+        ctx.buttons_mut()
+            .insert("reset", Rc::new(RefCell::new(Button::new())));
         ctx.set_layout(self.make_layout(&ctx)?);
 
         let fonts = Fonts::from_config(&self.config.fonts, &self.ttf)?;
@@ -178,7 +180,7 @@ impl Minswpr {
                             .board_width(board_width)
                             .board(ctx.board())
                             .stopwatch(ctx.stopwatch())
-                            .reset_button(ctx.reset_button())
+                            .reset_button(&ctx.buttons()["reset"])
                             .build()?
                             .try_into()?): Layout,
                     ))
@@ -282,7 +284,9 @@ fn handle_event(ctx: &Context, event: Event) -> GameState {
 }
 
 fn handle_mouse_up(ctx: &Context, mouse_btn: MouseButton, x: i32, y: i32) -> GameState {
-    ctx.reset_button().borrow_mut().set_released(true);
+    for button in ctx.buttons().values() {
+        button.borrow_mut().set_released(true);
+    }
 
     ctx.layout().defer_mouse_event(
         ctx,

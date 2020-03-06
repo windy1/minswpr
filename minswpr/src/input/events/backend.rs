@@ -7,7 +7,7 @@ use sdl2::keyboard::Keycode;
 use sdl2::mouse::{MouseButton, MouseState};
 use sdl2::EventPump;
 
-pub fn handle_events(ctx: &mut Context, event_pump: &mut EventPump) {
+pub fn poll_events(ctx: &mut Context, event_pump: &mut EventPump) {
     for event in event_pump.poll_iter() {
         ctx.set_game_state(self::handle_event(&ctx, event));
     }

@@ -82,7 +82,7 @@ impl Minswpr {
         let mut last_game_state = GameState::Unknown; // debug
 
         loop {
-            events::backend::handle_events(&mut ctx, &mut self.event_pump);
+            events::backend::poll_events(&mut ctx, &mut self.event_pump);
 
             self.handle_game_state(&mut ctx)?;
 

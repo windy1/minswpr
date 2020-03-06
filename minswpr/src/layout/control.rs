@@ -58,8 +58,10 @@ impl TryInto<Layout> for ControlLayout<'_> {
                             .margins(*Margins::new().left(btn_left).right(btn_right))
                             .build()?,
                     ))
-                    .mouse_up(Box::new(input::control::on_reset_mouse_up))
-                    .mouse_down(Box::new(input::control::on_reset_mouse_down))
+                    .mouse_up(Box::new(input::control::on_mouse_up_reset_button))
+                    .mouse_down(Box::new(input::control::on_mouse_down_reset_button))
+                    .mouse_leave(Box::new(input::control::on_mouse_leave_reset_button))
+                    .mouse_enter(Box::new(input::control::on_mouse_enter_reset_button))
                     .build()?,
             ),
             (

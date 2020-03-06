@@ -136,13 +136,13 @@ impl Layout {
                 if hover_id == n.id() {
                     ctx.game_state()
                 } else {
-                    self.on_hover_change(ctx, pos, n)
+                    self.on_hover_change(ctx, e, n)
                 }
             }
             None => {
                 let game_state = match hover_id {
                     "" => ctx.game_state(),
-                    _ => self.fire_mouse_leave_event(ctx, pos),
+                    _ => self.fire_mouse_leave_event(ctx, e),
                 };
                 self.hover_id.set("");
                 game_state
@@ -150,20 +150,20 @@ impl Layout {
         }
     }
 
-    fn on_hover_change(&self, ctx: &Context, pos: Point, node: &Node) -> GameState {
-        let game_state = self.fire_mouse_leave_event(ctx, pos);
+    fn on_hover_change(&self, ctx: &Context, e: &MouseMoveEvent, node: &Node) -> GameState {
+        let game_state = self.fire_mouse_leave_event(ctx, e);
         let game_state = match node.elem().mouse_enter() {
-            Some(enter) => enter(ctx, MouseEnterEvent::new(pos)),
+            Some(enter) => enter(ctx, MouseEnterEvent::from(e)),
             None => game_state,
         };
         self.hover_id.set(node.id());
         game_state
     }
 
-    fn fire_mouse_leave_event(&self, ctx: &Context, pos: Point) -> GameState {
+    fn fire_mouse_leave_event(&self, ctx: &Context, e: &MouseMoveEvent) -> GameState {
         match self.get(self.hover_id.get()) {
             Ok(old) => match old.elem().mouse_leave() {
-                Some(leave) => leave(ctx, MouseLeaveEvent::new(pos)),
+                Some(leave) => leave(ctx, MouseLeaveEvent::from(e)),
                 None => ctx.game_state(),
             },
             Err(_) => ctx.game_state(),

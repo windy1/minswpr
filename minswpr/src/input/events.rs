@@ -76,7 +76,14 @@ impl MouseEvent for MouseMoveEvent {
 /// Event thrown when the mouse enters a `layout::Element`
 #[derive(new)]
 pub struct MouseEnterEvent {
+    mouse_state: MouseState,
     mouse_pos: Point,
+}
+
+impl MouseEnterEvent {
+    pub fn mouse_state(&self) -> MouseState {
+        self.mouse_state
+    }
 }
 
 impl MouseEvent for MouseEnterEvent {
@@ -85,14 +92,33 @@ impl MouseEvent for MouseEnterEvent {
     }
 }
 
+impl From<&MouseMoveEvent> for MouseEnterEvent {
+    fn from(e: &MouseMoveEvent) -> Self {
+        Self::new(e.mouse_state(), e.mouse_pos())
+    }
+}
+
 /// Event thrown when the mouse leaves a `layout::Element`
 #[derive(new)]
 pub struct MouseLeaveEvent {
+    mouse_state: MouseState,
     mouse_pos: Point,
+}
+
+impl MouseLeaveEvent {
+    pub fn mouse_state(&self) -> MouseState {
+        self.mouse_state
+    }
 }
 
 impl MouseEvent for MouseLeaveEvent {
     fn mouse_pos(&self) -> Point {
         self.mouse_pos
+    }
+}
+
+impl From<&MouseMoveEvent> for MouseLeaveEvent {
+    fn from(e: &MouseMoveEvent) -> Self {
+        Self::new(e.mouse_state(), e.mouse_pos())
     }
 }

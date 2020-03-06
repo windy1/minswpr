@@ -1,8 +1,8 @@
 use crate::config::{ControlConfig, LedDisplayConfig};
-use crate::draw::control::{DrawLedDisplay, LedDisplayKind};
+use crate::draw::control::{DrawLedDisplay, DrawResetButtonBuilder, LedDisplayKind};
 use crate::draw::{DrawRect, Margins};
 use crate::layout::{Element, ElementBuilder, Layout, LayoutBuilder, Orientation};
-use crate::{BoardRef, GameState, MsResult, StopwatchRef};
+use crate::{BoardRef, GameState, MsResult, ResetButtonRef, StopwatchRef};
 use std::convert::TryInto;
 use std::rc::Rc;
 
@@ -12,6 +12,7 @@ pub struct ControlLayout<'a> {
     board_width: u32,
     board: &'a BoardRef,
     stopwatch: &'a StopwatchRef,
+    reset_button: &'a ResetButtonRef,
 }
 
 impl TryInto<Layout> for ControlLayout<'_> {
@@ -26,7 +27,8 @@ impl TryInto<Layout> for ControlLayout<'_> {
             .orientation(Orientation::Horizontal)
             .build()?;
 
-        let btn_dimen = self.config.reset_button_dimen;
+        let btn_config = &self.config.reset_button;
+        let btn_dimen = btn_config.dimen;
         let w = self.board_width;
         let btn_width = btn_dimen.width();
         let fc = &self.config.flag_counter;
@@ -48,11 +50,13 @@ impl TryInto<Layout> for ControlLayout<'_> {
             (
                 "reset_button",
                 ElementBuilder::default()
-                    .draw_ref(Box::new(DrawRect::with_margins(
-                        btn_dimen,
-                        self.config.reset_button_color,
-                        *Margins::new().left(btn_left).right(btn_right),
-                    )))
+                    .draw_ref(Box::new(
+                        DrawResetButtonBuilder::default()
+                            .config(btn_config.clone())
+                            .button(Rc::clone(&self.reset_button))
+                            .margins(*Margins::new().left(btn_left).right(btn_right))
+                            .build()?,
+                    ))
                     .mouse_up(Box::new(|_, _| GameState::Reset))
                     .build()?,
             ),

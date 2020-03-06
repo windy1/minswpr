@@ -19,8 +19,11 @@ spacer_height = 5
 spacer_color = "#000000"
 color = "#c0c0c0"
 padding = 5
-reset_button_dimen = { x = 25, y = 25 }
-reset_button_color = "#ffff00"
+
+[control.reset_button]
+dimen = { x = 25, y = 25 }
+color = "#ffff00"
+pressed_color = "#4269f5"
 
 [control.flag_counter]
 dimen = {x = 40, y = 25 }

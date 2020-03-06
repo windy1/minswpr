@@ -54,11 +54,18 @@ pub struct ControlConfig {
     #[serde(deserialize_with = "read_color")]
     pub color: Color,
     pub padding: u32,
-    pub reset_button_dimen: Dimen,
-    #[serde(deserialize_with = "read_color")]
-    pub reset_button_color: Color,
+    pub reset_button: ButtonConfig,
     pub flag_counter: LedDisplayConfig,
     pub stopwatch: LedDisplayConfig,
+}
+
+#[derive(Deserialize, Clone)]
+pub struct ButtonConfig {
+    pub dimen: Dimen,
+    #[serde(deserialize_with = "read_color")]
+    pub color: Color,
+    #[serde(deserialize_with = "read_color")]
+    pub pressed_color: Color,
 }
 
 /// Config for LED display like the flag counter or stopwatch

@@ -61,13 +61,14 @@ impl Minswpr {
     pub fn start(&mut self) -> MsResult {
         let board = Rc::new(RefCell::new(self.make_board()?));
         let stopwatch = Rc::new(RefCell::new(Stopwatch::new()));
+        let reset_button = Rc::new(RefCell::new(ResetButton::new()));
 
         let mut ctx = ContextBuilder::default()
             .config(self.config.clone())
             .game_state(GameState::Ready)
             .board(Rc::clone(&board))
             .stopwatch(Rc::clone(&stopwatch))
-            .layout(self.make_layout(&board, &stopwatch)?)
+            .layout(self.make_layout(&board, &stopwatch, &reset_button)?)
             .build()?;
 
         let fonts = Fonts::from_config(&self.config.fonts, &self.ttf)?;
@@ -153,7 +154,12 @@ impl Minswpr {
         Board::new(w, h, bc.num_mines)
     }
 
-    fn make_layout(&self, board: &BoardRef, stopwatch: &StopwatchRef) -> MsResult<Layout> {
+    fn make_layout(
+        &self,
+        board: &BoardRef,
+        stopwatch: &StopwatchRef,
+        reset_button: &ResetButtonRef,
+    ) -> MsResult<Layout> {
         let lc = &self.config.layout;
         let mut layout = LayoutBuilder::default()
             .color(lc.color)
@@ -179,6 +185,7 @@ impl Minswpr {
                             .board_width(board_width)
                             .board(&board)
                             .stopwatch(&stopwatch)
+                            .reset_button(&reset_button)
                             .build()?
                             .try_into()?): Layout,
                     ))

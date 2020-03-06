@@ -359,9 +359,9 @@ impl Element {
 pub struct Node {
     id: &'static str,
     order: i32,
-    elem: Element,
     #[new(default)]
     pos: Point,
+    elem: Element,
 }
 
 impl Node {

@@ -27,6 +27,7 @@ pub fn mouse_up(elem: &Element) -> Option<&OnMouseUp> {
     elem.mouse_up()
 }
 
+/// Returns a static `OnMouseDown` getter for convienience
 pub fn mouse_down(elem: &Element) -> Option<&OnMouseDown> {
     elem.mouse_down()
 }

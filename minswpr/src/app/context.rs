@@ -65,10 +65,13 @@ impl Context {
         &self.stopwatch
     }
 
+    /// Returns a `Vec<&Model<Button>>` of all the buttons being maintained
     pub fn buttons(&self) -> Vec<&Model<Button>> {
         self.buttons.values().collect()
     }
 
+    /// Returns the `Button` with the specified `id`. Panics if there is no
+    /// button with the specified `id`
     pub fn button(&self, id: &'static str) -> &Model<Button> {
         &self
             .buttons
@@ -76,6 +79,7 @@ impl Context {
             .unwrap_or_else(|| panic!("missing required Button `{}`", id))
     }
 
+    /// Inserts a new `Button` with the specified `id`
     pub fn insert_button(&mut self, id: &'static str, button: Button) {
         self.buttons.insert(id, Model::new(button));
     }

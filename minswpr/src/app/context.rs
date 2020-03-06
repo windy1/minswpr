@@ -1,9 +1,12 @@
 use super::{BoardRef, ButtonRef, GameState, StopwatchRef};
 use crate::config::Config;
+use crate::control::Button;
 use crate::layout::Layout;
 use crate::math::Point;
+use std::cell::RefCell;
 use std::cmp;
 use std::collections::HashMap;
+use std::rc::Rc;
 
 type ButtonMap = HashMap<&'static str, ButtonRef>;
 
@@ -62,12 +65,19 @@ impl Context {
         &self.stopwatch
     }
 
-    pub fn buttons(&self) -> &ButtonMap {
-        &self.buttons
+    pub fn buttons(&self) -> Vec<&ButtonRef> {
+        self.buttons.values().collect()
     }
 
-    pub fn buttons_mut(&mut self) -> &mut ButtonMap {
-        &mut self.buttons
+    pub fn button(&self, id: &'static str) -> &ButtonRef {
+        &self
+            .buttons
+            .get(id)
+            .unwrap_or_else(|| panic!("missing required Button `{}`", id))
+    }
+
+    pub fn insert_button(&mut self, id: &'static str, button: Button) {
+        self.buttons.insert(id, Rc::new(RefCell::new(button)));
     }
 
     /// Return `Some(Point<u32>)` with the board position of the cell that

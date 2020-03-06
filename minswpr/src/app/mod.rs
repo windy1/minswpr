@@ -66,8 +66,7 @@ impl Minswpr {
             .stopwatch(Rc::new(RefCell::new(Stopwatch::new())))
             .build()?;
 
-        ctx.buttons_mut()
-            .insert("reset", Rc::new(RefCell::new(Button::new())));
+        ctx.insert_button("reset", Button::new());
         ctx.set_layout(self.make_layout(&ctx)?);
 
         let fonts = Fonts::from_config(&self.config.fonts, &self.ttf)?;
@@ -179,7 +178,7 @@ impl Minswpr {
                             .board_width(board_width)
                             .board(ctx.board())
                             .stopwatch(ctx.stopwatch())
-                            .reset_button(&ctx.buttons()["reset"])
+                            .reset_button(ctx.button("reset"))
                             .build()?
                             .try_into()?): Layout,
                     ))
@@ -283,7 +282,7 @@ fn handle_event(ctx: &Context, event: Event) -> GameState {
 }
 
 fn handle_mouse_up(ctx: &Context, mouse_btn: MouseButton, x: i32, y: i32) -> GameState {
-    for button in ctx.buttons().values() {
+    for button in ctx.buttons() {
         button.borrow_mut().set_released(true);
     }
 

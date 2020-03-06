@@ -86,10 +86,10 @@ impl DrawRect {
     /// Creates a new `DrawRect`
     ///
     /// # Arguments
-    /// `dimen` - The dimensions of the rectangle
-    /// `color` - The rectangle Color
-    /// `margins` - The `Margins` of the rectangle for spacing relative to other
-    ///             elements
+    /// * `dimen` - The dimensions of the rectangle
+    /// * `color` - The rectangle Color
+    /// * `margins` - The `Margins` of the rectangle for spacing relative to
+    ///   other elements
     pub fn with_margins(dimen: Dimen, color: Color, margins: Margins) -> Self {
         Self {
             dimen,

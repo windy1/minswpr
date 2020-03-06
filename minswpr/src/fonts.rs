@@ -3,6 +3,7 @@ use crate::MsResult;
 use sdl2::ttf::Font;
 use sdl2::ttf::Sdl2TtfContext;
 use std::collections::HashMap;
+use std::ops::Index;
 use std::path::Path;
 
 type FontMap<'a> = HashMap<String, Font<'a, 'a>>;
@@ -36,12 +37,14 @@ impl<'a> Fonts<'a> {
             .insert(key.to_string(), self.ttf.load_font(fname, size)?);
         Ok(())
     }
+}
 
-    /// Returns `Ok(&Font)` of the font with the specified `key` if present.
-    /// Returns `Err(String)` otherwise
-    pub fn get(&self, key: &str) -> MsResult<&Font> {
+impl<'a> Index<&str> for Fonts<'a> {
+    type Output = Font<'a, 'a>;
+
+    fn index(&self, key: &str) -> &Self::Output {
         self.font_map
             .get(key)
-            .ok_or_else(|| format!("missing required font `{}`", key))
+            .unwrap_or_else(|| panic!("missing required font `{}`", key))
     }
 }

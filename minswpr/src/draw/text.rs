@@ -48,9 +48,7 @@ where
         format!("could not draw text: `{}`", e.to_string())
     }
 
-    let surface = ctx
-        .fonts()
-        .get(text.font_id)?
+    let surface = ctx.fonts()[text.font_id]
         .render(&text.content.to_string())
         .blended(text.color)
         .map_err(map_err)?;

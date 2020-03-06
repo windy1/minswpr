@@ -39,7 +39,7 @@ num_mines = 10
 [board.cells]
 dimen = { x = 15, y = 15 }
 color = "#c0c0c0"
-pressed_color = "#a9a9a9"
+pressed_color = "#4269f5"
 border_width = 1
 border_color = "#000000"
 revealed_color = "#4269f5"

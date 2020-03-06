@@ -37,7 +37,6 @@ pub fn on_click_board(ctx: &Context, e: MouseUpEvent) -> GameState {
 
             match &e.mouse_btn() {
                 MouseButton::Left => self::on_left_click_cell(ctx, p, game_state),
-                MouseButton::Right => self::on_right_click_cell(ctx, p, game_state),
                 MouseButton::Middle => self::on_middle_click_cell(ctx, p, game_state),
                 _ => game_state,
             }
@@ -59,15 +58,6 @@ fn on_left_click_cell(
     } else {
         game_state
     }
-}
-
-fn on_right_click_cell(
-    ctx: &Context,
-    Point { x, y }: Point<u32>,
-    game_state: GameState,
-) -> GameState {
-    ctx.board().borrow_mut().toggle_flag(x, y);
-    game_state
 }
 
 fn on_middle_click_cell(
@@ -115,22 +105,24 @@ pub fn on_mouse_down_board(ctx: &Context, e: MouseDownEvent) -> GameState {
         return ctx.game_state();
     }
 
-    // TODO: different buttons have different effects here
-    match e.mouse_btn() {
-        MouseButton::Left => {}
-        _ => return ctx.game_state(),
-    }
-
     let Point { x, y } = e.mouse_pos();
-    match ctx.get_cell_at(x, y) {
-        Some(p) => {
+
+    match (ctx.get_cell_at(x, y), e.mouse_btn()) {
+        (Some(p), MouseButton::Left) => {
+            // set "pressed" state
             ctx.board()
                 .borrow_mut()
                 .cell_mut(p.x, p.y)
                 .insert(CellFlags::PRESSED);
             ctx.game_state()
         }
-        None => ctx.game_state(),
+        (Some(p), MouseButton::Middle) => ctx.game_state(),
+        (Some(p), MouseButton::Right) => {
+            // place flag
+            ctx.board().borrow_mut().toggle_flag(p.x, p.y);
+            ctx.game_state()
+        }
+        _ => ctx.game_state(),
     }
 }
 

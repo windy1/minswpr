@@ -17,7 +17,7 @@ use crate::input::events::*;
 use self::Orientation::*;
 
 /// Organizes various elements on the canvas
-#[derive(Builder, AsAny)]
+#[derive(Default, Builder, AsAny)]
 pub struct Layout {
     #[builder(setter(skip))]
     nodes: HashMap<&'static str, Node>,

@@ -59,18 +59,15 @@ impl Minswpr {
     /// Starts the game. Returns an `Err` if an error occurs during
     /// initialization or the main game loop.
     pub fn start(&mut self) -> MsResult {
-        let board = Rc::new(RefCell::new(self.make_board()?));
-        let stopwatch = Rc::new(RefCell::new(Stopwatch::new()));
-        let reset_button = Rc::new(RefCell::new(ResetButton::new()));
-
         let mut ctx = ContextBuilder::default()
             .config(self.config.clone())
             .game_state(GameState::Ready)
-            .board(Rc::clone(&board))
-            .stopwatch(Rc::clone(&stopwatch))
-            .reset_button(Rc::clone(&reset_button))
-            .layout(self.make_layout(&board, &stopwatch, &reset_button)?)
+            .board(Rc::new(RefCell::new(self.make_board()?)))
+            .stopwatch(Rc::new(RefCell::new(Stopwatch::new())))
+            .reset_button(Rc::new(RefCell::new(ResetButton::new())))
             .build()?;
+
+        ctx.set_layout(self.make_layout(&ctx)?);
 
         let fonts = Fonts::from_config(&self.config.fonts, &self.ttf)?;
 
@@ -155,12 +152,7 @@ impl Minswpr {
         Board::new(w, h, bc.num_mines)
     }
 
-    fn make_layout(
-        &self,
-        board: &BoardRef,
-        stopwatch: &StopwatchRef,
-        reset_button: &ResetButtonRef,
-    ) -> MsResult<Layout> {
+    fn make_layout(&self, ctx: &Context) -> MsResult<Layout> {
         let lc = &self.config.layout;
         let mut layout = LayoutBuilder::default()
             .color(lc.color)
@@ -171,7 +163,7 @@ impl Minswpr {
         let cc = &self.config.control;
 
         let board_draw = Box::new(DrawBoard::new(
-            Rc::clone(&board),
+            Rc::clone(ctx.board()),
             self.config.board.cells.clone(),
         ));
         let board_width = board_draw.dimen().width();
@@ -184,9 +176,9 @@ impl Minswpr {
                         (ControlLayoutBuilder::default()
                             .config(&cc)
                             .board_width(board_width)
-                            .board(&board)
-                            .stopwatch(&stopwatch)
-                            .reset_button(&reset_button)
+                            .board(ctx.board())
+                            .stopwatch(ctx.stopwatch())
+                            .reset_button(ctx.reset_button())
                             .build()?
                             .try_into()?): Layout,
                     ))

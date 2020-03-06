@@ -10,6 +10,7 @@ use std::cmp;
 pub struct Context {
     config: Config,
     game_state: GameState,
+    #[builder(default)]
     layout: Layout,
     board: BoardRef,
     stopwatch: StopwatchRef,
@@ -27,6 +28,21 @@ impl Context {
         self.game_state = game_state
     }
 
+    /// Returns the base `Layout`
+    pub fn layout(&self) -> &Layout {
+        &self.layout
+    }
+
+    /// Returns the base `layout`
+    pub fn layout_mut(&mut self) -> &mut Layout {
+        &mut self.layout
+    }
+
+    /// Sets the root `Layout`
+    pub fn set_layout(&mut self, layout: Layout) {
+        self.layout = layout
+    }
+
     /// Returns a `RefCell` of the `Board`
     pub fn board(&self) -> &BoardRef {
         &self.board
@@ -40,16 +56,6 @@ impl Context {
     /// Returns a `RefCell` of the `ResetButton`
     pub fn reset_button(&self) -> &ResetButtonRef {
         &self.reset_button
-    }
-
-    /// Returns the base `Layout`
-    pub fn layout(&self) -> &Layout {
-        &self.layout
-    }
-
-    /// Returns the base `layout`
-    pub fn layout_mut(&mut self) -> &mut Layout {
-        &mut self.layout
     }
 
     /// Returns the application `Config`

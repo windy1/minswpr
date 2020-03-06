@@ -3,11 +3,11 @@ use crate::config::Config;
 use crate::control::{Button, Stopwatch};
 use crate::layout::Layout;
 use crate::math::Point;
-use crate::{GameState, Model};
+use crate::{GameState, ModelRef};
 use std::cmp;
 use std::collections::HashMap;
 
-type ButtonMap = HashMap<&'static str, Model<Button>>;
+type ButtonMap = HashMap<&'static str, ModelRef<Button>>;
 
 /// The main game context
 #[derive(Builder)]
@@ -17,8 +17,8 @@ pub struct Context {
     game_state: GameState,
     #[builder(default)]
     layout: Layout,
-    board: Model<Board>,
-    stopwatch: Model<Stopwatch>,
+    board: ModelRef<Board>,
+    stopwatch: ModelRef<Stopwatch>,
     #[builder(default)]
     buttons: ButtonMap,
 }
@@ -55,23 +55,23 @@ impl Context {
     }
 
     /// Returns a `RefCell` of the `Board`
-    pub fn board(&self) -> &Model<Board> {
+    pub fn board(&self) -> &ModelRef<Board> {
         &self.board
     }
 
     /// Returns a `RefCell` of the `Stopwatch`
-    pub fn stopwatch(&self) -> &Model<Stopwatch> {
+    pub fn stopwatch(&self) -> &ModelRef<Stopwatch> {
         &self.stopwatch
     }
 
     /// Returns a `Vec<&Model<Button>>` of all the buttons being maintained
-    pub fn buttons(&self) -> Vec<&Model<Button>> {
+    pub fn buttons(&self) -> Vec<&ModelRef<Button>> {
         self.buttons.values().collect()
     }
 
     /// Returns the `Button` with the specified `id`. Panics if there is no
     /// button with the specified `id`
-    pub fn button(&self, id: &'static str) -> &Model<Button> {
+    pub fn button(&self, id: &'static str) -> &ModelRef<Button> {
         &self
             .buttons
             .get(id)
@@ -80,7 +80,7 @@ impl Context {
 
     /// Inserts a new `Button` with the specified `id`
     pub fn insert_button(&mut self, id: &'static str, button: Button) {
-        self.buttons.insert(id, Model::new(button));
+        self.buttons.insert(id, ModelRef::new(button));
     }
 
     /// Return `Some(Point<u32>)` with the board position of the cell that

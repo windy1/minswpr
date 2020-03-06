@@ -1,11 +1,11 @@
 use std::cell::{Ref, RefCell, RefMut};
 use std::rc::Rc;
 
-pub struct Model<T> {
+pub struct ModelRef<T> {
     inner: Rc<RefCell<T>>,
 }
 
-impl<T> Model<T> {
+impl<T> ModelRef<T> {
     pub fn new(inner: T) -> Self {
         Self {
             inner: Rc::new(RefCell::new(inner)),
@@ -21,13 +21,13 @@ impl<T> Model<T> {
     }
 }
 
-impl<T> AsRef<Rc<RefCell<T>>> for Model<T> {
+impl<T> AsRef<Rc<RefCell<T>>> for ModelRef<T> {
     fn as_ref(&self) -> &Rc<RefCell<T>> {
         &self.inner
     }
 }
 
-impl<T> Clone for Model<T> {
+impl<T> Clone for ModelRef<T> {
     fn clone(&self) -> Self {
         Self {
             inner: Rc::clone(&self.inner),

@@ -5,16 +5,16 @@ use crate::draw::control::{DrawLedDisplay, DrawResetButtonBuilder, LedDisplayKin
 use crate::draw::Margins;
 use crate::input;
 use crate::layout::{Element, ElementBuilder, Layout, LayoutBuilder, Orientation};
-use crate::{Model, MsResult};
+use crate::{ModelRef, MsResult};
 use std::convert::TryInto;
 
 #[derive(Builder)]
 pub struct ControlLayout<'a> {
     config: &'a ControlConfig,
     board_width: u32,
-    board: &'a Model<Board>,
-    stopwatch: &'a Model<Stopwatch>,
-    reset_button: &'a Model<Button>,
+    board: &'a ModelRef<Board>,
+    stopwatch: &'a ModelRef<Stopwatch>,
+    reset_button: &'a ModelRef<Button>,
 }
 
 impl TryInto<Layout> for ControlLayout<'_> {

@@ -5,18 +5,18 @@ use super::{Draw, DrawContext};
 use crate::board::Board;
 use crate::config::CellConfig;
 use crate::math::{Dimen, Point};
-use crate::{utils, Model, MsResult};
+use crate::{utils, ModelRef, MsResult};
 use sdl2::rect::Rect;
 
 #[derive(AsAny)]
 pub struct DrawBoard {
-    board: Model<Board>,
+    board: ModelRef<Board>,
     dimen: Dimen,
     cell_config: CellConfig,
 }
 
 impl DrawBoard {
-    pub fn new(board: Model<Board>, cell_config: CellConfig) -> Self {
+    pub fn new(board: ModelRef<Board>, cell_config: CellConfig) -> Self {
         let cell_dimen = cell_config.dimen.as_i32();
         let border_width = cell_config.border_width as i32;
 

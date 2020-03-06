@@ -7,14 +7,14 @@ use crate::draw::text::{self, Text};
 use crate::draw::DrawContext;
 use crate::draw::Margins;
 use crate::math::{Dimen, Point};
-use crate::{utils, Model, MsResult};
+use crate::{utils, ModelRef, MsResult};
 use sdl2::rect::Rect;
 use std::cmp;
 
 #[derive(Builder, AsAny)]
 pub struct DrawResetButton {
     config: ButtonConfig,
-    button: Model<Button>,
+    button: ModelRef<Button>,
     margins: Margins,
 }
 
@@ -44,8 +44,8 @@ pub struct DrawLedDisplay {
 }
 
 pub enum LedDisplayKind {
-    FlagCounter(Model<Board>),
-    Stopwatch(Model<Stopwatch>),
+    FlagCounter(ModelRef<Board>),
+    Stopwatch(ModelRef<Stopwatch>),
 }
 
 impl Draw for DrawLedDisplay {

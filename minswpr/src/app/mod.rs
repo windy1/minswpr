@@ -3,7 +3,7 @@ pub(super) mod context;
 pub use self::context::*;
 
 use self::{Context, ContextBuilder};
-use super::Model;
+use super::ModelRef;
 use crate::board::{Board, CellFlags};
 use crate::config::{self, Config};
 use crate::control::{Button, Stopwatch};
@@ -56,8 +56,8 @@ impl Minswpr {
         let mut ctx = ContextBuilder::default()
             .config(self.config.clone())
             .game_state(GameState::Ready)
-            .board(Model::new(self.make_board()?))
-            .stopwatch(Model::new(Stopwatch::new()))
+            .board(ModelRef::new(self.make_board()?))
+            .stopwatch(ModelRef::new(Stopwatch::new()))
             .build()?;
 
         ctx.insert_button("reset", Button::new());

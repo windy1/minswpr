@@ -47,7 +47,7 @@ impl Stopwatch {
 pub struct Button {
     #[new(default)]
     is_pressed: bool,
-    #[new(default)]
+    #[new(value = "true")]
     is_released: bool,
 }
 

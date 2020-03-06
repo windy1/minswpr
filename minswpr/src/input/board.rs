@@ -96,8 +96,7 @@ pub fn on_mouse_move_board(ctx: &Context, e: MouseMoveEvent) -> GameState {
     let Point { x, y } = e.mouse_pos();
     match ctx.get_cell_at(x, y) {
         Some(p) => {
-            let mut board = ctx.board().borrow_mut();
-            board.clear_all(CellFlags::PRESSED);
+            ctx.board().borrow_mut().clear_all(CellFlags::PRESSED);
 
             if ctx.button("board").borrow().is_released() {
                 return ctx.game_state();
@@ -107,7 +106,10 @@ pub fn on_mouse_move_board(ctx: &Context, e: MouseMoveEvent) -> GameState {
             if mouse.is_mouse_button_pressed(MouseButton::Middle) {
                 self::set_board_area_pressed(ctx, p);
             } else if mouse.is_mouse_button_pressed(MouseButton::Left) {
-                board.cell_mut(p.x, p.y).insert(CellFlags::PRESSED);
+                ctx.board()
+                    .borrow_mut()
+                    .cell_mut(p.x, p.y)
+                    .insert(CellFlags::PRESSED);
             }
 
             ctx.game_state()

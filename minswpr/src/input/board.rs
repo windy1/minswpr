@@ -34,6 +34,7 @@ pub fn on_click_board(ctx: &Context, e: MouseUpEvent) -> GameState {
                 .cell(p.x, p.y)
                 .contains(CellFlags::PRESSED);
 
+            // if the cell was not previously pressed, ignore this event
             if !cell_pressed {
                 return game_state;
             }
@@ -98,6 +99,8 @@ pub fn on_mouse_move_board(ctx: &Context, e: MouseMoveEvent) -> GameState {
         Some(p) => {
             ctx.board().borrow_mut().clear_all(CellFlags::PRESSED);
 
+            // handles case where cursor moves off board, cursor is released, cursor is
+            // re-pressed off the board, and enters the board area once again
             if ctx.button("board").borrow().is_released() {
                 return ctx.game_state();
             }
@@ -119,6 +122,7 @@ pub fn on_mouse_move_board(ctx: &Context, e: MouseMoveEvent) -> GameState {
 }
 
 pub fn on_mouse_down_board(ctx: &Context, e: MouseDownEvent) -> GameState {
+    // board is frozen after game ends
     if let GameState::Over = ctx.game_state() {
         return ctx.game_state();
     }
@@ -148,6 +152,7 @@ pub fn on_mouse_down_board(ctx: &Context, e: MouseDownEvent) -> GameState {
 
 fn set_board_area_pressed(ctx: &Context, Point { x, y }: Point<u32>) {
     ctx.button("board").borrow_mut().set_released(false);
+
     let mut board = ctx.board().borrow_mut();
     board.cell_mut(x, y).insert(CellFlags::PRESSED);
     for neighbor in board.neighbors(x, y) {

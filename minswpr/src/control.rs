@@ -43,6 +43,7 @@ impl Stopwatch {
     }
 }
 
+/// Manages the state of a button on the screen
 #[derive(new)]
 pub struct Button {
     #[new(default)]
@@ -52,18 +53,27 @@ pub struct Button {
 }
 
 impl Button {
+    /// Returns true if the button is currently pressed and should be drawn to
+    /// reflect it's pressed state. Returns false otherwise
     pub fn is_pressed(&self) -> bool {
         self.is_pressed
     }
 
+    /// Sets whether if the button is currently pressed and should be drawn to
+    /// reflect it's pressed state
     pub fn set_pressed(&mut self, is_pressed: bool) {
         self.is_pressed = is_pressed
     }
 
+    /// Returns true if the button has been released since being pressed. If a
+    /// button is pressed and the cursor moves out of the button area, we still
+    /// might want to consider the button pressed when the cursor re-enters the
+    /// button area as long as the mouse button was not released in between
     pub fn is_released(&self) -> bool {
         self.is_released
     }
 
+    /// Sets if the button has been released
     pub fn set_released(&mut self, is_released: bool) {
         self.is_released = is_released
     }

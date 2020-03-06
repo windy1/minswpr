@@ -5,8 +5,7 @@ use crate::draw::control::{DrawLedDisplay, DrawResetButtonBuilder, LedDisplayKin
 use crate::draw::Margins;
 use crate::input;
 use crate::layout::{Element, ElementBuilder, Layout, LayoutBuilder, Orientation};
-use crate::models::Model;
-use crate::MsResult;
+use crate::{Model, MsResult};
 use std::convert::TryInto;
 
 #[derive(Builder)]

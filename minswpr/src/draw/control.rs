@@ -7,8 +7,7 @@ use crate::draw::text::{self, Text};
 use crate::draw::DrawContext;
 use crate::draw::Margins;
 use crate::math::{Dimen, Point};
-use crate::models::Model;
-use crate::{utils, MsResult};
+use crate::{utils, Model, MsResult};
 use sdl2::rect::Rect;
 use std::cmp;
 

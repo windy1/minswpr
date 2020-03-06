@@ -5,9 +5,7 @@ use super::{Draw, DrawContext};
 use crate::board::Board;
 use crate::config::CellConfig;
 use crate::math::{Dimen, Point};
-use crate::models::Model;
-use crate::utils;
-use crate::MsResult;
+use crate::{utils, Model, MsResult};
 use sdl2::rect::Rect;
 
 #[derive(AsAny)]

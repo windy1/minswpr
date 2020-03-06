@@ -3,6 +3,7 @@ pub(super) mod context;
 pub use self::context::*;
 
 use self::{Context, ContextBuilder};
+use super::Model;
 use crate::board::{Board, CellFlags};
 use crate::config::{self, Config};
 use crate::control::{Button, Stopwatch};
@@ -14,7 +15,6 @@ use crate::input::events::{MouseDownEvent, MouseMoveEvent, MouseUpEvent};
 use crate::layout::control::ControlLayoutBuilder;
 use crate::layout::{Element, ElementBuilder, Layout, LayoutBuilder};
 use crate::math::{Dimen, Point};
-use crate::models::Model;
 use crate::MsResult;
 use sdl2::event::{Event, WindowEvent};
 use sdl2::keyboard::Keycode;

@@ -19,6 +19,7 @@ pub mod math;
 pub mod draw;
 
 mod app;
+mod model;
 
 /// Defines basic components to manage the state of the main board
 pub mod board;
@@ -32,11 +33,10 @@ pub mod fonts;
 pub mod input;
 /// Handles the layout of the GUI
 pub mod layout;
-/// Model types for state reference
-pub mod models;
 
 pub use app::context::*;
 pub use app::*;
+pub use model::*;
 
 /// Helper type for Result
 pub type MsResult<R = (), E = String> = Result<R, E>;

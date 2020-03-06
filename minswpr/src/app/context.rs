@@ -1,10 +1,9 @@
-use super::GameState;
 use crate::board::Board;
 use crate::config::Config;
 use crate::control::{Button, Stopwatch};
 use crate::layout::Layout;
 use crate::math::Point;
-use crate::models::Model;
+use crate::{GameState, Model};
 use std::cmp;
 use std::collections::HashMap;
 

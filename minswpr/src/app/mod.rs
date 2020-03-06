@@ -67,6 +67,8 @@ impl Minswpr {
             .build()?;
 
         ctx.insert_button("reset", Button::new());
+        ctx.insert_button("board", Button::new());
+
         ctx.set_layout(self.make_layout(&ctx)?);
 
         let fonts = Fonts::from_config(&self.config.fonts, &self.ttf)?;

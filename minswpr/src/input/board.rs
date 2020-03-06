@@ -1,4 +1,4 @@
-use crate::board::{Board, CellFlags};
+use crate::board::CellFlags;
 use crate::math::Point;
 use crate::{Context, GameState};
 use sdl2::mouse::MouseButton;
@@ -28,6 +28,16 @@ pub fn on_click_board(ctx: &Context, e: MouseUpEvent) -> GameState {
 
     match ctx.get_cell_at(x, y) {
         Some(p) => {
+            let cell_pressed = ctx
+                .board()
+                .borrow()
+                .cell(p.x, p.y)
+                .contains(CellFlags::PRESSED);
+
+            if !cell_pressed {
+                return game_state;
+            }
+
             // start the game when the first cell of a fresh board is clicked
             let game_state = if let GameState::Ready = game_state {
                 GameState::Start
@@ -89,9 +99,13 @@ pub fn on_mouse_move_board(ctx: &Context, e: MouseMoveEvent) -> GameState {
             let mut board = ctx.board().borrow_mut();
             board.clear_all(CellFlags::PRESSED);
 
+            if ctx.button("board").borrow().is_released() {
+                return ctx.game_state();
+            }
+
             let mouse = e.mouse_state();
             if mouse.is_mouse_button_pressed(MouseButton::Middle) {
-                self::set_board_area_pressed(&mut board, p);
+                self::set_board_area_pressed(ctx, p);
             } else if mouse.is_mouse_button_pressed(MouseButton::Left) {
                 board.cell_mut(p.x, p.y).insert(CellFlags::PRESSED);
             }
@@ -109,14 +123,17 @@ pub fn on_mouse_down_board(ctx: &Context, e: MouseDownEvent) -> GameState {
 
     let Point { x, y } = e.mouse_pos();
     let board = || ctx.board().borrow_mut();
+    let set_not_released = || ctx.button("board").borrow_mut().set_released(false);
 
     match (ctx.get_cell_at(x, y), e.mouse_btn()) {
         (Some(p), MouseButton::Left) => {
             board().cell_mut(p.x, p.y).insert(CellFlags::PRESSED);
+            set_not_released();
             ctx.game_state()
         }
         (Some(p), MouseButton::Middle) => {
-            self::set_board_area_pressed(&mut board(), p);
+            self::set_board_area_pressed(ctx, p);
+            set_not_released();
             ctx.game_state()
         }
         (Some(p), MouseButton::Right) => {
@@ -127,7 +144,9 @@ pub fn on_mouse_down_board(ctx: &Context, e: MouseDownEvent) -> GameState {
     }
 }
 
-fn set_board_area_pressed(board: &mut Board, Point { x, y }: Point<u32>) {
+fn set_board_area_pressed(ctx: &Context, Point { x, y }: Point<u32>) {
+    ctx.button("board").borrow_mut().set_released(false);
+    let mut board = ctx.board().borrow_mut();
     board.cell_mut(x, y).insert(CellFlags::PRESSED);
     for neighbor in board.neighbors(x, y) {
         board

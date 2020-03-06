@@ -4,36 +4,38 @@ use sdl2::mouse::MouseButton;
 
 pub fn on_mouse_down_reset_button(ctx: &Context, e: MouseDownEvent) -> GameState {
     match e.mouse_btn() {
-        MouseButton::Left => {}
+        MouseButton::Left => {
+            let mut btn = ctx.button("reset").borrow_mut();
+            btn.set_pressed(true);
+            btn.set_released(false);
+            ctx.game_state()
+        }
         MouseButton::Middle => {
             // TODO
-            return ctx.game_state();
+            ctx.game_state()
         }
-        _ => return ctx.game_state(),
+        _ => ctx.game_state(),
     }
-
-    let mut btn = ctx.button("reset").borrow_mut();
-    btn.set_pressed(true);
-    btn.set_released(false);
-
-    ctx.game_state()
 }
 
 pub fn on_mouse_up_reset_button(ctx: &Context, e: MouseUpEvent) -> GameState {
     match e.mouse_btn() {
-        MouseButton::Left => {}
+        MouseButton::Left => {
+            let mut btn = ctx.button("reset").borrow_mut();
+            if btn.is_pressed() {
+                btn.set_pressed(false);
+                btn.set_released(true);
+                GameState::Reset
+            } else {
+                ctx.game_state()
+            }
+        }
         MouseButton::Middle => {
             // TODO
-            return ctx.game_state();
+            ctx.game_state()
         }
-        _ => return ctx.game_state(),
+        _ => ctx.game_state(),
     }
-
-    let mut btn = ctx.button("reset").borrow_mut();
-    btn.set_pressed(false);
-    btn.set_released(true);
-
-    GameState::Reset
 }
 
 pub fn on_mouse_leave_reset_button(ctx: &Context, _: MouseLeaveEvent) -> GameState {

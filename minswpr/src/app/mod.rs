@@ -68,6 +68,7 @@ impl Minswpr {
             .game_state(GameState::Ready)
             .board(Rc::clone(&board))
             .stopwatch(Rc::clone(&stopwatch))
+            .reset_button(Rc::clone(&reset_button))
             .layout(self.make_layout(&board, &stopwatch, &reset_button)?)
             .build()?;
 
@@ -190,6 +191,7 @@ impl Minswpr {
                             .try_into()?): Layout,
                     ))
                     .mouse_up(input::defer_mouse("control", &input::mouse_up))
+                    .mouse_down(input::defer_mouse("control", &input::mouse_down))
                     .build()?,
             ),
             (

@@ -19,7 +19,12 @@ pub struct DrawResetButton {
 
 impl Draw for DrawResetButton {
     fn draw(&mut self, ctx: &DrawContext, pos: Point) -> MsResult {
-        draw_rect!(self.dimen(), self.config.color, ctx, pos)
+        let color = if self.button.borrow().is_pressed() {
+            self.config.pressed_color
+        } else {
+            self.config.color
+        };
+        draw_rect!(self.dimen(), color, ctx, pos)
     }
 
     fn dimen(&self) -> Dimen {

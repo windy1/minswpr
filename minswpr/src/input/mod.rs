@@ -1,4 +1,5 @@
 pub mod board;
+pub mod control;
 pub mod events;
 
 use crate::layout::Element;

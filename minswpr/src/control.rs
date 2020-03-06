@@ -53,4 +53,8 @@ impl ResetButton {
     pub fn is_pressed(&self) -> bool {
         self.is_pressed
     }
+
+    pub fn set_pressed(&mut self, is_pressed: bool) {
+        self.is_pressed = is_pressed
+    }
 }

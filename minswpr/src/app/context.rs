@@ -1,4 +1,4 @@
-use super::{BoardRef, GameState, StopwatchRef};
+use super::{BoardRef, GameState, ResetButtonRef, StopwatchRef};
 use crate::config::Config;
 use crate::layout::Layout;
 use crate::math::Point;
@@ -13,6 +13,7 @@ pub struct Context {
     layout: Layout,
     board: BoardRef,
     stopwatch: StopwatchRef,
+    reset_button: ResetButtonRef,
 }
 
 impl Context {
@@ -34,6 +35,11 @@ impl Context {
     /// Returns a `RefCell` of the `Stopwatch`
     pub fn stopwatch(&self) -> &StopwatchRef {
         &self.stopwatch
+    }
+
+    /// Returns a `RefCell` of the `ResetButton`
+    pub fn reset_button(&self) -> &ResetButtonRef {
+        &self.reset_button
     }
 
     /// Returns the base `Layout`

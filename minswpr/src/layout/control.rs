@@ -1,8 +1,9 @@
 use crate::config::{ControlConfig, LedDisplayConfig};
 use crate::draw::control::{DrawLedDisplay, DrawResetButtonBuilder, LedDisplayKind};
-use crate::draw::{DrawRect, Margins};
+use crate::draw::Margins;
+use crate::input;
 use crate::layout::{Element, ElementBuilder, Layout, LayoutBuilder, Orientation};
-use crate::{BoardRef, GameState, MsResult, ResetButtonRef, StopwatchRef};
+use crate::{BoardRef, MsResult, ResetButtonRef, StopwatchRef};
 use std::convert::TryInto;
 use std::rc::Rc;
 
@@ -57,7 +58,8 @@ impl TryInto<Layout> for ControlLayout<'_> {
                             .margins(*Margins::new().left(btn_left).right(btn_right))
                             .build()?,
                     ))
-                    .mouse_up(Box::new(|_, _| GameState::Reset))
+                    .mouse_up(Box::new(input::control::on_reset_mouse_up))
+                    .mouse_down(Box::new(input::control::on_reset_mouse_down))
                     .build()?,
             ),
             (

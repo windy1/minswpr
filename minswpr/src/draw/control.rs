@@ -6,7 +6,7 @@ use crate::draw::DrawContext;
 use crate::draw::Margins;
 use crate::math::{Dimen, Point};
 use crate::utils;
-use crate::{BoardRef, ButtonRef, MsResult, ResetButtonRef, StopwatchRef};
+use crate::{BoardRef, ButtonRef, MsResult, StopwatchRef};
 use sdl2::rect::Rect;
 use std::cmp;
 

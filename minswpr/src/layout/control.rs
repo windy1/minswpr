@@ -3,7 +3,7 @@ use crate::draw::control::{DrawLedDisplay, DrawResetButtonBuilder, LedDisplayKin
 use crate::draw::Margins;
 use crate::input;
 use crate::layout::{Element, ElementBuilder, Layout, LayoutBuilder, Orientation};
-use crate::{BoardRef, ButtonRef, MsResult, ResetButtonRef, StopwatchRef};
+use crate::{BoardRef, ButtonRef, MsResult, StopwatchRef};
 use std::convert::TryInto;
 use std::rc::Rc;
 

@@ -1,9 +1,8 @@
-use crate::board::CellFlags;
 use crate::input;
 use crate::input::events::{MouseDownEvent, MouseMoveEvent, MouseUpEvent};
 use crate::math::Point;
 use crate::{Context, GameState};
-use sdl2::event::{Event, WindowEvent};
+use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::mouse::{MouseButton, MouseState};
 use sdl2::EventPump;
@@ -29,13 +28,6 @@ fn handle_event(ctx: &Context, event: Event) -> GameState {
         Event::KeyDown { keycode, .. } => match keycode {
             Some(k) => self::handle_key_down(ctx, k),
             None => ctx.game_state(),
-        },
-        Event::Window { win_event, .. } => match win_event {
-            WindowEvent::Leave => {
-                ctx.board().borrow_mut().clear_all(CellFlags::PRESSED);
-                ctx.game_state()
-            }
-            _ => ctx.game_state(),
         },
         _ => ctx.game_state(),
     }

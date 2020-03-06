@@ -24,14 +24,14 @@ mod app;
 pub mod board;
 /// Handles user configuration parsing and deserialization
 pub mod config;
+/// Defines components for the control panel above the board
+pub mod control;
 /// Handles font loading
 pub mod fonts;
 /// Implements the behavior for input events
 pub mod input;
 /// Handles the layout of the GUI
 pub mod layout;
-/// Keeps track of time for the game stopwatch
-pub mod stopwatch;
 
 pub use app::context::*;
 pub use app::*;

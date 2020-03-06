@@ -33,7 +33,7 @@ impl Board {
     pub fn new(width: usize, height: usize, num_mines: usize) -> MsResult<Self> {
         let num_cells = width * height;
 
-        if num_mines > width * height {
+        if num_mines > num_cells {
             return Err("num_mines must not exceed the area of the board".to_string());
         }
 

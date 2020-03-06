@@ -18,9 +18,9 @@ impl DrawCell<'_> {
     pub fn draw(&mut self, ctx: &DrawContext, pos: Point) -> MsResult {
         let cell = self.board.cell(self.board_pos.x, self.board_pos.y);
         if cell.contains(CellFlags::REVEALED) {
-            self.draw_revealed(*cell, ctx, pos)
+            self.draw_revealed(cell, ctx, pos)
         } else {
-            self.draw_hidden(*cell, ctx, pos)
+            self.draw_hidden(cell, ctx, pos)
         }
     }
 

@@ -67,8 +67,8 @@ impl Board {
 
     /// Returns the cell at the specified `x` and `y` position. Panics if the
     /// cell is not present
-    pub fn cell(&self, x: u32, y: u32) -> &CellFlags {
-        &self.cells[Self::index(x, y, self.width)]
+    pub fn cell(&self, x: u32, y: u32) -> CellFlags {
+        self.cells[Self::index(x, y, self.width)]
     }
 
     /// Returns the cell at the specified `x` and `y` position. Panics if the
@@ -235,7 +235,7 @@ impl Board {
 
     fn filter_neighbors<F>(&self, x: u32, y: u32, f: F) -> Vec<Point<u32>>
     where
-        F: Fn(&CellFlags) -> bool,
+        F: Fn(CellFlags) -> bool,
     {
         let neighbors = self.neighbors(x, y);
         neighbors

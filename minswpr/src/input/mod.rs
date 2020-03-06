@@ -9,7 +9,7 @@ use self::events::*;
 /// Returns an `OnMouse<E: MouseEvent>` handler that will defer `MouseUpEvent`s
 /// to the specified `Layout`'s child elements. Panics if the `Node` with
 /// `layout_id` is not a `Layout`
-pub fn defer_mouse<E, F>(layout_id: &'static str, f: &'static F) -> Box<OnMouse<E>>
+pub fn defer_mouse<E: 'static, F>(layout_id: &'static str, f: &'static F) -> Box<OnMouse<E>>
 where
     E: MouseEvent,
     F: Fn(&Element) -> Option<&OnMouse<E>>,

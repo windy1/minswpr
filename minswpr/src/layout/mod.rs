@@ -6,7 +6,7 @@ use crate::draw::{Draw, DrawContext};
 use crate::math::{Dimen, Point};
 use crate::MsResult;
 use sdl2::pixels::Color;
-use std::any;
+use std::any::TypeId;
 use std::cell::Cell;
 use std::cmp::Ordering;
 use std::collections::{hash_map, HashMap};
@@ -112,13 +112,12 @@ impl Layout {
     /// * `ctx` - The main `Context`
     /// * `handler_getter` - A function that takes an `&Element` as an argument
     ///   and returns the proper `OnMouse` handler for the event type
-    pub fn defer_mouse_event<E, F>(&self, ctx: &Context, e: E, handler_getter: F) -> GameState
+    pub fn defer_mouse_event<E: 'static, F>(&self, ctx: &Context, e: E, f: F) -> GameState
     where
         E: MouseEvent,
         F: FnOnce(&Element) -> Option<&OnMouse<E>>,
     {
-        // bit of a hack but need to handle MouseMoveEvent for hover tracking
-        let game_state = if any::type_name::<E>() == any::type_name::<MouseMoveEvent>() {
+        let game_state = if TypeId::of::<E>() == TypeId::of::<MouseMoveEvent>() {
             self.on_mouse_move(ctx, e.as_ref().downcast_ref::<MouseMoveEvent>().unwrap())
         } else {
             ctx.game_state()
@@ -126,7 +125,7 @@ impl Layout {
 
         let Point { x, y } = e.mouse_pos();
         match self.get_at(x, y) {
-            Some(n) => match handler_getter(n.elem()) {
+            Some(n) => match f(n.elem()) {
                 Some(handler) => handler(ctx, e),
                 None => game_state,
             },

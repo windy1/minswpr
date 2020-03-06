@@ -1,19 +1,21 @@
+use crate::board::Board;
 use crate::config::{ControlConfig, LedDisplayConfig};
+use crate::control::{Button, Stopwatch};
 use crate::draw::control::{DrawLedDisplay, DrawResetButtonBuilder, LedDisplayKind};
 use crate::draw::Margins;
 use crate::input;
 use crate::layout::{Element, ElementBuilder, Layout, LayoutBuilder, Orientation};
-use crate::{BoardRef, ButtonRef, MsResult, StopwatchRef};
+use crate::models::Model;
+use crate::MsResult;
 use std::convert::TryInto;
-use std::rc::Rc;
 
 #[derive(Builder)]
 pub struct ControlLayout<'a> {
     config: &'a ControlConfig,
     board_width: u32,
-    board: &'a BoardRef,
-    stopwatch: &'a StopwatchRef,
-    reset_button: &'a ButtonRef,
+    board: &'a Model<Board>,
+    stopwatch: &'a Model<Stopwatch>,
+    reset_button: &'a Model<Button>,
 }
 
 impl TryInto<Layout> for ControlLayout<'_> {
@@ -43,7 +45,7 @@ impl TryInto<Layout> for ControlLayout<'_> {
                 "flag_counter",
                 Element::new(Box::new(self::make_led_display(
                     LedDisplayKind::FlagCounter {
-                        board: Rc::clone(self.board),
+                        board: self.board.clone(),
                     },
                     &fc,
                 )?)),
@@ -54,7 +56,7 @@ impl TryInto<Layout> for ControlLayout<'_> {
                     .draw_ref(Box::new(
                         DrawResetButtonBuilder::default()
                             .config(btn_config.clone())
-                            .button(Rc::clone(&self.reset_button))
+                            .button(self.reset_button.clone())
                             .margins(*Margins::new().left(btn_left).right(btn_right))
                             .build()?,
                     ))
@@ -68,7 +70,7 @@ impl TryInto<Layout> for ControlLayout<'_> {
                 "stopwatch",
                 Element::new(Box::new(self::make_led_display(
                     LedDisplayKind::Stopwatch {
-                        stopwatch: Rc::clone(self.stopwatch),
+                        stopwatch: self.stopwatch.clone(),
                     },
                     &sw,
                 )?)),

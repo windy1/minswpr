@@ -29,13 +29,6 @@ use std::rc::Rc;
 use std::thread;
 use std::time::Duration;
 
-/// Helper type for a `Board` reference
-pub type BoardRef = Rc<RefCell<Board>>;
-/// Helper type for a `Stopwatch` reference
-pub type StopwatchRef = Rc<RefCell<Stopwatch>>;
-// Helper type for a `Button` reference
-pub type ButtonRef = Rc<RefCell<Button>>;
-
 /// The application root
 pub struct Minswpr {
     config: Config,
@@ -180,9 +173,9 @@ impl Minswpr {
                         (ControlLayoutBuilder::default()
                             .config(&cc)
                             .board_width(board_width)
-                            .board(ctx.board().as_ref())
-                            .stopwatch(ctx.stopwatch().as_ref())
-                            .reset_button(ctx.button("reset").as_ref())
+                            .board(ctx.board())
+                            .stopwatch(ctx.stopwatch())
+                            .reset_button(ctx.button("reset"))
                             .build()?
                             .try_into()?): Layout,
                     ))

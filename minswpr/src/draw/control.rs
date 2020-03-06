@@ -1,19 +1,21 @@
 use super::Draw;
+use crate::board::Board;
 use crate::config::{ButtonConfig, LedDisplayConfig};
+use crate::control::{Button, Stopwatch};
 use crate::draw::text::TextResult;
 use crate::draw::text::{self, Text};
 use crate::draw::DrawContext;
 use crate::draw::Margins;
 use crate::math::{Dimen, Point};
-use crate::utils;
-use crate::{BoardRef, ButtonRef, MsResult, StopwatchRef};
+use crate::models::Model;
+use crate::{utils, MsResult};
 use sdl2::rect::Rect;
 use std::cmp;
 
 #[derive(Builder, AsAny)]
 pub struct DrawResetButton {
     config: ButtonConfig,
-    button: ButtonRef,
+    button: Model<Button>,
     margins: Margins,
 }
 
@@ -43,8 +45,8 @@ pub struct DrawLedDisplay {
 }
 
 pub enum LedDisplayKind {
-    FlagCounter { board: BoardRef },
-    Stopwatch { stopwatch: StopwatchRef },
+    FlagCounter { board: Model<Board> },
+    Stopwatch { stopwatch: Model<Stopwatch> },
 }
 
 impl Draw for DrawLedDisplay {
@@ -69,8 +71,9 @@ impl DrawLedDisplay {
         let normal_val = |i| cmp::max(-99, cmp::min(999, i));
         text::make_text(ctx, match &self.kind {
             LedDisplayKind::FlagCounter { board } => {
-                let flags_remaining =
-                    utils::borrow_safe(&board, |b| b.num_mines() as i32 - b.count_flags() as i32);
+                let flags_remaining = utils::borrow_safe(&board.as_ref(), |b| {
+                    b.num_mines() as i32 - b.count_flags() as i32
+                });
                 Text::new(
                     normal_val(flags_remaining),
                     "control.flag_counter",

@@ -1,15 +1,12 @@
-use super::{BoardRef, ButtonRef, GameState, StopwatchRef};
+use super::GameState;
 use crate::board::Board;
 use crate::config::Config;
-use crate::control::Button;
-use crate::control::Stopwatch;
+use crate::control::{Button, Stopwatch};
 use crate::layout::Layout;
 use crate::math::Point;
 use crate::models::Model;
-use std::cell::RefCell;
 use std::cmp;
 use std::collections::HashMap;
-use std::rc::Rc;
 
 type ButtonMap = HashMap<&'static str, Model<Button>>;
 

@@ -17,39 +17,48 @@ pub(super) struct DrawCell<'a> {
 impl DrawCell<'_> {
     pub fn draw(&mut self, ctx: &DrawContext, pos: Point) -> MsResult {
         let cell = self.board.cell(self.board_pos.x, self.board_pos.y);
-        let config = &self.config;
-        let mines = &config.mines;
-        let flags = &config.flags;
-
         if cell.contains(CellFlags::REVEALED) {
-            let is_mine = cell.contains(CellFlags::MINE);
-            let fill_color = if is_mine {
-                mines.revealed_color
-            } else {
-                config.revealed_color
-            };
-            draw_rect!(self.config.dimen, fill_color, ctx, pos)?;
-
-            let adjacent_mines = self
-                .board
-                .count_adjacent_mines(self.board_pos.x, self.board_pos.y);
-
-            if is_mine {
-                self.draw_centered_rect(&ctx, pos, mines.dimen, mines.color)?;
-            } else if adjacent_mines > 0 {
-                self.draw_hint(ctx, pos, adjacent_mines)?;
-            }
+            self.draw_revealed(*cell, ctx, pos)
         } else {
-            if cell.contains(CellFlags::PRESSED) {
-                draw_rect!(self.config.dimen, self.config.pressed_color, ctx, pos)?;
-            }
+            self.draw_hidden(*cell, ctx, pos)
+        }
+    }
 
-            if cell.contains(CellFlags::FLAG) {
-                self.draw_centered_rect(&ctx, pos, flags.dimen, flags.color)?;
-            }
+    fn draw_revealed(&self, cell: CellFlags, ctx: &DrawContext, pos: Point) -> MsResult {
+        let mines = &self.config.mines;
+
+        let is_mine = cell.contains(CellFlags::MINE);
+        let fill_color = if is_mine {
+            mines.revealed_color
+        } else {
+            self.config.revealed_color
+        };
+        draw_rect!(self.config.dimen, fill_color, ctx, pos)?;
+
+        let adjacent_mines = self
+            .board
+            .count_adjacent_mines(self.board_pos.x, self.board_pos.y);
+
+        if is_mine {
+            self.draw_centered_rect(&ctx, pos, mines.dimen, mines.color)
+        } else if adjacent_mines > 0 {
+            self.draw_hint(ctx, pos, adjacent_mines)
+        } else {
+            Ok(())
+        }
+    }
+
+    fn draw_hidden(&self, cell: CellFlags, ctx: &DrawContext, pos: Point) -> MsResult {
+        if cell.contains(CellFlags::PRESSED) {
+            draw_rect!(self.config.dimen, self.config.pressed_color, ctx, pos)?;
         }
 
-        Ok(())
+        if cell.contains(CellFlags::FLAG) {
+            let flags = &self.config.flags;
+            self.draw_centered_rect(&ctx, pos, flags.dimen, flags.color)
+        } else {
+            Ok(())
+        }
     }
 
     fn draw_centered_rect(

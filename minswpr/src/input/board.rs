@@ -1,4 +1,4 @@
-use crate::board::CellFlags;
+use crate::board::{Board, CellFlags};
 use crate::math::Point;
 use crate::{Context, GameState};
 use sdl2::mouse::MouseButton;
@@ -83,17 +83,19 @@ pub fn on_mouse_move_board(ctx: &Context, e: MouseMoveEvent) -> GameState {
         return ctx.game_state();
     }
 
-    if !e.mouse_state().is_mouse_button_pressed(MouseButton::Left) {
-        // TODO: different mouse button have different effects here
-        return ctx.game_state();
-    }
-
     let Point { x, y } = e.mouse_pos();
     match ctx.get_cell_at(x, y) {
         Some(p) => {
             let mut board = ctx.board().borrow_mut();
             board.clear_all(CellFlags::PRESSED);
-            board.cell_mut(p.x, p.y).insert(CellFlags::PRESSED);
+
+            let mouse = e.mouse_state();
+            if mouse.is_mouse_button_pressed(MouseButton::Middle) {
+                self::set_board_area_pressed(&mut board, p);
+            } else if mouse.is_mouse_button_pressed(MouseButton::Left) {
+                board.cell_mut(p.x, p.y).insert(CellFlags::PRESSED);
+            }
+
             ctx.game_state()
         }
         None => ctx.game_state(),
@@ -106,23 +108,31 @@ pub fn on_mouse_down_board(ctx: &Context, e: MouseDownEvent) -> GameState {
     }
 
     let Point { x, y } = e.mouse_pos();
+    let board = || ctx.board().borrow_mut();
 
     match (ctx.get_cell_at(x, y), e.mouse_btn()) {
         (Some(p), MouseButton::Left) => {
-            // set "pressed" state
-            ctx.board()
-                .borrow_mut()
-                .cell_mut(p.x, p.y)
-                .insert(CellFlags::PRESSED);
+            board().cell_mut(p.x, p.y).insert(CellFlags::PRESSED);
             ctx.game_state()
         }
-        (Some(p), MouseButton::Middle) => ctx.game_state(),
+        (Some(p), MouseButton::Middle) => {
+            self::set_board_area_pressed(&mut board(), p);
+            ctx.game_state()
+        }
         (Some(p), MouseButton::Right) => {
-            // place flag
-            ctx.board().borrow_mut().toggle_flag(p.x, p.y);
+            board().toggle_flag(p.x, p.y);
             ctx.game_state()
         }
         _ => ctx.game_state(),
+    }
+}
+
+fn set_board_area_pressed(board: &mut Board, Point { x, y }: Point<u32>) {
+    board.cell_mut(x, y).insert(CellFlags::PRESSED);
+    for neighbor in board.neighbors(x, y) {
+        board
+            .cell_mut(neighbor.x, neighbor.y)
+            .insert(CellFlags::PRESSED);
     }
 }
 

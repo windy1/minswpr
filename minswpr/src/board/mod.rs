@@ -217,7 +217,9 @@ impl Board {
         neighbors
     }
 
-    fn neighbors(&self, x: u32, y: u32) -> Vec<Point<u32>> {
+    /// Returns a `Vec<Point<u32>>` of cell positions that are adjacent
+    /// (horizontal, vertical, diagonal) to the specified `x` and `y` positions
+    pub fn neighbors(&self, x: u32, y: u32) -> Vec<Point<u32>> {
         let x = x as i32;
         let y = y as i32;
         (x - 1..x + 2)

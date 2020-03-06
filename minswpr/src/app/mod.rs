@@ -4,21 +4,18 @@ pub use self::context::*;
 
 use self::{Context, ContextBuilder};
 use super::ModelRef;
-use crate::board::{Board, CellFlags};
+use crate::board::Board;
 use crate::config::{self, Config};
 use crate::control::{Button, Stopwatch};
 use crate::draw::board::DrawBoard;
 use crate::draw::{CanvasRef, Draw, DrawContext, DrawRect};
 use crate::fonts::Fonts;
 use crate::input;
-use crate::input::events::{MouseDownEvent, MouseMoveEvent, MouseUpEvent};
+use crate::input::events;
 use crate::layout::control::ControlLayoutBuilder;
 use crate::layout::{Element, ElementBuilder, Layout, LayoutBuilder};
 use crate::math::{Dimen, Point};
 use crate::MsResult;
-use sdl2::event::{Event, WindowEvent};
-use sdl2::keyboard::Keycode;
-use sdl2::mouse::{MouseButton, MouseState};
 use sdl2::ttf::Sdl2TtfContext;
 use sdl2::{self, EventPump, VideoSubsystem};
 use std::cell::RefCell;
@@ -85,21 +82,17 @@ impl Minswpr {
         let mut last_game_state = GameState::Unknown; // debug
 
         loop {
-            // handle input events
-            for event in self.event_pump.poll_iter() {
-                ctx.set_game_state(self::handle_event(&ctx, event));
-            }
+            events::backend::handle_events(&mut ctx, &mut self.event_pump);
 
-            // do some post-processing on the game state produced by the input events
             self.handle_game_state(&mut ctx)?;
 
-            // initialize the canvas
             draw.with_canvas(|mut c| {
                 c.set_draw_color(self.config.window.bg_color);
                 c.clear();
             });
 
             ctx.layout_mut().draw(&draw, *LAYOUT_POS)?;
+
             draw.canvas().present();
 
             // debug
@@ -248,67 +241,5 @@ pub enum GameState {
 impl Default for GameState {
     fn default() -> Self {
         Self::Unknown
-    }
-}
-
-fn handle_event(ctx: &Context, event: Event) -> GameState {
-    match event {
-        Event::Quit { .. } => GameState::Quit,
-        Event::MouseButtonUp {
-            mouse_btn, x, y, ..
-        } => self::handle_mouse_up(ctx, mouse_btn, x, y),
-        Event::MouseButtonDown {
-            mouse_btn, x, y, ..
-        } => self::handle_mouse_down(ctx, mouse_btn, x, y),
-        Event::MouseMotion {
-            mousestate, x, y, ..
-        } => self::handle_mouse_motion(ctx, mousestate, x, y),
-        Event::KeyDown { keycode, .. } => match keycode {
-            Some(k) => self::handle_key_down(ctx, k),
-            None => ctx.game_state(),
-        },
-        Event::Window { win_event, .. } => match win_event {
-            WindowEvent::Leave => {
-                ctx.board().borrow_mut().clear_all(CellFlags::PRESSED);
-                ctx.game_state()
-            }
-            _ => ctx.game_state(),
-        },
-        _ => ctx.game_state(),
-    }
-}
-
-fn handle_mouse_up(ctx: &Context, mouse_btn: MouseButton, x: i32, y: i32) -> GameState {
-    for button in ctx.buttons() {
-        button.borrow_mut().set_released(true);
-    }
-
-    ctx.layout().defer_mouse_event(
-        ctx,
-        MouseUpEvent::new(mouse_btn, point!(x, y)),
-        &input::mouse_up,
-    )
-}
-
-fn handle_mouse_down(ctx: &Context, mouse_btn: MouseButton, x: i32, y: i32) -> GameState {
-    ctx.layout().defer_mouse_event(
-        ctx,
-        MouseDownEvent::new(mouse_btn, point!(x, y)),
-        &input::mouse_down,
-    )
-}
-
-fn handle_mouse_motion(ctx: &Context, mouse_state: MouseState, x: i32, y: i32) -> GameState {
-    ctx.layout().defer_mouse_event(
-        ctx,
-        MouseMoveEvent::new(mouse_state, point!(x, y)),
-        &input::mouse_move,
-    )
-}
-
-fn handle_key_down(ctx: &Context, keycode: Keycode) -> GameState {
-    match keycode {
-        Keycode::F2 => GameState::Reset,
-        _ => ctx.game_state(),
     }
 }

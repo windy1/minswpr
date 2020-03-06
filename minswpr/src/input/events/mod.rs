@@ -1,3 +1,5 @@
+pub mod backend;
+
 use crate::math::Point;
 use crate::{Context, GameState};
 use sdl2::mouse::{MouseButton, MouseState};

@@ -49,13 +49,11 @@ impl DrawCell<'_> {
     }
 
     fn draw_hidden(&self, cell: CellFlags, ctx: &DrawContext, pos: Point) -> MsResult {
-        if cell.contains(CellFlags::PRESSED) {
-            draw_rect!(self.config.dimen, self.config.pressed_color, ctx, pos)?;
-        }
-
         if cell.contains(CellFlags::FLAG) {
             let flags = &self.config.flags;
             self.draw_centered_rect(&ctx, pos, flags.dimen, flags.color)
+        } else if cell.contains(CellFlags::PRESSED) {
+            draw_rect!(self.config.dimen, self.config.pressed_color, ctx, pos)
         } else {
             Ok(())
         }

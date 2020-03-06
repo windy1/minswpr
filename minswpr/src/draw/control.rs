@@ -44,8 +44,8 @@ pub struct DrawLedDisplay {
 }
 
 pub enum LedDisplayKind {
-    FlagCounter { board: Model<Board> },
-    Stopwatch { stopwatch: Model<Stopwatch> },
+    FlagCounter(Model<Board>),
+    Stopwatch(Model<Stopwatch>),
 }
 
 impl Draw for DrawLedDisplay {
@@ -69,7 +69,7 @@ impl DrawLedDisplay {
     fn make_text<'a>(&self, ctx: &'a DrawContext<'a>) -> TextResult<'a> {
         let normal_val = |i| cmp::max(-99, cmp::min(999, i));
         text::make_text(ctx, match &self.kind {
-            LedDisplayKind::FlagCounter { board } => {
+            LedDisplayKind::FlagCounter(board) => {
                 let flags_remaining = utils::borrow_safe(&board.as_ref(), |b| {
                     b.num_mines() as i32 - b.count_flags() as i32
                 });
@@ -79,7 +79,7 @@ impl DrawLedDisplay {
                     color!(red),
                 )
             }
-            LedDisplayKind::Stopwatch { stopwatch } => Text::new(
+            LedDisplayKind::Stopwatch(stopwatch) => Text::new(
                 normal_val(stopwatch.borrow().elapsed().as_secs() as i32),
                 "control.stopwatch",
                 color!(red),

@@ -43,9 +43,7 @@ impl TryInto<Layout> for ControlLayout<'_> {
             (
                 "flag_counter",
                 Element::new(Box::new(self::make_led_display(
-                    LedDisplayKind::FlagCounter {
-                        board: self.board.clone(),
-                    },
+                    LedDisplayKind::FlagCounter(self.board.clone()),
                     &fc,
                 )?)),
             ),
@@ -68,9 +66,7 @@ impl TryInto<Layout> for ControlLayout<'_> {
             (
                 "stopwatch",
                 Element::new(Box::new(self::make_led_display(
-                    LedDisplayKind::Stopwatch {
-                        stopwatch: self.stopwatch.clone(),
-                    },
+                    LedDisplayKind::Stopwatch(self.stopwatch.clone()),
                     &sw,
                 )?)),
             ),

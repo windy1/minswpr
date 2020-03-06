@@ -1,15 +1,13 @@
-use super::{Draw, DrawRect, Margins};
-use crate::config::{ControlConfig, LedDisplayConfig};
+use super::Draw;
+use crate::config::LedDisplayConfig;
 use crate::draw::text::TextResult;
 use crate::draw::text::{self, Text};
 use crate::draw::DrawContext;
-use crate::layout::{Element, ElementBuilder, Layout, LayoutBuilder, Orientation};
 use crate::math::{Dimen, Point};
 use crate::utils;
-use crate::{BoardRef, GameState, MsResult, StopwatchRef};
+use crate::{BoardRef, MsResult, StopwatchRef};
 use sdl2::rect::Rect;
 use std::cmp;
-use std::rc::Rc;
 
 #[derive(new, AsAny)]
 pub struct DrawLedDisplay {
@@ -64,74 +62,4 @@ impl DrawLedDisplay {
             ),
         })
     }
-}
-
-pub fn make_layout(
-    config: &ControlConfig,
-    board_width: u32,
-    board: &BoardRef,
-    stopwatch: &StopwatchRef,
-) -> MsResult<Layout> {
-    let p = config.padding;
-
-    let mut layout = LayoutBuilder::default()
-        .color(config.color)
-        .padding(p)
-        .orientation(Orientation::Horizontal)
-        .build()?;
-
-    let btn_dimen = config.reset_button_dimen;
-    let w = board_width;
-    let btn_width = btn_dimen.width();
-    let fc = &config.flag_counter;
-    let sw = &config.stopwatch;
-
-    let btn_left = w / 2 - btn_width / 2 - fc.dimen.width() - p - fc.padding * 2;
-    let btn_right = w / 2 - btn_width / 2 - sw.dimen.width() - p - sw.padding * 2;
-
-    layout.insert_all(vec![
-        (
-            "flag_counter",
-            Element::new(Box::new(self::make_led_display(
-                LedDisplayKind::FlagCounter {
-                    board: Rc::clone(board),
-                },
-                &fc,
-            )?)),
-        ),
-        (
-            "reset_button",
-            ElementBuilder::default()
-                .draw_ref(Box::new(DrawRect::with_margins(
-                    btn_dimen,
-                    config.reset_button_color,
-                    *Margins::new().left(btn_left).right(btn_right),
-                )))
-                .mouse_up(Box::new(|_, _| GameState::Reset))
-                .build()?,
-        ),
-        (
-            "stopwatch",
-            Element::new(Box::new(self::make_led_display(
-                LedDisplayKind::Stopwatch {
-                    stopwatch: Rc::clone(stopwatch),
-                },
-                &sw,
-            )?)),
-        ),
-    ]);
-
-    Ok(layout)
-}
-
-fn make_led_display(kind: LedDisplayKind, config: &LedDisplayConfig) -> MsResult<Layout> {
-    let mut layout = LayoutBuilder::default()
-        .color(config.color)
-        .padding(config.padding)
-        .build()?;
-
-    let text = Element::new(Box::new(DrawLedDisplay::new(kind, config.clone())));
-    layout.insert("text", 0, text);
-
-    Ok(layout)
 }

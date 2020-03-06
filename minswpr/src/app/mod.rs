@@ -9,9 +9,9 @@ use crate::board::{Board, CellFlags};
 use crate::config::{self, Config};
 use crate::control::{ResetButton, Stopwatch};
 use crate::draw::board::DrawBoard;
-use crate::draw::control;
 use crate::draw::{CanvasRef, Draw, DrawContext, DrawRect};
 use crate::fonts::Fonts;
+use crate::layout::control::ControlLayoutBuilder;
 use crate::layout::{Element, ElementBuilder, Layout, LayoutBuilder};
 use crate::math::{Dimen, Point};
 use crate::MsResult;
@@ -21,6 +21,7 @@ use sdl2::mouse::{MouseButton, MouseState};
 use sdl2::ttf::Sdl2TtfContext;
 use sdl2::{self, EventPump, VideoSubsystem};
 use std::cell::RefCell;
+use std::convert::TryInto;
 use std::path::Path;
 use std::process;
 use std::rc::Rc;
@@ -172,12 +173,15 @@ impl Minswpr {
             (
                 "control",
                 ElementBuilder::default()
-                    .draw_ref(Box::new(control::make_layout(
-                        &cc,
-                        board_width,
-                        &board,
-                        &stopwatch,
-                    )?))
+                    .draw_ref(Box::new(
+                        (ControlLayoutBuilder::default()
+                            .config(&cc)
+                            .board_width(board_width)
+                            .board(&board)
+                            .stopwatch(&stopwatch)
+                            .build()?
+                            .try_into()?): Layout,
+                    ))
                     .mouse_up(input::defer_mouse("control", &input::mouse_up))
                     .build()?,
             ),

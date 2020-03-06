@@ -1,3 +1,5 @@
+pub mod control;
+
 use crate::app::context::Context;
 use crate::app::GameState;
 use crate::draw::{Draw, DrawContext};

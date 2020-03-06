@@ -7,7 +7,7 @@ use super::input;
 use super::input::events::{MouseDownEvent, MouseMoveEvent, MouseUpEvent};
 use crate::board::{Board, CellFlags};
 use crate::config::{self, Config};
-use crate::control::Stopwatch;
+use crate::control::{ResetButton, Stopwatch};
 use crate::draw::board::DrawBoard;
 use crate::draw::control;
 use crate::draw::{CanvasRef, Draw, DrawContext, DrawRect};
@@ -31,6 +31,8 @@ use std::time::Duration;
 pub type BoardRef = Rc<RefCell<Board>>;
 /// Helper type for a `Stopwatch` reference
 pub type StopwatchRef = Rc<RefCell<Stopwatch>>;
+// Helper type for a `ResetButton` reference
+pub type ResetButtonRef = Rc<RefCell<ResetButton>>;
 
 /// The application root
 pub struct Minswpr {

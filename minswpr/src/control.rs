@@ -42,3 +42,15 @@ impl Stopwatch {
             .unwrap_or_else(|| self.elapsed_final)
     }
 }
+
+#[derive(new)]
+pub struct ResetButton {
+    #[new(default)]
+    is_pressed: bool,
+}
+
+impl ResetButton {
+    pub fn is_pressed(&self) -> bool {
+        self.is_pressed
+    }
+}

@@ -7,6 +7,7 @@ use std::num::TryFromIntError;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 /// Creates a new `Point` with `x` and `y`
+#[macro_export]
 macro_rules! point {
     ($x:expr, $y:expr) => {
         Point::new($x, $y)

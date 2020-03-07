@@ -38,8 +38,8 @@ color = "#000000"
 padding = 1
 
 [board]
-dimen = { x = 9, y = 9 }
-num_mines = 10
+dimen = { x = 16, y = 16 }
+num_mines = 40
 
 [board.cells]
 dimen = { x = 15, y = 15 }

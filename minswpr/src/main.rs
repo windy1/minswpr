@@ -29,8 +29,12 @@ fn main() -> MsResult {
     Minswpr::new(config)?.start()
 }
 
-/// A clone of Microsoft's classic Minesweeper, because why not
+/// A clone of Microsoft's classic Minesweeper, because why not?
 #[derive(Clap)]
+#[clap(
+    version = "0.1.0",
+    author = "Walker J. Crouse <walkercrouse@hotmail.com>"
+)]
 struct Opts {
     #[clap(long = "config")]
     config: Option<String>,

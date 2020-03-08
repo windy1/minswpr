@@ -56,7 +56,7 @@ checksum = "4785bdd1c96b2a846b2bd7cc02e86b6b3dbf14e7e53446c4f54c92a361040822"
 [[package]]
 name = "clap"
 version = "3.0.0-beta.1"
-source = "git+https://github.com/clap-rs/clap/#19c20f7c00310900ce6667baedfe1190e20eeeab"
+source = "git+https://github.com/clap-rs/clap/#23706657fca033845bc5b8c0b74fb06fb96e780c"
 dependencies = [
  "ansi_term",
  "atty",
@@ -73,7 +73,7 @@ dependencies = [
 [[package]]
 name = "clap_derive"
 version = "3.0.0-beta.1"
-source = "git+https://github.com/clap-rs/clap/#19c20f7c00310900ce6667baedfe1190e20eeeab"
+source = "git+https://github.com/clap-rs/clap/#23706657fca033845bc5b8c0b74fb06fb96e780c"
 dependencies = [
  "heck",
  "proc-macro-error",

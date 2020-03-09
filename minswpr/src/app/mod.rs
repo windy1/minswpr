@@ -64,10 +64,10 @@ impl Minswpr {
 
         let fonts = Fonts::from_config(&self.config.fonts, &self.ttf)?;
 
-        let draw = {
+        let mut draw = {
             let canvas = self.make_canvas(ctx.layout().dimen())?;
             let textures = canvas.borrow().texture_creator();
-            DrawContext::new(canvas, &fonts, textures)
+            DrawContext::new(canvas, &fonts, textures, ctx.game_state())
         };
 
         draw.with_canvas(|mut c| {
@@ -91,6 +91,7 @@ impl Minswpr {
                 c.clear();
             });
 
+            draw.set_game_state(ctx.game_state());
             ctx.layout_mut().draw(&draw, *LAYOUT_POS)?;
 
             draw.canvas().present();

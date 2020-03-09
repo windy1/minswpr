@@ -11,7 +11,7 @@ pub mod text;
 
 use crate::fonts::Fonts;
 use crate::math::{Dimen, Point};
-use crate::MsResult;
+use crate::{GameState, MsResult};
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::{TextureCreator, WindowCanvas};
@@ -45,6 +45,7 @@ pub struct DrawContext<'a> {
     canvas: CanvasRef,
     fonts: &'a Fonts<'a>,
     textures: Textures,
+    game_state: GameState,
 }
 
 impl DrawContext<'_> {
@@ -70,6 +71,14 @@ impl DrawContext<'_> {
     /// Returns a reference to the `TextureCreator`
     pub fn textures(&self) -> &Textures {
         &self.textures
+    }
+
+    pub fn game_state(&self) -> GameState {
+        self.game_state
+    }
+
+    pub fn set_game_state(&mut self, game_state: GameState) {
+        self.game_state = game_state
     }
 }
 

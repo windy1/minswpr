@@ -7,6 +7,7 @@ use crate::draw::text::{self, Text};
 use crate::draw::DrawContext;
 use crate::draw::Margins;
 use crate::math::{Dimen, Point};
+use crate::GameState;
 use crate::{utils, ModelRef, MsResult};
 use sdl2::rect::Rect;
 use std::cmp;
@@ -21,10 +22,10 @@ pub struct DrawResetButton {
 impl Draw for DrawResetButton {
     fn draw(&mut self, ctx: &DrawContext, pos: Point) -> MsResult {
         let btn = &self.config.button;
-        let color = if self.button.borrow().is_pressed() {
-            btn.pressed_color
-        } else {
-            btn.color
+        let color = match (self.button.borrow().is_pressed(), ctx.game_state()) {
+            (true, _) => btn.pressed_color,
+            (_, GameState::Over) => self.config.game_over_color,
+            _ => btn.color,
         };
         draw_rect!(self.dimen(), color, ctx, pos)
     }

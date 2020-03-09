@@ -75,6 +75,8 @@ pub struct LedDisplayConfig {
     #[serde(deserialize_with = "read_color")]
     pub color: Color,
     pub padding: u32,
+    #[serde(deserialize_with = "read_color")]
+    pub text_color: Color,
 }
 
 /// `Board` specific values

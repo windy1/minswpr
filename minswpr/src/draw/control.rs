@@ -71,6 +71,7 @@ impl DrawLedDisplay {
 
     fn make_text<'a>(&self, ctx: &'a DrawContext<'a>) -> TextResult<'a> {
         let normal_val = |i| cmp::max(Self::MIN_VALUE, cmp::min(Self::MAX_VALUE, i));
+        let text_color = self.config.text_color;
         text::make_text(ctx, match &self.kind {
             LedDisplayKind::FlagCounter(board) => {
                 let flags_remaining = utils::borrow_safe(&board.as_ref(), |b| {
@@ -79,13 +80,13 @@ impl DrawLedDisplay {
                 Text::new(
                     normal_val(flags_remaining),
                     "control.flag_counter",
-                    color!(red),
+                    text_color,
                 )
             }
             LedDisplayKind::Stopwatch(stopwatch) => Text::new(
                 normal_val(stopwatch.borrow().elapsed().as_secs() as i32),
                 "control.stopwatch",
-                color!(red),
+                text_color,
             ),
         })
     }

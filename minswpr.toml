@@ -11,7 +11,7 @@ bg_color = "#ffffff"
 [layout]
 padding = 5
 color = "#000000"
-guides = true
+guides = false
 
 [control]
 height = 35
@@ -26,12 +26,16 @@ color = "#ffff00"
 pressed_color = "#4269f5"
 
 [control.flag_counter]
-dimen = {x = 40, y = 25 }
+dimen = { x = 40, y = 25 }
 color = "#000000"
+padding = 1
+text_color = "#ff0000"
 
 [control.stopwatch]
-dimen = {x = 40, y = 25 }
+dimen = { x = 40, y = 25 }
 color = "#000000"
+padding = 1
+text_color = "#ff0000"
 
 [board]
 dimen = { x = 9, y = 9 }
@@ -40,6 +44,7 @@ num_mines = 10
 [board.cells]
 dimen = { x = 15, y = 15 }
 color = "#c0c0c0"
+pressed_color = "#4269f5"
 border_width = 1
 border_color = "#000000"
 revealed_color = "#4269f5"

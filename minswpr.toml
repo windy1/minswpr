@@ -43,6 +43,7 @@ color = "#c0c0c0"
 border_width = 1
 border_color = "#000000"
 revealed_color = "#4269f5"
+text_color = "#00ff00"
 
 [board.cells.mines]
 color = "#000000"

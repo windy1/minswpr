@@ -72,7 +72,7 @@ impl DrawCell<'_> {
     }
 
     fn draw_hint(&self, ctx: &DrawContext, pos: Point, hint: usize) -> MsResult {
-        let text = text::make_text(ctx, Text::new(hint, "board.cell", color!(green)))?;
+        let text = text::make_text(ctx, Text::new(hint, "board.cell", self.config.text_color))?;
         let tq = text.query();
 
         let cell_dimen = &self.config.dimen.as_i32();

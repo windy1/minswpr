@@ -98,6 +98,8 @@ pub struct CellConfig {
     pub border_color: Color,
     #[serde(deserialize_with = "read_color")]
     pub revealed_color: Color,
+    #[serde(deserialize_with = "read_color")]
+    pub text_color: Color,
     pub mines: MinesConfig,
     pub flags: FlagsConfig,
 }

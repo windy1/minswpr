@@ -1,6 +1,6 @@
 use crate::board::CellFlags;
 use crate::math::Point;
-use crate::{Context, GameState};
+use crate::{utils, Context, GameState};
 use sdl2::mouse::MouseButton;
 
 use super::events::*;
@@ -22,11 +22,11 @@ pub fn on_click_board(ctx: &Context, e: MouseUpEvent) -> GameState {
     let game_state = ctx.game_state();
 
     // if the current game is over, freeze the board
-    if let GameState::Over = game_state {
+    if let GameState::Over(_) = game_state {
         return game_state;
     }
 
-    match ctx.get_cell_at(x, y) {
+    self::check_did_win(ctx, match ctx.get_cell_at(x, y) {
         Some(p) => {
             let cell_pressed = ctx
                 .board()
@@ -53,6 +53,29 @@ pub fn on_click_board(ctx: &Context, e: MouseUpEvent) -> GameState {
             }
         }
         None => game_state,
+    })
+}
+
+fn check_did_win(ctx: &Context, game_state: GameState) -> GameState {
+    if let GameState::Over(_) = ctx.game_state() {
+        return game_state;
+    }
+
+    let (did_win, remaining) = utils::borrow_safe(ctx.board().as_ref(), |b| {
+        let r = b.remaining_cells();
+        (r.len() == b.num_mines(), r)
+    });
+
+    if did_win {
+        for Point { x, y } in remaining {
+            ctx.board()
+                .borrow_mut()
+                .cell_mut(x, y)
+                .insert(CellFlags::FLAG);
+        }
+        GameState::Over(true)
+    } else {
+        game_state
     }
 }
 
@@ -65,7 +88,7 @@ fn on_left_click_cell(
     let num_revealed = board.reveal_from(x, y);
     if num_revealed > 0 && board.cell(x, y).contains(CellFlags::MINE) {
         // hit a mine :(
-        GameState::Over
+        GameState::Over(false)
     } else {
         game_state
     }
@@ -83,14 +106,14 @@ fn on_middle_click_cell(
         .filter(|p| board.cell(p.x, p.y).contains(CellFlags::MINE))
         .count();
     if mines_revealed > 0 {
-        GameState::Over
+        GameState::Over(false)
     } else {
         game_state
     }
 }
 
 pub fn on_mouse_move_board(ctx: &Context, e: MouseMoveEvent) -> GameState {
-    if let GameState::Over = ctx.game_state() {
+    if let GameState::Over(_) = ctx.game_state() {
         return ctx.game_state();
     }
 
@@ -123,7 +146,7 @@ pub fn on_mouse_move_board(ctx: &Context, e: MouseMoveEvent) -> GameState {
 
 pub fn on_mouse_down_board(ctx: &Context, e: MouseDownEvent) -> GameState {
     // board is frozen after game ends
-    if let GameState::Over = ctx.game_state() {
+    if let GameState::Over(_) = ctx.game_state() {
         return ctx.game_state();
     }
 

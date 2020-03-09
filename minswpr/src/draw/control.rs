@@ -24,7 +24,8 @@ impl Draw for DrawResetButton {
         let btn = &self.config.button;
         let color = match (self.button.borrow().is_pressed(), ctx.game_state()) {
             (true, _) => btn.pressed_color,
-            (_, GameState::Over) => self.config.game_over_color,
+            (_, GameState::Over(false)) => self.config.game_over_color,
+            (_, GameState::Over(true)) => self.config.win_color,
             _ => btn.color,
         };
         draw_rect!(self.dimen(), color, ctx, pos)

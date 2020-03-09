@@ -127,9 +127,9 @@ impl Minswpr {
                 ctx.stopwatch().borrow_mut().start();
                 GameState::Started
             }
-            GameState::Over => {
+            GameState::Over(s) => {
                 ctx.stopwatch().borrow_mut().stop();
-                GameState::Over
+                GameState::Over(s)
             }
             _ => ctx.game_state(),
         });
@@ -234,7 +234,7 @@ pub enum GameState {
     Ready,
     Start,
     Started,
-    Over,
+    Over(bool),
     Reset,
     Quit,
 }

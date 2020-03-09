@@ -133,6 +133,15 @@ impl Board {
             .len()
     }
 
+    pub fn remaining_cells(&self) -> Vec<Point<u32>> {
+        (0..self.width)
+            .cartesian_product(0..self.height)
+            .map(|(x, y)| (x as u32, y as u32))
+            .filter(|(x, y)| !self.cell(*x, *y).contains(CellFlags::REVEALED))
+            .map(Point::from)
+            .collect()
+    }
+
     /// Recursively reveals cells on the board from the specified `x` abd `y`
     /// position. This method reveals cells starting with the positions
     /// neighbors, expanding outwards until a mine or a cell with no adjacent

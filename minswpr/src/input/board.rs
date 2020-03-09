@@ -26,34 +26,36 @@ pub fn on_click_board(ctx: &Context, e: MouseUpEvent) -> GameState {
         return game_state;
     }
 
-    self::check_did_win(ctx, match ctx.get_cell_at(x, y) {
+    match ctx.get_cell_at(x, y) {
         Some(p) => {
-            let cell_pressed = ctx
-                .board()
-                .borrow()
-                .cell(p.x, p.y)
-                .contains(CellFlags::PRESSED);
+            self::check_did_win(ctx, {
+                let cell_pressed = ctx
+                    .board()
+                    .borrow()
+                    .cell(p.x, p.y)
+                    .contains(CellFlags::PRESSED);
 
-            // if the cell was not previously pressed, ignore this event
-            if !cell_pressed {
-                return game_state;
-            }
+                // if the cell was not previously pressed, ignore this event
+                if !cell_pressed {
+                    return game_state;
+                }
 
-            // start the game when the first cell of a fresh board is clicked
-            let game_state = if let GameState::Ready = game_state {
-                GameState::Start
-            } else {
-                game_state
-            };
+                // start the game when the first cell of a fresh board is clicked
+                let game_state = if let GameState::Ready = game_state {
+                    GameState::Start
+                } else {
+                    game_state
+                };
 
-            match &e.mouse_btn() {
-                MouseButton::Left => self::on_left_click_cell(ctx, p, game_state),
-                MouseButton::Middle => self::on_middle_click_cell(ctx, p, game_state),
-                _ => game_state,
-            }
+                match &e.mouse_btn() {
+                    MouseButton::Left => self::on_left_click_cell(ctx, p, game_state),
+                    MouseButton::Middle => self::on_middle_click_cell(ctx, p, game_state),
+                    _ => game_state,
+                }
+            })
         }
         None => game_state,
-    })
+    }
 }
 
 fn check_did_win(ctx: &Context, game_state: GameState) -> GameState {

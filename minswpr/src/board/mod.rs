@@ -133,6 +133,8 @@ impl Board {
             .len()
     }
 
+    /// Returns a `Vec<Point<u32>>` of cell positions that do not contain
+    /// `CellFlags::REVEALED`
     pub fn remaining_cells(&self) -> Vec<Point<u32>> {
         (0..self.width)
             .cartesian_product(0..self.height)

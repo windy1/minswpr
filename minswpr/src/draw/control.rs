@@ -1,6 +1,6 @@
 use super::Draw;
 use crate::board::Board;
-use crate::config::{ButtonConfig, LedDisplayConfig};
+use crate::config::{LedDisplayConfig, ResetButtonConfig};
 use crate::control::{Button, Stopwatch};
 use crate::draw::text::TextResult;
 use crate::draw::text::{self, Text};
@@ -13,23 +13,24 @@ use std::cmp;
 
 #[derive(Builder, AsAny)]
 pub struct DrawResetButton {
-    config: ButtonConfig,
+    config: ResetButtonConfig,
     button: ModelRef<Button>,
     margins: Margins,
 }
 
 impl Draw for DrawResetButton {
     fn draw(&mut self, ctx: &DrawContext, pos: Point) -> MsResult {
+        let btn = &self.config.button;
         let color = if self.button.borrow().is_pressed() {
-            self.config.pressed_color
+            btn.pressed_color
         } else {
-            self.config.color
+            btn.color
         };
         draw_rect!(self.dimen(), color, ctx, pos)
     }
 
     fn dimen(&self) -> Dimen {
-        self.config.dimen
+        self.config.button.dimen
     }
 
     fn margins(&self) -> Margins {

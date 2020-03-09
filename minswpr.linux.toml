@@ -21,6 +21,10 @@ color = "#c0c0c0"
 padding = 5
 
 [control.reset_button]
+game_over_color = "#ff0000"
+win_color = "#00ff00"
+
+[control.reset_button.button]
 dimen = { x = 25, y = 25 }
 color = "#ffff00"
 pressed_color = "#4269f5"

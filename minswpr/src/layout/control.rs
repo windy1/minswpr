@@ -30,7 +30,7 @@ impl TryInto<Layout> for ControlLayout<'_> {
             .build()?;
 
         let btn_config = &self.config.reset_button;
-        let btn_dimen = btn_config.dimen;
+        let btn_dimen = btn_config.button.dimen;
         let w = self.board_width;
         let btn_width = btn_dimen.width();
         let fc = &self.config.flag_counter;

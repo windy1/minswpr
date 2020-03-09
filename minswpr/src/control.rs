@@ -1,5 +1,4 @@
-use std::time::Duration;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 /// Tracks the elapsed time during an active game
 #[derive(new, Default)]

@@ -30,3 +30,16 @@ $ cargo install --git https://github.com/windy1/minswpr
 ```
 $ minswpr --help
 ```
+
+## Quickstart
+
+```rust
+```rust
+use minswpr::config;
+use minswpr::Minswpr;
+
+fn main() -> Result<(), String> {
+    let config = config::read_config(config::resolve()?)?;
+    Minswpr::new(config)?.start()
+}
+```

@@ -1,5 +1,23 @@
 #![feature(type_ascription)]
 
+//! # minswpr
+//!
+//! minswpr is a minimally implemented clone of Microsoft's classic
+//! Minesweeper that has stolen the hearts of countless procrastinators
+//! throughout the years
+//!
+//! ## Quickstart
+//!
+//! ```no_run
+//! use minswpr::config;
+//! use minswpr::Minswpr;
+//!
+//! fn main() -> Result<(), String> {
+//!     let config = config::read_config(config::resolve()?)?;
+//!     Minswpr::new(config)?.start()
+//! }
+//! ```
+
 #[macro_use]
 extern crate minswpr_derive;
 #[macro_use]

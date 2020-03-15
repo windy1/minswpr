@@ -1,7 +1,7 @@
 /// Helper macro for quickly creating common `Color` values
 ///
 /// # Example
-/// ```rust
+/// ```
 /// use sdl2::pixels::Color;
 ///
 /// assert_eq!(color!(red), Color::RGB(255, 0, 0));

@@ -36,12 +36,17 @@ fn main() -> MsResult {
     author = "Walker J. Crouse <walkercrouse@hotmail.com>"
 )]
 struct Opts {
+    /// Path to the configuration file to use, resolved automatically if not
+    /// specified
     #[clap(long = "config")]
     config: Option<String>,
+    /// The cell-width of the board (overrides config)
     #[clap(short = "w", long = "width")]
     width: Option<usize>,
+    /// The cell-height of the board (overrides config)
     #[clap(short = "h", long = "height")]
     height: Option<usize>,
+    /// The amount of mines to place on the board (overrides config)
     #[clap(short = "m", long = "num-mines")]
     num_mines: Option<usize>,
 }

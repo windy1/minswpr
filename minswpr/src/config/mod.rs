@@ -1,3 +1,6 @@
+/// Pre-defined difficulties present in the original version
+pub mod difficulties;
+
 use crate::math::{self, Dimen};
 use crate::MsResult;
 use sdl2::pixels::Color;

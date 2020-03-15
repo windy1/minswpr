@@ -28,6 +28,8 @@ extern crate derive_builder;
 extern crate derive_new;
 #[macro_use]
 extern crate lazy_static;
+#[macro_use]
+extern crate maplit;
 
 /// Contains misc. math functions and structures
 #[macro_use]

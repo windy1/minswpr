@@ -34,7 +34,6 @@ $ minswpr --help
 ## Quickstart
 
 ```rust
-```rust
 use minswpr::config;
 use minswpr::Minswpr;
 

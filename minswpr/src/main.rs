@@ -1,7 +1,8 @@
 use clap::Clap;
 use minswpr::config::{self, difficulties};
-use minswpr::math::{Dimen, Point};
-use minswpr::{point, Minswpr, MsResult};
+use reba::math::{Dimen, Point};
+use reba::point;
+use minswpr::{Minswpr, MsResult};
 use std::path::PathBuf;
 
 fn main() -> MsResult {

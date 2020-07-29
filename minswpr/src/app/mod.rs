@@ -9,13 +9,14 @@ use crate::config::{self, Config};
 use crate::control::{Button, Stopwatch};
 use crate::draw::board::DrawBoard;
 use crate::draw::{CanvasRef, Draw, DrawContext, DrawRect};
-use crate::fonts::Fonts;
 use crate::input;
 use crate::input::events;
 use crate::layout::control::ControlLayoutBuilder;
 use crate::layout::{Element, ElementBuilder, Layout, LayoutBuilder};
-use crate::math::{Dimen, Point};
 use crate::MsResult;
+use reba::app::{App, Window};
+use reba::fonts::{Fonts, FontData};
+use reba::math::{Dimen, Point};
 use sdl2::ttf::Sdl2TtfContext;
 use sdl2::{self, EventPump, VideoSubsystem};
 use std::cell::RefCell;
@@ -25,6 +26,26 @@ use std::process;
 use std::rc::Rc;
 use std::thread;
 use std::time::Duration;
+use std::collections::VecDeque;
+use config::FontsConfig;
+
+pub struct Minswprx {
+    font_bus: VecDeque<FontData>,
+}
+
+impl App for Minswprx {
+    fn font_bus(&self) -> &VecDeque<FontData> {
+        &self.font_bus
+    }
+
+    fn font_bus_mut(&mut self) -> &mut VecDeque<FontData> {
+        &mut self.font_bus
+    }
+
+    fn window(&self) -> Window {
+        Window::new("test".to_string(), point!(900, 600), color!(red))
+    }
+}
 
 /// The application root
 pub struct Minswpr {
@@ -62,7 +83,11 @@ impl Minswpr {
 
         ctx.set_layout(self.make_layout(&ctx)?);
 
-        let fonts = Fonts::from_config(&self.config.fonts, &self.ttf)?;
+        let fonts = {
+            let mut f = Fonts::new(&self.ttf);
+            Minswpr::load_fonts(&self.config.fonts, &mut f)?;
+            f
+        };
 
         let mut draw = {
             let canvas = self.make_canvas(ctx.layout().dimen())?;
@@ -134,6 +159,13 @@ impl Minswpr {
             _ => ctx.game_state(),
         });
 
+        Ok(())
+    }
+
+    fn load_fonts(config: &FontsConfig, fonts: &mut Fonts) -> MsResult {
+        for (k, f) in config {
+            fonts.load(k, &f.path, f.pt)?;
+        }
         Ok(())
     }
 

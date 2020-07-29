@@ -1,0 +1,14 @@
+[package]
+name = "reba"
+version = "0.1.0"
+authors = ["Walker Crouse <Walker.Crouse@bjss.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rand = "^0.7.3"
+sdl2 = { version = "^0.33.0", features = ["ttf"] }
+serde = { version = "^1.0.104", features = ["derive"] }
+derive_builder = "^0.9.0"
+derive-new = "^0.5.8"

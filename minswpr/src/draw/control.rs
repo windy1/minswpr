@@ -6,9 +6,9 @@ use crate::draw::text::TextResult;
 use crate::draw::text::{self, Text};
 use crate::draw::DrawContext;
 use crate::draw::Margins;
-use crate::math::{Dimen, Point};
 use crate::GameState;
 use crate::{utils, ModelRef, MsResult};
+use reba::math::{Dimen, Point};
 use sdl2::rect::Rect;
 use std::cmp;
 

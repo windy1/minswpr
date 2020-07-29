@@ -1,12 +1,17 @@
-use crate::config::FontsConfig;
-use crate::MsResult;
+use crate::RebaResult;
 use sdl2::ttf::Font;
 use sdl2::ttf::Sdl2TtfContext;
 use std::collections::HashMap;
 use std::ops::Index;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 type FontMap<'a> = HashMap<String, Font<'a, 'a>>;
+
+pub struct FontData {
+    pub key: String,
+    pub fname: PathBuf,
+    pub size: u16
+}
 
 /// Handles font loading and storage
 #[derive(new)]
@@ -17,22 +22,13 @@ pub struct Fonts<'a> {
 }
 
 impl<'a> Fonts<'a> {
-    /// Creates a new Fonts and loads the fonts from the specified `FontsConfig`
-    pub fn from_config(config: &FontsConfig, ttf: &'a Sdl2TtfContext) -> MsResult<Self> {
-        let mut font_map = FontMap::new();
-        for (k, f) in config {
-            font_map.insert(k.to_string(), ttf.load_font(&f.path, f.pt)?);
-        }
-        Ok(Fonts { ttf, font_map })
-    }
-
     /// Loads a new font from the specified `Path` with the specified size.
     ///
     /// # Arguments
     /// * `key` - Unique identifier of font
     /// * `fname` - Path to TTF file
     /// * `pt` - Font point size
-    pub fn load(&mut self, key: &str, fname: &Path, size: u16) -> MsResult {
+    pub fn load(&mut self, key: &str, fname: &Path, size: u16) -> RebaResult {
         self.font_map
             .insert(key.to_string(), self.ttf.load_font(fname, size)?);
         Ok(())

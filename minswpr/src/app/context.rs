@@ -2,8 +2,8 @@ use crate::board::Board;
 use crate::config::Config;
 use crate::control::{Button, Stopwatch};
 use crate::layout::Layout;
-use crate::math::Point;
 use crate::{GameState, ModelRef};
+use reba::math::Point;
 use std::cmp;
 use std::collections::HashMap;
 

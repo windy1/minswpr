@@ -3,7 +3,7 @@ pub mod control;
 use crate::app::context::Context;
 use crate::app::GameState;
 use crate::draw::{Draw, DrawContext};
-use crate::math::{Dimen, Point};
+use reba::math::{Dimen, Point};
 use crate::MsResult;
 use sdl2::pixels::Color;
 use std::any::TypeId;

@@ -9,9 +9,9 @@ pub mod control;
 /// Implements text rendering
 pub mod text;
 
-use crate::fonts::Fonts;
-use crate::math::{Dimen, Point};
 use crate::{GameState, MsResult};
+use reba::fonts::Fonts;
+use reba::math::{Dimen, Point};
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::{TextureCreator, WindowCanvas};

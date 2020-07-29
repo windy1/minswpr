@@ -2,7 +2,7 @@ use crate::board::{Board, CellFlags};
 use crate::config::CellConfig;
 use crate::draw::text::{self, Text};
 use crate::draw::{Draw, DrawContext};
-use crate::math::{Dimen, Point};
+use reba::math::{Dimen, Point};
 use crate::MsResult;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;

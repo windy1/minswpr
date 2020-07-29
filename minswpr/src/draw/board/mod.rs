@@ -4,8 +4,8 @@ use self::cell::DrawCellBuilder;
 use super::{Draw, DrawContext};
 use crate::board::Board;
 use crate::config::CellConfig;
-use crate::math::{Dimen, Point};
 use crate::{utils, ModelRef, MsResult};
+use reba::math::{Dimen, Point};
 use sdl2::rect::Rect;
 
 #[derive(AsAny)]

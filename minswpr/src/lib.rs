@@ -30,10 +30,9 @@ extern crate derive_new;
 extern crate lazy_static;
 #[macro_use]
 extern crate maplit;
-
-/// Contains misc. math functions and structures
 #[macro_use]
-pub mod math;
+extern crate reba;
+
 /// Contains the basic components necessary to draw to the canvas
 #[macro_use]
 pub mod draw;
@@ -47,8 +46,6 @@ pub mod board;
 pub mod config;
 /// Defines components for the control panel above the board
 pub mod control;
-/// Handles font loading
-pub mod fonts;
 /// Implements the behavior for input events
 pub mod input;
 /// Handles the layout of the GUI

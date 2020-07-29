@@ -5,6 +5,7 @@ authors = ["Walker Crouse <Walker.Crouse@bjss.com>"]
 edition = "2018"
 
 [dependencies]
+reba = { path = "../reba" }
 minswpr_derive = { path = "../minswpr_derive" }
 sdl2 = { version = "^0.33.0", features = ["ttf"] }
 bitflags = "^1.2.1"

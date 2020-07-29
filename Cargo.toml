@@ -1,2 +1,2 @@
 [workspace]
-members = ["minswpr", "minswpr_derive"]
+members = ["reba", "minswpr", "minswpr_derive"]

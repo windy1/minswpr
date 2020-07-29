@@ -1,6 +1,6 @@
 use crate::board::CellFlags;
-use crate::math::Point;
 use crate::{utils, Context, GameState};
+use reba::math::Point;
 use sdl2::mouse::MouseButton;
 
 use super::events::*;

@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests;
 
-use crate::math::{self, Point};
+use reba::math::{self, Point};
 use crate::MsResult;
 use itertools::Itertools;
 

@@ -1,8 +1,8 @@
 /// Pre-defined difficulties present in the original version
 pub mod difficulties;
 
-use crate::math::{self, Dimen};
 use crate::MsResult;
+use reba::math::{self, Dimen};
 use sdl2::pixels::Color;
 use serde::de::{self, Visitor};
 use serde::{Deserialize, Deserializer};

@@ -1,6 +1,6 @@
 use crate::config::Config;
-use crate::math::{Dimen, Point};
 use crate::MsResult;
+use reba::math::{Dimen, Point};
 use std::collections::HashMap;
 
 /// A `&'static str` array of all difficulties

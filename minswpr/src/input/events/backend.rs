@@ -1,7 +1,7 @@
 use crate::input;
 use crate::input::events::{MouseDownEvent, MouseMoveEvent, MouseUpEvent};
-use crate::math::Point;
 use crate::{Context, GameState};
+use reba::math::Point;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::mouse::{MouseButton, MouseState};
